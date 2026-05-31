@@ -126,6 +126,12 @@ function chooseEnemyAutoTarget(action) {
     return chooseFrontTarget(targetSide);
   }
 
+  if (action.target === "enemy_back_unit") {
+    const backIndexes = getCurrentBackUnitIndexes(targetSide);
+    if (backIndexes.length === 0) return null;
+    return { side: targetSide, index: backIndexes[0] };
+  }
+
   if (action.target === "enemy_any_unit") {
     return chooseFirstAliveTarget(targetSide);
   }

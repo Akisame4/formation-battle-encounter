@@ -407,18 +407,6 @@ function getCompactActionLabel(action) {
   return action.label || "行動";
 }
 
-function getRow(index) {
-  return Math.floor(index / 3);
-}
-
-function getCol(index) {
-  return index % 3;
-}
-
-function getIndex(row, col) {
-  return row * 3 + col;
-}
-
 function isInsideBoard(row, col) {
   return row >= 0 && row <= 2 && col >= 0 && col <= 2;
 }
@@ -521,7 +509,7 @@ function getAffectedCellIndexesForPreview(side, index) {
   }
 
   const row = getRow(baseIndex);
-  const col = getCol(baseIndex);
+  const col = getColumn(baseIndex);
   const indexes = [];
 
   if (pattern === "horizontal_3") {
