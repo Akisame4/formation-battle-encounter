@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>フォーメーションバトル・エンカウント</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div id="title-screen" class="title-screen">
+    <div class="title-box">
+      <h1>フォーメーションバトル・エンカウント</h1>
+      <div class="title-subtitle">Formation Battle Encounter</div>
+
+      <div class="title-description">
+        3×3の盤面にキャラクターを配置し、ダイスの出目で行動する対戦ゲームです。<br>
+        まずは遊び方を選んでください。
+      </div>
+
+      <label class="debug-mode-toggle">
+        <input id="debug-mode-checkbox" type="checkbox">
+        <span>検証モード：手動ターンで出目を選べるようにする</span>
+      </label>
+
+      <div class="mode-grid">
+        <div class="mode-card">
+          <h2>オートバトル</h2>
+          <p>
+            味方側だけを操作します。敵側は自動でキャラクターを選び、ダイスを振って行動します。
+            任意の文字列を入力すると、その文字列をもとに敵構成をランダム生成します。未入力なら完全ランダム構成です。
+          </p>
+
+          <div class="code-area">
+            <label for="battle-code-input">敵生成シード</label>
+            <input id="battle-code-input" type="text" placeholder="未入力なら完全ランダム構成">
+          </div>
+
+          <button class="primary-button" id="start-auto-button">オートバトル開始</button>
+        </div>
+
+        <div class="mode-card">
+          <h2>対人バトル</h2>
+          <p>
+            味方側も敵側も、同じ画面で交互に操作します。
+            相手から受け取ったパーティコードを入力すると、敵陣形として反映します。
+          </p>
+
+          <div class="code-area">
+            <label for="versus-enemy-code-input">敵パーティコード</label>
+            <input id="versus-enemy-code-input" type="text" placeholder="未入力なら標準敵パーティ">
+          </div>
+
+          <button class="primary-button" id="start-versus-button">対人バトル開始</button>
+        </div>
+
+        <div class="mode-card">
+          <h2>ステージ攻略</h2>
+          <p>
+            最初に作った4体パーティと陣形で、全10ステージのモンスター戦に挑みます。
+            ステージが進むほど敵が強くなり、各ステージ開始時に味方は全回復します。
+          </p>
+
+          <button class="primary-button" id="start-stage-button">ステージ攻略開始</button>
+        </div>
+
+        <div class="mode-card">
+          <h2>パーティコード作成</h2>
+          <p>
+            4体のパーティと3×3の初期陣形を作り、対戦相手に送るためのコードを生成します。
+            4体を配置すると、コードは自動で生成されます。
+          </p>
+
+          <button class="primary-button" id="open-party-code-button">コード作成画面へ</button>
+        </div>
+
+        <div class="mode-card online-mode-card">
+          <h2>🌐 オンライン対戦</h2>
+          <p>
+            離れた相手とリアルタイムでオンライン対戦します。ルームを作成してコードを共有するか、相手のコードを入力して参加してください。
+          </p>
+
+          <button class="primary-button" id="start-online-button">オンライン対戦へ</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- オンラインロビー画面 -->
+  <div id="online-lobby-screen" class="title-screen" style="display:none">
+    <div class="title-box">
+      <h1>オンライン対戦</h1>
+      <div class="title-subtitle">Formation Battle Encounter Online</div>
+
+      <div class="online-name-area">
+        <label for="online-player-name-input">プレイヤー名</label>
+        <input id="online-player-name-input" type="text" placeholder="名前を入力（最大12文字）" maxlength="12">
+      </div>
+
+      <div class="mode-grid">
+        <div class="mode-card">
+          <h2>ルームを作る</h2>
+          <p>ルームコードを生成して相手に共有します。相手がコードで参加するのを待ちます。</p>
+          <button class="primary-button" id="online-create-button">ルームを作成</button>
+        </div>
+
+        <div class="mode-card">
+          <h2>ルームに参加</h2>
+          <p>相手から受け取ったルームコードを入力して参加します。</p>
+          <div class="code-area">
+            <label for="online-join-code-input">ルームコード</label>
+            <input id="online-join-code-input" type="text" placeholder="XXXXXX" maxlength="8" style="text-transform:uppercase">
+          </div>
+          <button class="primary-button" id="online-join-button">参加する</button>
+        </div>
+      </div>
+
+      <div id="online-lobby-error" class="error-text" style="display:none; color:#e94560; margin-top:8px; font-size:0.9rem;"></div>
+      <button id="online-lobby-back-button" style="margin-top:16px">タイトルへ戻る</button>
+    </div>
+  </div>
+
+  <!-- オンライン待機室（ホスト用） -->
+  <div id="online-waiting-screen" class="title-screen" style="display:none">
+    <div class="title-box">
+      <h1>待機中...</h1>
+
+      <div class="online-room-code-box">
+        <div class="online-room-code-label">ルームコード（相手に教えてください）</div>
+        <div id="online-room-code-text" class="online-room-code-text">------</div>
+        <button id="online-copy-room-code" class="btn-copy">コピー</button>
+      </div>
+
+      <div id="online-waiting-status" class="status-text" style="margin:16px 0; font-size:1rem;">
+        対戦相手を待っています...
+      </div>
+
+      <button class="primary-button" id="online-waiting-setup-button" disabled>
+        パーティを設定する →
+      </button>
+      <button id="online-waiting-back-button" style="margin-top:12px">タイトルへ戻る</button>
+    </div>
+  </div>
+
+  <!-- 待機オーバーレイ（陣形設定後の待ち時間） -->
+  <div id="online-waiting-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:16px;">
+    <div class="online-spinner"></div>
+    <div class="online-waiting-msg" style="color:#eee; font-size:1.1rem;">対戦相手の準備を待っています...</div>
+  </div>
+
+  <!-- オンライン自分のターン通知 -->
+  <div id="online-turn-banner" style="display:none; position:fixed; top:60px; left:50%; transform:translateX(-50%); background:#27ae60; color:#fff; padding:12px 32px; border-radius:8px; font-size:1.1rem; font-weight:bold; z-index:8000; pointer-events:none;"></div>
+
+  <div id="party-code-screen" class="party-code-screen">
+    <div class="party-code-box">
+      <div class="select-header">
+        <div>
+          <h1>パーティコード作成</h1>
+          <div id="party-code-description" class="select-description">キャラクターを4体、盤面へドラッグ＆ドロップしてください。</div>
+        </div>
+        <div class="select-header-actions">
+          <button id="party-code-back-button">タイトルへ戻る</button>
+        </div>
+      </div>
+
+      <div class="party-code-layout">
+        <div class="party-code-left">
+          <div class="selected-party-area">
+            <div class="selected-party-title">現在のパーティ</div>
+            <div id="party-code-selected-list" class="selected-party-list"></div>
+          </div>
+
+          <div class="formation-area">
+            <div class="formation-title">陣形配置</div>
+            <div class="select-help">
+              コード作成画面では、上段が前列、中段が中列、下段が後列です。キャラクターを盤面へドラッグして配置し、盤面外へドラッグすると外せます。
+            </div>
+            <div id="party-code-formation-board" class="formation-board"></div>
+          </div>
+
+          <div class="party-code-output-area">
+            <label for="party-code-output">生成コード</label>
+            <textarea id="party-code-output" readonly placeholder="4体を盤面に配置するとコードが自動生成されます。"></textarea>
+            <div class="party-code-output-buttons">
+              <button id="party-code-copy-button" disabled>コピー</button>
+              <button id="party-code-clear-button">盤面配置をクリア</button>
+            </div>
+            <div id="party-code-status" class="party-code-status"></div>
+          </div>
+        </div>
+
+        <div class="party-code-right">
+          <div class="select-help">
+            キャラクターカードを盤面へドラッグすると配置できます。配置中のキャラは別マスへドラッグすると移動・入れ替えできます。
+          </div>
+          <div id="party-code-character-list" class="character-selection-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="player-formation-screen" class="party-code-screen">
+    <div class="party-code-box">
+      <div class="select-header">
+        <div>
+          <h1>自陣配置</h1>
+          <div id="player-formation-description" class="select-description">キャラクターを4体、盤面へドラッグ＆ドロップしてください。</div>
+        </div>
+        <div class="select-header-actions">
+          <button id="player-formation-back-button">タイトルへ戻る</button>
+          <button class="primary-button" id="player-formation-start-button" disabled>この陣形で開始</button>
+        </div>
+      </div>
+
+      <div class="party-code-layout">
+        <div class="party-code-left">
+          <div class="party-code-output-area">
+            <label for="player-formation-code-input">パーティコード読み込み</label>
+            <textarea id="player-formation-code-input" placeholder="過去に使ったパーティコードを貼り付けると、この画面の自陣配置に反映できます。"></textarea>
+            <div class="party-code-output-buttons">
+              <button id="player-formation-code-apply-button">コードを反映</button>
+              <button id="player-formation-code-clear-button">入力を消す</button>
+            </div>
+            <div id="player-formation-code-status" class="party-code-status"></div>
+          </div>
+
+          <div class="selected-party-area">
+            <div class="selected-party-title">現在のパーティ</div>
+            <div id="player-formation-selected-list" class="selected-party-list"></div>
+          </div>
+
+          <div class="formation-area">
+            <div class="formation-title">自陣配置</div>
+            <div class="select-help">
+              味方視点では、上段が前列、中段が中列、下段が後列です。キャラクターを盤面へドラッグして配置し、盤面外へドラッグすると配置から外せます。
+            </div>
+            <div id="player-formation-board" class="formation-board"></div>
+          </div>
+
+          <div class="battle-option-area">
+            <label for="decisive-moment-turn-input">決着の刻</label>
+            <div class="battle-option-row">
+              <span>第</span>
+              <input id="decisive-moment-turn-input" type="number" min="1" max="99" step="1" value="20">
+              <span>ターン終了時から、または両軍残り1人で発動。後攻行動後に全員へ10ダメージ</span>
+            </div>
+          </div>
+
+          <div class="party-code-output-area">
+            <div id="player-formation-status" class="party-code-status">4体を盤面に配置すると開始できます。</div>
+          </div>
+        </div>
+
+        <div class="party-code-right">
+          <div class="select-help">
+            キャラクターカードを盤面へドラッグすると配置できます。配置中のキャラは別マスへドラッグすると移動・入れ替えできます。
+          </div>
+          <div id="player-formation-character-list" class="character-selection-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="main-layout" class="main-layout">
+    <div id="card-panel" class="card-panel">
+      <div class="left-panel-header">
+        <div class="game-title">フォーメーションバトル・エンカウント</div>
+        <div class="panel-subtitle">キャラクターカード</div>
+      </div>
+
+      <div id="card-list" class="card-list-inner"></div>
+    </div>
+
+    <div
+      id="card-vertical-resizer"
+      class="vertical-resizer"
+      title="左右にドラッグしてカード領域を調整"
+    ></div>
+
+    <div id="board-panel" class="board-panel">
+      <div class="title-area">
+        <h1>フォーメーションバトル・エンカウント</h1>
+        <div id="mode-description" class="description">
+          モード未選択
+        </div>
+      </div>
+
+      <div class="board-section">
+        <h2 id="board-label-top">敵陣営 ↓</h2>
+        <div class="board-wrapper">
+          <div id="enemy-board" class="board"></div>
+        </div>
+      </div>
+
+      <div class="vs-line">VS</div>
+
+      <div class="board-section">
+        <h2 id="board-label-bottom">味方陣営 ↑</h2>
+        <div class="board-wrapper">
+          <div id="player-board" class="board"></div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      id="right-vertical-resizer"
+      class="vertical-resizer"
+      title="左右にドラッグして右側領域を調整"
+    ></div>
+
+    <div id="right-panel" class="right-panel">
+      <div id="control-panel" class="control-panel">
+        <h3>操作・アナウンス</h3>
+
+        <div id="battle-turn-info" class="battle-turn-info">
+          現在ターン：-
+        </div>
+
+        <div id="decisive-moment-banner" class="decisive-moment-banner" aria-live="polite"></div>
+
+        <div class="button-area">
+          <button id="roll-button" disabled>ダイスを振る</button>
+          <button id="execute-button" disabled>実行</button>
+          <button id="cancel-button" disabled>選択解除</button>
+          <button id="pass-button" disabled>ターン終了</button>
+          <button id="next-stage-button" disabled>次のステージへ</button>
+          <button id="reset-button">リセット</button>
+          <button id="back-title-button">タイトルへ</button>
+        </div>
+
+        <div id="debug-dice-area" class="debug-dice-area">
+          <div class="debug-dice-title">検証モード：出目を指定</div>
+          <div class="debug-dice-buttons">
+            <button class="debug-dice-button" data-debug-roll="1" disabled>1</button>
+            <button class="debug-dice-button" data-debug-roll="2" disabled>2</button>
+            <button class="debug-dice-button" data-debug-roll="3" disabled>3</button>
+            <button class="debug-dice-button" data-debug-roll="4" disabled>4</button>
+            <button class="debug-dice-button" data-debug-roll="5" disabled>5</button>
+            <button class="debug-dice-button" data-debug-roll="6" disabled>6</button>
+          </div>
+        </div>
+
+        <div id="status-area" class="status-area">
+          準備中です。
+        </div>
+      </div>
+
+      <div
+        id="right-horizontal-resizer"
+        class="horizontal-resizer"
+        title="上下にドラッグして操作欄とログ欄を調整"
+      ></div>
+
+      <div class="log-panel">
+        <h3>ログ</h3>
+        <div id="message"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
+  <script src="characters.js"></script>
+  <script src="partyCode.js"></script>
+  <script src="state.js"></script>
+  <script src="utils.js"></script>
+  <script src="targetLogic.js"></script>
+  <script src="battleLogic.js"></script>
+  <script src="aiLogic.js"></script>
+  <script src="setup.js"></script>
+  <script src="render.js"></script>
+  <script src="main.js"></script>
+  <script src="online.js"></script>
+</body>
+</html>
