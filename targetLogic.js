@@ -212,6 +212,10 @@ function isTwoStepMoveAction(action) {
     return action.moveDirection === "sideways";
   }
 
+  if (action.type === "move_self_adjacent_empty") {
+    return true;
+  }
+
   return false;
 }
 
