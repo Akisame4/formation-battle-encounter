@@ -179,29 +179,31 @@ function handleOnlineFormationReady() {
 
   setOnlineWaitingOverlay(true, "対戦相手の準備を待っています...");
 
-  pushMySetup(entries, decisiveMomentTurn).then(() => {
-    watchBothSetupReady((room, hostSetup, guestSetup) => {
-      setOnlineWaitingOverlay(false);
-
-      if (onlineState.mySide === "player") {
-        // Host: build initial board and start battle
-        gameState.onlineGuestFormationEntries = guestSetup.entries;
-        gameState.decisiveMomentStartTurn = hostSetup.decisiveMomentTurn || 20;
-        gameState.battleMode = "online";
-        gameState.onlineMySide = "player";
-        showBattleScreen();
-        resetGame();
-      } else {
-        // Guest: wait for host to push initial state
-        gameState.battleMode = "online";
-        gameState.onlineMySide = "enemy";
-        setOnlineWaitingOverlay(true, "ホストが対戦を開始しています...");
-        startListeningBattle();
-      }
-    });
-  }).catch((err) => {
+  // pushより先にリスナーを登録することで、自分の書き込みが
+  // Firebase に届いた瞬間にリスナーが確実に発火する順序を保証する。
+  // push後に登録すると、書き込み完了イベントがすでに処理済みになって
+  // リスナーが不完全なキャッシュで初回発火し、その後発火しないケースがある。
+  watchBothSetupReady((room, hostSetup, guestSetup) => {
     setOnlineWaitingOverlay(false);
-    alert("エラーが発生しました: " + err.message);
+
+    if (onlineState.mySide === "player") {
+      gameState.onlineGuestFormationEntries = guestSetup.entries;
+      gameState.decisiveMomentStartTurn = hostSetup.decisiveMomentTurn || 20;
+      gameState.battleMode = "online";
+      gameState.onlineMySide = "player";
+      showBattleScreen();
+      resetGame();
+    } else {
+      gameState.battleMode = "online";
+      gameState.onlineMySide = "enemy";
+      setOnlineWaitingOverlay(true, "ホストが対戦を開始しています...");
+      startListeningBattle();
+    }
+  });
+
+  pushMySetup(entries, decisiveMomentTurn).catch((err) => {
+    setOnlineWaitingOverlay(false);
+    alert("セットアップの送信に失敗しました: " + err.message);
   });
 }
 
