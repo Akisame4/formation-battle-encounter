@@ -35,7 +35,8 @@ const onlineState = {
   mySide: null,
   opponentName: null,
   roomListener: null,
-  battleListener: null
+  battleListener: null,
+  setupListener: null
 };
 
 // ============================================================
@@ -156,6 +157,10 @@ function pushMySetup(entries, decisiveMomentTurn) {
 }
 
 function watchBothSetupReady(onBothReady) {
+  if (onlineState.setupListener) {
+    fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).off("value", onlineState.setupListener);
+    onlineState.setupListener = null;
+  }
   const ref = fbeDb.ref(`fbe/rooms/${onlineState.roomId}`);
   const handler = ref.on("value", (snap) => {
     const room = snap.val();
@@ -164,9 +169,11 @@ function watchBothSetupReady(onBothReady) {
     const guestSetup = room.setup[room.guestId];
     if (hostSetup && hostSetup.ready && guestSetup && guestSetup.ready) {
       ref.off("value", handler);
+      onlineState.setupListener = null;
       onBothReady(room, hostSetup, guestSetup);
     }
   });
+  onlineState.setupListener = handler;
 }
 
 // ============================================================
@@ -267,9 +274,15 @@ function deserializeBoard(serialized) {
 // ============================================================
 
 let onlinePendingLogEntry = null;
+let _onlineReceivingLog = false;
 
 function setOnlinePendingLog(msg) {
-  onlinePendingLogEntry = msg;
+  onlinePendingLogEntry = onlinePendingLogEntry ? onlinePendingLogEntry + msg : msg;
+}
+
+function accumulateOnlineLog(text) {
+  if (_onlineReceivingLog) return;
+  setOnlinePendingLog(text);
 }
 
 function pushBattleState() {
@@ -354,7 +367,9 @@ function applyRemoteBattleState(data) {
   if (data.nu) gameState.nextUnitId = data.nu;
 
   if (data.log) {
+    _onlineReceivingLog = true;
     logMessage(data.log);
+    _onlineReceivingLog = false;
   }
 
   gameState.animation.locked = false;
@@ -385,6 +400,9 @@ function cleanupOnlineState() {
     if (onlineState.roomListener) {
       fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).off("value", onlineState.roomListener);
     }
+    if (onlineState.setupListener) {
+      fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).off("value", onlineState.setupListener);
+    }
   }
   onlineState.roomId = null;
   onlineState.myId = null;
@@ -392,6 +410,7 @@ function cleanupOnlineState() {
   onlineState.opponentName = null;
   onlineState.battleListener = null;
   onlineState.roomListener = null;
+  onlineState.setupListener = null;
   gameState.battleMode = "auto";
   gameState.onlineMySide = null;
   gameState.onlineGuestFormationEntries = null;

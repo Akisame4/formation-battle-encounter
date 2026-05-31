@@ -15,6 +15,9 @@ function getEnemySide(side) {
 }
 
 function getSideName(side) {
+  if (gameState.battleMode === "online" && gameState.onlineMySide) {
+    return side === gameState.onlineMySide ? "味方" : "敵";
+  }
   return side === "player" ? "味方" : "敵";
 }
 
@@ -148,6 +151,10 @@ function logMessage(text) {
 
   message.textContent += logText;
   message.scrollTop = message.scrollHeight;
+
+  if (gameState.battleMode === "online" && typeof accumulateOnlineLog === "function") {
+    accumulateOnlineLog(logText);
+  }
 }
 
 
