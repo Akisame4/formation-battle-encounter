@@ -251,19 +251,38 @@ function deserializeBoard(serialized) {
 
   entries.forEach(([i, data]) => {
     if (!data || isNaN(i) || i < 0 || i >= 9) return;
-    const template = CHARACTER_TEMPLATES.find((t) => t.id === data.tid);
-    if (!template) return;
-    const char = JSON.parse(JSON.stringify(template));
-    char.hp = data.hp;
-    char.maxHp = data.mhp || template.maxHp;
-    char.guard = data.g || 0;
-    char.cooldown = data.cd || 0;
-    char.attackBuff = data.ab || 0;
-    char.damageTakenIncrease = data.dti || 0;
-    char.damageDealtDecrease = data.ddd || 0;
-    char.immovable = data.im || 0;
-    char.poisonDamage = data.pd || 0;
-    char.unitId = data.uid || "";
+
+    let char;
+    if (data.tid === "decoy") {
+      char = {
+        id: "decoy",
+        name: "デコイ",
+        job: "デコイ",
+        role: "攻撃対象になるお邪魔マス",
+        image: "assets/decoy.png",
+        hp: data.hp,
+        maxHp: data.mhp || data.hp,
+        guard: data.g || 0,
+        cooldown: data.cd || 0,
+        isDecoy: true,
+        unitId: data.uid || "",
+        actions: {}
+      };
+    } else {
+      const template = CHARACTER_TEMPLATES.find((t) => t.id === data.tid);
+      if (!template) return;
+      char = JSON.parse(JSON.stringify(template));
+      char.hp = data.hp;
+      char.maxHp = data.mhp || template.maxHp;
+      char.guard = data.g || 0;
+      char.cooldown = data.cd || 0;
+      char.attackBuff = data.ab || 0;
+      char.damageTakenIncrease = data.dti || 0;
+      char.damageDealtDecrease = data.ddd || 0;
+      char.immovable = data.im || 0;
+      char.poisonDamage = data.pd || 0;
+      char.unitId = data.uid || "";
+    }
     result[i] = char;
   });
   return result;
