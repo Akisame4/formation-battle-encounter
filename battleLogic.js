@@ -308,8 +308,9 @@ function getMoveDestinationIndexesForAction(action, side, fromIndex) {
 
   const isMoveAction = action.type === "move";
   const isSidewaysDamageMoveAction = action.type === "damage_and_move" && action.moveDirection === "sideways";
+  const isSelfAdjacentMove = action.type === "move_self_adjacent_empty";
 
-  if (!isMoveAction && !isSidewaysDamageMoveAction) {
+  if (!isMoveAction && !isSidewaysDamageMoveAction && !isSelfAdjacentMove) {
     return [];
   }
 
@@ -317,6 +318,10 @@ function getMoveDestinationIndexesForAction(action, side, fromIndex) {
 
   if (!board[fromIndex]) {
     return [];
+  }
+
+  if (isSelfAdjacentMove) {
+    return getAdjacentIndexes(fromIndex).filter(index => !board[index]);
   }
 
   if (action.move === "ally_any_empty_cell") {
@@ -959,7 +964,16 @@ function executeAction() {
   }
 
   if (action.type === "move_self_adjacent_empty") {
-    const moved = moveSelfToAdjacentEmptyCell(gameState.selectedActor.side, gameState.selectedActor.index);
+    let moved = false;
+    if (gameState.selectedMoveDestination) {
+      moved = tryMoveUnit(
+        gameState.selectedActor.side,
+        gameState.selectedActor.index,
+        gameState.selectedMoveDestination.index
+      );
+    } else {
+      moved = moveSelfToAdjacentEmptyCell(gameState.selectedActor.side, gameState.selectedActor.index);
+    }
     return actionStartPrefix + (moved ? `${actor.name} は隣接する空きマスへ移動した。` : `${actor.name} は隣接する空きマスへ移動できなかった。`);
   }
 

@@ -333,7 +333,11 @@ async function handleRollButtonClick(forcedRollNumber = null) {
 ${gameState.selectedAction.label}`
   );
 
-  if (gameState.selectedAction.target === "self") {
+  if (gameState.selectedAction.type === "move_self_adjacent_empty") {
+    gameState.selectedTarget = { side: gameState.selectedActor.side, index: gameState.selectedActor.index };
+    const adjacentCandidates = getSelectableMoveDestinationCandidatesForCurrentAction();
+    gameState.phase = adjacentCandidates.length > 0 ? "select_move_destination" : "confirm";
+  } else if (gameState.selectedAction.target === "self") {
     gameState.phase = "confirm";
   } else {
     gameState.phase = "select_target";
@@ -433,6 +437,17 @@ function handleCancelButtonClick() {
   }
 
   if (gameState.phase === "select_move_destination") {
+    if (gameState.selectedAction && gameState.selectedAction.type === "move_self_adjacent_empty") {
+      gameState.selectedTarget = null;
+      gameState.selectedMoveDestination = null;
+      gameState.selectedAction = null;
+      gameState.rolledNumber = null;
+      gameState.phase = "roll";
+      showDiceEffect("ダイスを振り直してください");
+      renderAll();
+      return;
+    }
+
     gameState.selectedTarget = null;
     gameState.selectedMoveDestination = null;
     gameState.phase = "select_target";
