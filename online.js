@@ -406,8 +406,8 @@ function applyRemoteBattleState(data) {
   }
 
   gameState.animation.locked = false;
-  renderAll();
 
+  // renderAll より先にオーバーレイを起動して結果が1フレームも見えないようにする
   if (data.initRoll) {
     animateInitiativeDiceRoll({
       playerRoll: data.initRoll.playerRoll,
@@ -423,6 +423,8 @@ function applyRemoteBattleState(data) {
       actionText: data.dice.actionLabel
     });
   }
+
+  renderAll();
 
   if (data.cs === onlineState.mySide && data.ph === "select_actor" && !data.go) {
     flashOnlineTurnBanner();

@@ -1790,9 +1790,18 @@ async function decideInitiative() {
   gameState.animation.locked = true;
   renderAll();
 
+  if (gameState.battleMode === "online") {
+    startListeningBattle();
+  }
+
   do {
     playerRoll = rollDice();
     enemyRoll = rollDice();
+
+    if (gameState.battleMode === "online" && typeof setOnlineInitRollEvent === "function") {
+      setOnlineInitRollEvent({ playerRoll, enemyRoll });
+      pushBattleState();
+    }
 
     await animateInitiativeDiceRoll({
       playerRoll,
@@ -1836,11 +1845,6 @@ ${gameState.currentSide === "player" ? "味方" : "敵"}が先攻です。`
   renderAll();
 
   if (gameState.battleMode === "online") {
-    // ホストが初期盤面をFirebaseに push し、ゲストが受信して開始する
-    if (typeof setOnlineInitRollEvent === "function") {
-      setOnlineInitRollEvent({ playerRoll, enemyRoll });
-    }
-    startListeningBattle();
     pushBattleState();
   } else if (!isHumanControlledSide(gameState.currentSide)) {
     scheduleEnemyAutoTurn();
