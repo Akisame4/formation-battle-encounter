@@ -1837,6 +1837,9 @@ ${gameState.currentSide === "player" ? "味方" : "敵"}が先攻です。`
 
   if (gameState.battleMode === "online") {
     // ホストが初期盤面をFirebaseに push し、ゲストが受信して開始する
+    if (typeof setOnlineInitRollEvent === "function") {
+      setOnlineInitRollEvent({ playerRoll, enemyRoll });
+    }
     startListeningBattle();
     pushBattleState();
   } else if (!isHumanControlledSide(gameState.currentSide)) {

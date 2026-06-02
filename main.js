@@ -351,6 +351,12 @@ ${gameState.selectedAction.label}`
   renderAll();
 
   if (gameState.battleMode === "online") {
+    setOnlineDiceRollEvent({
+      side: gameState.currentSide,
+      actorName: actor.name,
+      roll: rolledNumber,
+      actionLabel: typeof getCompactActionLabel === "function" ? getCompactActionLabel(selectedAction) : ""
+    });
     pushBattleState();
   }
 
