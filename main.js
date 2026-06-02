@@ -313,6 +313,17 @@ async function handleRollButtonClick(forcedRollNumber = null) {
   gameState.selectedTarget = null;
   gameState.selectedMoveDestination = null;
 
+  // アニメーション開始前に相手へ通知して同時スタートさせる
+  if (gameState.battleMode === "online") {
+    setOnlineDiceRollEvent({
+      side: gameState.currentSide,
+      actorName: actor.name,
+      roll: rolledNumber,
+      actionLabel: typeof getCompactActionLabel === "function" ? getCompactActionLabel(selectedAction) : ""
+    });
+    pushBattleState();
+  }
+
   gameState.animation.locked = true;
   renderAll();
 
@@ -351,12 +362,6 @@ ${gameState.selectedAction.label}`
   renderAll();
 
   if (gameState.battleMode === "online") {
-    setOnlineDiceRollEvent({
-      side: gameState.currentSide,
-      actorName: actor.name,
-      roll: rolledNumber,
-      actionLabel: typeof getCompactActionLabel === "function" ? getCompactActionLabel(selectedAction) : ""
-    });
     pushBattleState();
   }
 
