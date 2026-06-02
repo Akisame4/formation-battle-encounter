@@ -581,100 +581,139 @@ function sleep(ms) {
   });
 }
 
-let _diceAudioCtx = null;
+// ============================================================
+// Audio system
+// ============================================================
 
-function getDiceAudioCtx() {
+let _audioCtx = null;
+let _masterGain = null;
+
+function initAudio() {
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC) return null;
-  try {
-    if (!_diceAudioCtx || _diceAudioCtx.state === "closed") {
-      _diceAudioCtx = new AC();
-    }
-    if (_diceAudioCtx.state === "suspended") {
-      _diceAudioCtx.resume().catch(() => {});
-    }
-    return _diceAudioCtx;
-  } catch (e) {
-    return null;
+  if (!AC) return;
+  if (_audioCtx && _audioCtx.state !== "closed") {
+    if (_audioCtx.state === "suspended") _audioCtx.resume().catch(() => {});
+    return;
   }
+  try {
+    _audioCtx = new AC();
+    _masterGain = _audioCtx.createGain();
+    _masterGain.gain.value = getVolumeSliderValue();
+    _masterGain.connect(_audioCtx.destination);
+  } catch (e) {}
+}
+
+function getVolumeSliderValue() {
+  const el = document.getElementById("volume-slider");
+  return el ? Number(el.value) / 100 : 0.7;
+}
+
+function setupVolumeControl() {
+  const slider = document.getElementById("volume-slider");
+  const icon = document.getElementById("volume-icon");
+  if (!slider || !icon) return;
+
+  const update = () => {
+    const vol = Number(slider.value) / 100;
+    if (_masterGain) _masterGain.gain.value = vol;
+    icon.textContent = vol === 0 ? "🔇" : vol < 0.34 ? "🔈" : vol < 0.67 ? "🔉" : "🔊";
+  };
+
+  slider.addEventListener("input", update);
+  update();
+}
+
+document.addEventListener("click", initAudio);
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", setupVolumeControl);
+} else {
+  setupVolumeControl();
 }
 
 function playDiceRollSE() {
-  const ctx = getDiceAudioCtx();
-  if (!ctx) return;
+  if (!_audioCtx) return;
 
-  try {
-    const now = ctx.currentTime;
-    const sr = ctx.sampleRate;
+  const doPlay = () => {
+    const ctx = _audioCtx;
+    const master = _masterGain;
+    if (!ctx || !master) return;
 
-    // ── 転がり音：バンドパスフィルタ通したノイズクリックを徐々に間隔を空けながら打つ ──
-    // 22フレーム × 平均 ~81ms ≒ 1.78s の転がりフェーズに合わせる
-    const clickTimes = [0, 0.08, 0.17, 0.27, 0.38, 0.50, 0.63, 0.76,
-                        0.90, 1.05, 1.20, 1.35, 1.52, 1.68];
+    try {
+      const now = ctx.currentTime;
+      const sr = ctx.sampleRate;
 
-    clickTimes.forEach((t, i) => {
-      const len = Math.floor(sr * 0.045);
-      const buf = ctx.createBuffer(1, len, sr);
-      const d = buf.getChannelData(0);
-      for (let j = 0; j < len; j++) {
-        d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 2.5);
+      // 転がり音：バンドパスノイズクリック × 14回（~1.75秒）
+      const clickTimes = [0, 0.08, 0.17, 0.27, 0.38, 0.50, 0.63, 0.76,
+                          0.90, 1.05, 1.20, 1.35, 1.52, 1.68];
+
+      clickTimes.forEach((t, i) => {
+        const len = Math.floor(sr * 0.05);
+        const buf = ctx.createBuffer(1, len, sr);
+        const d = buf.getChannelData(0);
+        for (let j = 0; j < len; j++) {
+          d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 2);
+        }
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+
+        const bpf = ctx.createBiquadFilter();
+        bpf.type = "bandpass";
+        bpf.frequency.value = 1400 + Math.random() * 1600;
+        bpf.Q.value = 1.5;
+
+        const gn = ctx.createGain();
+        const vol = 0.35 + (i / clickTimes.length) * 0.55;
+        gn.gain.setValueAtTime(vol, now + t);
+        gn.gain.exponentialRampToValueAtTime(0.001, now + t + 0.05);
+
+        src.connect(bpf);
+        bpf.connect(gn);
+        gn.connect(master);
+        src.start(now + t);
+      });
+
+      // 着地音：低音オシレーター（ピッチ急落）+ ノイズ衝撃
+      const landAt = now + 1.82;
+
+      const osc = ctx.createOscillator();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(200, landAt);
+      osc.frequency.exponentialRampToValueAtTime(55, landAt + 0.15);
+      const oscGn = ctx.createGain();
+      oscGn.gain.setValueAtTime(0.9, landAt);
+      oscGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.3);
+      osc.connect(oscGn);
+      oscGn.connect(master);
+      osc.start(landAt);
+      osc.stop(landAt + 0.35);
+
+      const impLen = Math.floor(sr * 0.08);
+      const impBuf = ctx.createBuffer(1, impLen, sr);
+      const imp = impBuf.getChannelData(0);
+      for (let j = 0; j < impLen; j++) {
+        imp[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / impLen, 1.5);
       }
+      const impSrc = ctx.createBufferSource();
+      impSrc.buffer = impBuf;
+      const lpf = ctx.createBiquadFilter();
+      lpf.type = "lowpass";
+      lpf.frequency.value = 800;
+      const impGn = ctx.createGain();
+      impGn.gain.setValueAtTime(0.7, landAt);
+      impGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.15);
+      impSrc.connect(lpf);
+      lpf.connect(impGn);
+      impGn.connect(master);
+      impSrc.start(landAt);
 
-      const src = ctx.createBufferSource();
-      src.buffer = buf;
+    } catch (e) {}
+  };
 
-      const bpf = ctx.createBiquadFilter();
-      bpf.type = "bandpass";
-      bpf.frequency.value = 1600 + Math.random() * 1200;
-      bpf.Q.value = 1.8;
-
-      const gn = ctx.createGain();
-      const vol = 0.06 + (i / clickTimes.length) * 0.20;
-      gn.gain.setValueAtTime(vol, now + t);
-      gn.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.045);
-
-      src.connect(bpf);
-      bpf.connect(gn);
-      gn.connect(ctx.destination);
-      src.start(now + t);
-    });
-
-    // ── 着地音：低音オシレーター（ピッチ急落）+ ノイズ衝撃 ──
-    const landAt = now + 1.82;
-
-    const osc = ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(200, landAt);
-    osc.frequency.exponentialRampToValueAtTime(55, landAt + 0.13);
-    const oscGn = ctx.createGain();
-    oscGn.gain.setValueAtTime(0.55, landAt);
-    oscGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.28);
-    osc.connect(oscGn);
-    oscGn.connect(ctx.destination);
-    osc.start(landAt);
-    osc.stop(landAt + 0.32);
-
-    const impLen = Math.floor(sr * 0.07);
-    const impBuf = ctx.createBuffer(1, impLen, sr);
-    const imp = impBuf.getChannelData(0);
-    for (let j = 0; j < impLen; j++) {
-      imp[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / impLen, 1.8);
-    }
-    const impSrc = ctx.createBufferSource();
-    impSrc.buffer = impBuf;
-    const lpf = ctx.createBiquadFilter();
-    lpf.type = "lowpass";
-    lpf.frequency.value = 700;
-    const impGn = ctx.createGain();
-    impGn.gain.setValueAtTime(0.40, landAt);
-    impGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.12);
-    impSrc.connect(lpf);
-    lpf.connect(impGn);
-    impGn.connect(ctx.destination);
-    impSrc.start(landAt);
-
-  } catch (e) {
-    // 音声非対応環境では無視
+  if (_audioCtx.state === "running") {
+    doPlay();
+  } else {
+    _audioCtx.resume().then(doPlay).catch(() => {});
   }
 }
 
