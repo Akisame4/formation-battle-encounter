@@ -623,7 +623,10 @@ function setupVolumeControl() {
   update();
 }
 
-document.addEventListener("click", initAudio);
+document.addEventListener("click", () => {
+  initAudio();
+  loadDiceRollSE();
+});
 
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", setupVolumeControl);
@@ -631,116 +634,42 @@ if (document.readyState === "loading") {
   setupVolumeControl();
 }
 
+let _diceRollBuffer = null;
+
+function loadDiceRollSE() {
+  const ctx = _audioCtx;
+  if (!ctx || _diceRollBuffer) return;
+  fetch("assets/dice_roll.mp3")
+    .then(res => res.arrayBuffer())
+    .then(ab => ctx.decodeAudioData(ab))
+    .then(buf => { _diceRollBuffer = buf; })
+    .catch(() => {});
+}
+
 function playDiceRollSE() {
-  if (!_audioCtx) return;
+  if (!_audioCtx || !_masterGain) return;
 
   const doPlay = () => {
-    const ctx = _audioCtx;
-    const master = _masterGain;
-    if (!ctx || !master) return;
-
+    if (!_diceRollBuffer) return;
     try {
-      const now = ctx.currentTime;
-      const sr = ctx.sampleRate;
-
-      // ── 鉛筆のカラカラ音 ──
-      // 六角形の面が転がりながら当たる高周波クリック音
-      // 速い→ゆっくり のリズムで鉛筆の減速を表現
-
-      // 速い（0〜0.52s: 六角面が素早く連打）
-      const fastClicks  = [0.000, 0.040, 0.080, 0.120, 0.160, 0.200,
-                           0.242, 0.286, 0.332, 0.380, 0.432, 0.488, 0.520];
-      // 中速（0.56〜1.05s: 間隔が広がる）
-      const midClicks   = [0.570, 0.640, 0.720, 0.810, 0.910, 1.020];
-      // 遅い（1.10〜1.65s: 一面ずつゆっくり）
-      const slowClicks  = [1.120, 1.280, 1.460, 1.650];
-      // 停止直前のカタン × 2
-      const stopClicks  = [1.790, 1.890];
-
-      const allClicks = [...fastClicks, ...midClicks, ...slowClicks, ...stopClicks];
-
-      allClicks.forEach((t, i) => {
-        const phase = t / 1.89;
-        const isStop = t >= 1.79;
-
-        // 非常に短いノイズバースト（鉛筆の面が硬い面に当たる音）
-        const len = Math.floor(sr * (isStop ? 0.025 : 0.013));
-        const buf = ctx.createBuffer(1, len, sr);
-        const d = buf.getChannelData(0);
-        for (let j = 0; j < len; j++) {
-          d[j] = (Math.random() * 2 - 1) * Math.exp(-j / (len * 0.18));
-        }
-        const src = ctx.createBufferSource();
-        src.buffer = buf;
-
-        // 高周波バンドパス：鉛筆の明るく硬い木質感
-        const bpf = ctx.createBiquadFilter();
-        bpf.type = "bandpass";
-        bpf.frequency.value = isStop
-          ? 2000 + Math.random() * 500       // 停止は少し低め
-          : 3200 + Math.random() * 1200;     // カラカラは高め 3200〜4400Hz
-        bpf.Q.value = isStop ? 4.0 : 3.5;
-
-        // 音量：中盤が最大、停止へ向けて減衰
-        let vol;
-        if (phase < 0.3) {
-          vol = 0.45 + Math.random() * 0.15;
-        } else if (phase < 0.6) {
-          vol = 0.65 + Math.random() * 0.15; // 中盤でよく鳴る
-        } else {
-          vol = Math.max(0.1, 0.65 * (1 - (phase - 0.6) * 1.8));
-        }
-        if (isStop) vol = 0.7 + Math.random() * 0.15;
-
-        const gn = ctx.createGain();
-        gn.gain.setValueAtTime(vol, now + t);
-        gn.gain.exponentialRampToValueAtTime(0.001, now + t + (isStop ? 0.03 : 0.014));
-
-        src.connect(bpf);
-        bpf.connect(gn);
-        gn.connect(master);
-        src.start(now + t);
-
-        // 軽い木質共鳴を重ねる（鉛筆の中空感・ホローな音色）
-        const resOsc = ctx.createOscillator();
-        resOsc.type = "triangle";
-        resOsc.frequency.value = 1100 + Math.random() * 500;
-        const resGn = ctx.createGain();
-        resGn.gain.setValueAtTime(0.06, now + t);
-        resGn.gain.exponentialRampToValueAtTime(0.001, now + t + 0.022);
-        resOsc.connect(resGn);
-        resGn.connect(master);
-        resOsc.start(now + t);
-        resOsc.stop(now + t + 0.025);
-      });
-
-      // 転がる低周波サーッというすれ音（非常に微量）
-      const rollLen = Math.floor(sr * 1.9);
-      const rollBuf = ctx.createBuffer(1, rollLen, sr);
-      const rollD = rollBuf.getChannelData(0);
-      for (let j = 0; j < rollLen; j++) rollD[j] = Math.random() * 2 - 1;
-      const rollSrc = ctx.createBufferSource();
-      rollSrc.buffer = rollBuf;
-      const rollLpf = ctx.createBiquadFilter();
-      rollLpf.type = "lowpass";
-      rollLpf.frequency.value = 180;
-      const rollGn = ctx.createGain();
-      rollGn.gain.setValueAtTime(0.0, now);
-      rollGn.gain.linearRampToValueAtTime(0.04, now + 0.15);
-      rollGn.gain.linearRampToValueAtTime(0.04, now + 1.50);
-      rollGn.gain.linearRampToValueAtTime(0.0,  now + 1.90);
-      rollSrc.connect(rollLpf);
-      rollLpf.connect(rollGn);
-      rollGn.connect(master);
-      rollSrc.start(now);
-
+      const src = _audioCtx.createBufferSource();
+      src.buffer = _diceRollBuffer;
+      src.connect(_masterGain);
+      src.start(_audioCtx.currentTime);
     } catch (e) {}
   };
 
   if (_audioCtx.state === "running") {
-    doPlay();
+    if (_diceRollBuffer) {
+      doPlay();
+    } else {
+      loadDiceRollSE();
+    }
   } else {
-    _audioCtx.resume().then(doPlay).catch(() => {});
+    _audioCtx.resume().then(() => {
+      if (!_diceRollBuffer) loadDiceRollSE();
+      setTimeout(doPlay, 150);
+    }).catch(() => {});
   }
 }
 
