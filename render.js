@@ -701,6 +701,10 @@ function renderBoard(board, elementId, side) {
 
       cell.classList.add(side === "enemy" ? "enemy-cell" : "player-cell");
 
+      if (previousHpValue > currentHpValue) {
+        cell.classList.add("damage-flash");
+      }
+
       if (character.cooldown > 0 && !canActorAct(side, character)) {
         cell.classList.add("cooldown-cell");
       }

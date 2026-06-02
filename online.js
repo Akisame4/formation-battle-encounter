@@ -294,6 +294,8 @@ function deserializeBoard(serialized) {
 
 let onlinePendingLogEntry = null;
 let _onlineReceivingLog = false;
+let onlineDiceRollEvent = null;
+let onlineInitRollEvent = null;
 
 function setOnlinePendingLog(msg) {
   onlinePendingLogEntry = onlinePendingLogEntry ? onlinePendingLogEntry + msg : msg;
@@ -302,6 +304,14 @@ function setOnlinePendingLog(msg) {
 function accumulateOnlineLog(text) {
   if (_onlineReceivingLog) return;
   setOnlinePendingLog(text);
+}
+
+function setOnlineDiceRollEvent(event) {
+  onlineDiceRollEvent = event;
+}
+
+function setOnlineInitRollEvent(event) {
+  onlineInitRollEvent = event;
 }
 
 function pushBattleState() {
@@ -328,10 +338,14 @@ function pushBattleState() {
     ss: gameState.secondSide || null,
     nu: gameState.nextUnitId || 1,
     by: onlineState.myId,
-    log: onlinePendingLogEntry || null
+    log: onlinePendingLogEntry || null,
+    dice: onlineDiceRollEvent || null,
+    initRoll: onlineInitRollEvent || null
   };
 
   onlinePendingLogEntry = null;
+  onlineDiceRollEvent = null;
+  onlineInitRollEvent = null;
   fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).set(data);
 }
 
@@ -393,6 +407,22 @@ function applyRemoteBattleState(data) {
 
   gameState.animation.locked = false;
   renderAll();
+
+  if (data.initRoll) {
+    animateInitiativeDiceRoll({
+      playerRoll: data.initRoll.playerRoll,
+      enemyRoll: data.initRoll.enemyRoll
+    });
+  }
+
+  if (data.dice) {
+    animateDiceRoll({
+      side: data.dice.side,
+      actorName: data.dice.actorName,
+      finalNumber: data.dice.roll,
+      actionText: data.dice.actionLabel
+    });
+  }
 
   if (data.cs === onlineState.mySide && data.ph === "select_actor" && !data.go) {
     flashOnlineTurnBanner();
