@@ -542,7 +542,7 @@ async function animateInitiativeDiceRoll(options) {
   setDiceEffectSideClass(null);
   playDiceRollSE();
 
-  const rollFrames = 22;
+  const rollFrames = 18;
 
   for (let i = 0; i < rollFrames; i++) {
     const temporaryPlayerNumber = rollDice();
@@ -571,7 +571,7 @@ async function animateInitiativeDiceRoll(options) {
   }
 
   showDiceEffect(caption.textContent, true, playerRoll === enemyRoll ? null : playerRoll > enemyRoll ? "player" : "enemy");
-  await sleep(2080);
+  await sleep(1300);
   overlay.classList.remove("visible");
 }
 
@@ -717,7 +717,7 @@ async function animateDiceRoll(options) {
   setDiceEffectSideClass(side);
   playDiceRollSE();
 
-  const rollFrames = 22;
+  const rollFrames = 18;
 
   for (let i = 0; i < rollFrames; i++) {
     const temporaryNumber = rollDice();
@@ -736,7 +736,7 @@ async function animateDiceRoll(options) {
   box.className = `dice-roll-box final ${getDiceSideClass(side)}`;
   showDiceEffect(`🎲 ${finalNumber}${actionText ? `\n${actionText}` : ""}`, true, side);
 
-  await sleep(2080);
+  await sleep(1300);
 
   overlay.classList.remove("visible");
 }
