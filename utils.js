@@ -540,6 +540,7 @@ async function animateInitiativeDiceRoll(options) {
   enemyCard.className = "initiative-dice-roll-card dice-side-enemy rolling";
   caption.textContent = "同時にダイスを振ります。";
   setDiceEffectSideClass(null);
+  playDiceRollSE();
 
   const rollFrames = 22;
 
@@ -578,6 +579,103 @@ function sleep(ms) {
   return new Promise(resolve => {
     setTimeout(resolve, ms);
   });
+}
+
+let _diceAudioCtx = null;
+
+function getDiceAudioCtx() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return null;
+  try {
+    if (!_diceAudioCtx || _diceAudioCtx.state === "closed") {
+      _diceAudioCtx = new AC();
+    }
+    if (_diceAudioCtx.state === "suspended") {
+      _diceAudioCtx.resume().catch(() => {});
+    }
+    return _diceAudioCtx;
+  } catch (e) {
+    return null;
+  }
+}
+
+function playDiceRollSE() {
+  const ctx = getDiceAudioCtx();
+  if (!ctx) return;
+
+  try {
+    const now = ctx.currentTime;
+    const sr = ctx.sampleRate;
+
+    // ── 転がり音：バンドパスフィルタ通したノイズクリックを徐々に間隔を空けながら打つ ──
+    // 22フレーム × 平均 ~81ms ≒ 1.78s の転がりフェーズに合わせる
+    const clickTimes = [0, 0.08, 0.17, 0.27, 0.38, 0.50, 0.63, 0.76,
+                        0.90, 1.05, 1.20, 1.35, 1.52, 1.68];
+
+    clickTimes.forEach((t, i) => {
+      const len = Math.floor(sr * 0.045);
+      const buf = ctx.createBuffer(1, len, sr);
+      const d = buf.getChannelData(0);
+      for (let j = 0; j < len; j++) {
+        d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / len, 2.5);
+      }
+
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+
+      const bpf = ctx.createBiquadFilter();
+      bpf.type = "bandpass";
+      bpf.frequency.value = 1600 + Math.random() * 1200;
+      bpf.Q.value = 1.8;
+
+      const gn = ctx.createGain();
+      const vol = 0.06 + (i / clickTimes.length) * 0.20;
+      gn.gain.setValueAtTime(vol, now + t);
+      gn.gain.exponentialRampToValueAtTime(0.0001, now + t + 0.045);
+
+      src.connect(bpf);
+      bpf.connect(gn);
+      gn.connect(ctx.destination);
+      src.start(now + t);
+    });
+
+    // ── 着地音：低音オシレーター（ピッチ急落）+ ノイズ衝撃 ──
+    const landAt = now + 1.82;
+
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(200, landAt);
+    osc.frequency.exponentialRampToValueAtTime(55, landAt + 0.13);
+    const oscGn = ctx.createGain();
+    oscGn.gain.setValueAtTime(0.55, landAt);
+    oscGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.28);
+    osc.connect(oscGn);
+    oscGn.connect(ctx.destination);
+    osc.start(landAt);
+    osc.stop(landAt + 0.32);
+
+    const impLen = Math.floor(sr * 0.07);
+    const impBuf = ctx.createBuffer(1, impLen, sr);
+    const imp = impBuf.getChannelData(0);
+    for (let j = 0; j < impLen; j++) {
+      imp[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / impLen, 1.8);
+    }
+    const impSrc = ctx.createBufferSource();
+    impSrc.buffer = impBuf;
+    const lpf = ctx.createBiquadFilter();
+    lpf.type = "lowpass";
+    lpf.frequency.value = 700;
+    const impGn = ctx.createGain();
+    impGn.gain.setValueAtTime(0.40, landAt);
+    impGn.gain.exponentialRampToValueAtTime(0.001, landAt + 0.12);
+    impSrc.connect(lpf);
+    lpf.connect(impGn);
+    impGn.connect(ctx.destination);
+    impSrc.start(landAt);
+
+  } catch (e) {
+    // 音声非対応環境では無視
+  }
 }
 
 function setDiceEffectSideClass(side) {
@@ -622,6 +720,7 @@ async function animateDiceRoll(options) {
   captionElement.textContent = "カラカラカラ……";
 
   setDiceEffectSideClass(side);
+  playDiceRollSE();
 
   const rollFrames = 22;
 
