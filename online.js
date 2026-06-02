@@ -405,25 +405,33 @@ function applyRemoteBattleState(data) {
     _onlineReceivingLog = false;
   }
 
-  gameState.animation.locked = false;
-
-  // renderAll より先にオーバーレイを起動して結果が1フレームも見えないようにする
   if (data.initRoll) {
+    gameState.animation.locked = true;
     animateInitiativeDiceRoll({
       playerRoll: data.initRoll.playerRoll,
       enemyRoll: data.initRoll.enemyRoll
+    }).then(() => {
+      gameState.animation.locked = false;
     });
+    renderAll();
+    return;
   }
 
   if (data.dice) {
+    gameState.animation.locked = true;
     animateDiceRoll({
       side: data.dice.side,
       actorName: data.dice.actorName,
       finalNumber: data.dice.roll,
       actionText: data.dice.actionLabel
+    }).then(() => {
+      gameState.animation.locked = false;
     });
+    renderAll();
+    return;
   }
 
+  gameState.animation.locked = false;
   renderAll();
 
   if (data.cs === onlineState.mySide && data.ph === "select_actor" && !data.go) {
