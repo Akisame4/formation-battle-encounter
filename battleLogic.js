@@ -1548,6 +1548,7 @@ function proceedAfterTurn(actedCharacter) {
 
 ${gameEndText}`);
         renderAll();
+        if (gameState.battleMode === "online") pushBattleState();
         return;
       }
 
