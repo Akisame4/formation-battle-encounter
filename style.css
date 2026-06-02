@@ -46,8 +46,9 @@ body {
   margin: 0;
   padding: 8px;
   color: #222;
-  height: 100vh;
-  overflow: hidden;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 body.resizing {
@@ -73,10 +74,12 @@ h3 {
 }
 
 .title-screen {
-  height: calc(100vh - 16px);
+  min-height: calc(100vh - 16px);
+  height: auto;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 16px 0;
 }
 
 .title-box {
@@ -988,16 +991,6 @@ button.recommended-button {
 }
 
 @media (max-width: 1100px) {
-  body {
-    height: auto;
-    overflow: auto;
-  }
-
-  .title-screen {
-    height: auto;
-    min-height: calc(100vh - 16px);
-  }
-
   .mode-grid {
     grid-template-columns: 1fr;
   }
