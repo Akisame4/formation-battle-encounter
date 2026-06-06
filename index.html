@@ -248,7 +248,7 @@
             <div class="battle-option-row">
               <span>第</span>
               <input id="decisive-moment-turn-input" type="number" min="1" max="99" step="1" value="20">
-              <span>ターン終了時から、または両軍残り1人で発動。後攻行動後に全員へ10ダメージ</span>
+              <span>ターン終了時から、または両軍残り1人で発動。後攻行動後に全員へ10ダメージ（以降5ターンごとに10ずつ増加）</span>
             </div>
           </div>
 
@@ -332,6 +332,7 @@
           <button id="pass-button" disabled>ターン終了</button>
           <button id="next-stage-button" disabled>次のステージへ</button>
           <button id="reset-button">リセット</button>
+          <button id="online-rematch-button" style="display:none">もう一度対戦</button>
           <button id="back-title-button">タイトルへ</button>
         </div>
 

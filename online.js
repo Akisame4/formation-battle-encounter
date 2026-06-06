@@ -36,7 +36,8 @@ const onlineState = {
   opponentName: null,
   roomListener: null,
   battleListener: null,
-  setupListener: null
+  setupListener: null,
+  rematchListener: null
 };
 
 // ============================================================
@@ -200,11 +201,13 @@ function handleOnlineFormationReady() {
       gameState.onlineMySide = "player";
       showBattleScreen();
       resetGame();
+      startWatchingRematch();
     } else {
       gameState.battleMode = "online";
       gameState.onlineMySide = "enemy";
       setOnlineWaitingOverlay(true, "ホストが対戦を開始しています...");
       startListeningBattle();
+      startWatchingRematch();
     }
   });
 
@@ -334,6 +337,7 @@ function pushBattleState() {
     rn: (gameState.rolledNumber != null) ? gameState.rolledNumber : null,
     go: gameState.gameOver || false,
     dm: gameState.decisiveMomentStartTurn,
+    dmas: gameState.decisiveMomentActiveSince != null ? gameState.decisiveMomentActiveSince : null,
     fs: gameState.firstSide || null,
     ss: gameState.secondSide || null,
     nu: gameState.nextUnitId || 1,
@@ -395,6 +399,7 @@ function applyRemoteBattleState(data) {
   gameState.rolledNumber = (data.rn != null) ? data.rn : null;
   gameState.gameOver = data.go || false;
   gameState.decisiveMomentStartTurn = data.dm || gameState.decisiveMomentStartTurn;
+  if (data.dmas !== undefined) gameState.decisiveMomentActiveSince = data.dmas != null ? data.dmas : null;
   gameState.firstSide = data.fs || null;
   gameState.secondSide = data.ss || null;
   if (data.nu) gameState.nextUnitId = data.nu;
@@ -462,6 +467,9 @@ function cleanupOnlineState() {
     if (onlineState.setupListener) {
       fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).off("value", onlineState.setupListener);
     }
+    if (onlineState.rematchListener) {
+      fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
+    }
   }
   onlineState.roomId = null;
   onlineState.myId = null;
@@ -470,8 +478,75 @@ function cleanupOnlineState() {
   onlineState.battleListener = null;
   onlineState.roomListener = null;
   onlineState.setupListener = null;
+  onlineState.rematchListener = null;
   gameState.battleMode = "auto";
   gameState.onlineMySide = null;
   gameState.onlineGuestFormationEntries = null;
   setOnlineWaitingOverlay(false);
+}
+
+// ============================================================
+// Rematch
+// ============================================================
+
+function startWatchingRematch() {
+  if (!onlineState.roomId || !fbeDb) return;
+
+  if (onlineState.rematchListener) {
+    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
+    onlineState.rematchListener = null;
+  }
+
+  let initialized = false;
+
+  const ref = fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`);
+  const handler = ref.on("value", (snap) => {
+    if (!initialized) {
+      initialized = true;
+      return;
+    }
+
+    const val = snap.val();
+    if (!val) return;
+
+    ref.off("value", handler);
+    onlineState.rematchListener = null;
+
+    if (onlineState.battleListener) {
+      fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).off("value", onlineState.battleListener);
+      onlineState.battleListener = null;
+    }
+
+    openPlayerFormationForBattle("online");
+  });
+
+  onlineState.rematchListener = handler;
+}
+
+async function requestOnlineRematch() {
+  if (!onlineState.roomId || !fbeDb) return;
+
+  if (onlineState.rematchListener) {
+    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
+    onlineState.rematchListener = null;
+  }
+
+  if (onlineState.battleListener) {
+    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).off("value", onlineState.battleListener);
+    onlineState.battleListener = null;
+  }
+
+  try {
+    await fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).update({
+      setup: null,
+      battle: null,
+      rematch: Date.now()
+    });
+  } catch (e) {
+    startWatchingRematch();
+    alert("再戦リクエストの送信に失敗しました: " + e.message);
+    return;
+  }
+
+  openPlayerFormationForBattle("online");
 }

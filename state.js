@@ -18,6 +18,7 @@ const gameState = {
 
   decisiveMomentStartTurn: 20,
   decisiveMomentDamage: 10,
+  decisiveMomentActiveSince: null,
 
   selectedActor: null,
   selectedAction: null,
