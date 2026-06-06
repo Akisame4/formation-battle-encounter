@@ -1324,12 +1324,23 @@ function shouldTriggerDecisiveMoment() {
   return isDecisiveMomentTurnReached() || isDecisiveMomentOneOnOne();
 }
 
+function getCurrentDecisiveMomentDamage() {
+  const base = gameState.decisiveMomentDamage || 10;
+  if (gameState.decisiveMomentActiveSince == null) return base;
+  const elapsed = gameState.turnNumber - gameState.decisiveMomentActiveSince;
+  return base + Math.floor(Math.max(0, elapsed) / 5) * 10;
+}
+
 function applyDecisiveMomentDamage() {
   if (!shouldTriggerDecisiveMoment()) {
     return "";
   }
 
-  const damage = gameState.decisiveMomentDamage || 10;
+  if (gameState.decisiveMomentActiveSince == null) {
+    gameState.decisiveMomentActiveSince = gameState.turnNumber;
+  }
+
+  const damage = getCurrentDecisiveMomentDamage();
   const triggerText = getDecisiveMomentTriggerText();
   const damagedTexts = [];
 

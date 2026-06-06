@@ -852,6 +852,12 @@ function bindEvents() {
     resetGame();
   });
 
+  document.getElementById("online-rematch-button").addEventListener("click", () => {
+    if (gameState.animation.locked) return;
+    if (!window.confirm("もう一度対戦しますか？双方がキャラ選びの画面に戻ります。")) return;
+    requestOnlineRematch();
+  });
+
   document.getElementById("back-title-button").addEventListener("click", () => {
     if (!confirmBeforeBackToTitleFromBattle()) {
       return;

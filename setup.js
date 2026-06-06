@@ -75,6 +75,7 @@ function resetGame() {
   gameState.nextUnitId = 1;
   gameState.animation.locked = false;
   gameState.animation.movingUnits = [];
+  gameState.decisiveMomentActiveSince = null;
 
   const playerFormationEntries = getPlayerFormationEntries();
 
@@ -145,7 +146,7 @@ function resetGame() {
   const codeText = getBattleStartEnemyDescriptionText();
 
   document.getElementById("message").textContent =
-    `${partyText}\n${codeText}\n決着の刻：第${gameState.decisiveMomentStartTurn}ターン終了時から、または両軍残り1人で発動。後攻行動後に全員へ${gameState.decisiveMomentDamage}ダメージ。\n先攻後攻をダイスで決定します。`;
+    `${partyText}\n${codeText}\n決着の刻：第${gameState.decisiveMomentStartTurn}ターン終了時から、または両軍残り1人で発動。後攻行動後に全員へ${gameState.decisiveMomentDamage}ダメージ（以降5ターンごとに10ずつ増加）。\n先攻後攻をダイスで決定します。`;
 
   setDiceEffectText("先攻後攻を決定します");
 

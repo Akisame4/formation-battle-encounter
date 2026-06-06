@@ -76,7 +76,10 @@ function renderAll() {
 
 function getDecisiveMomentDisplayStatus() {
   const startTurn = gameState.decisiveMomentStartTurn || 20;
-  const damage = gameState.decisiveMomentDamage || 10;
+  const baseDamage = gameState.decisiveMomentDamage || 10;
+  const damage = typeof getCurrentDecisiveMomentDamage === "function"
+    ? getCurrentDecisiveMomentDamage()
+    : baseDamage;
   const oneOnOne = getAliveCharacterCount("player") === 1 && getAliveCharacterCount("enemy") === 1;
   const triggerReasons = [];
 
@@ -90,6 +93,7 @@ function getDecisiveMomentDisplayStatus() {
 
   return {
     startTurn,
+    baseDamage,
     damage,
     oneOnOne,
     triggerReasons,
@@ -121,7 +125,7 @@ function renderDecisiveMomentBanner() {
   element.classList.add("visible");
   element.innerHTML = `
     <div class="decisive-moment-banner-title">決着の刻 発動中</div>
-    <div class="decisive-moment-banner-detail">${status.triggerReasons.join("・")} / 後攻行動後、全員${status.damage}ダメージ</div>
+    <div class="decisive-moment-banner-detail">${status.triggerReasons.join("・")} / 後攻行動後、全員${status.damage}ダメージ（5ターンごとに10増加）</div>
   `;
 }
 
@@ -153,8 +157,8 @@ function renderBattleTurnInfo() {
   const secondSideText = gameState.secondSide ? getSideName(gameState.secondSide) : "未決定";
 
   const decisiveText = decisiveStatus.isActive
-    ? `決着の刻：発動中（${decisiveStatus.triggerReasons.join("・")}／後攻行動後、全員${decisiveStatus.damage}ダメージ）`
-    : `決着の刻：第${decisiveStatus.startTurn}ターン終了時から、または両軍残り1人で発動`;
+    ? `決着の刻：発動中（${decisiveStatus.triggerReasons.join("・")}／後攻行動後、全員${decisiveStatus.damage}ダメージ・5ターンごとに10増加）`
+    : `決着の刻：第${decisiveStatus.startTurn}ターン終了時から、または両軍残り1人で発動（5ターンごとに10ずつ増加）`;
 
   const lines = [];
 
@@ -1151,6 +1155,7 @@ function clearRecommendedButtons() {
     "pass-button",
     "next-stage-button",
     "reset-button",
+    "online-rematch-button",
     "back-title-button"
   ];
 
@@ -1212,10 +1217,17 @@ function renderButtons() {
   });
 
   const resetButton = document.getElementById("reset-button");
+  const onlineRematchButton = document.getElementById("online-rematch-button");
   const backTitleButton = document.getElementById("back-title-button");
 
   if (resetButton) {
     resetButton.disabled = gameState.animation.locked;
+    resetButton.style.display = gameState.battleMode === "online" ? "none" : "";
+  }
+
+  if (onlineRematchButton) {
+    onlineRematchButton.style.display = gameState.battleMode === "online" ? "" : "none";
+    onlineRematchButton.disabled = gameState.animation.locked;
   }
 
   if (backTitleButton) {
