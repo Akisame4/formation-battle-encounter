@@ -396,7 +396,7 @@ const CHARACTER_TEMPLATES = [
       3: { label: "敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 10, backRowMultiplier: 2 },
       4: { label: "敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 20, backRowMultiplier: 2 },
       5: { label: "敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 30, backRowMultiplier: 2 },
-      6: { label: "敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 40, backRowMultiplier: 2 }
+      6: { label: "敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 30, backRowMultiplier: 2 }
     }
   },
   {
@@ -414,9 +414,9 @@ const CHARACTER_TEMPLATES = [
       1: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
       2: { label: "自分の対応マスの敵に50ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 50 },
       3: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
-      4: { label: "自分の対応マスの敵に50ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 50 },
+      4: { label: "自分の対応マスの敵に60ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 60 },
       5: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
-      6: { label: "自分の対応マスの敵に50ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 50 }
+      6: { label: "自分の対応マスの敵に70ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 70 }
     }
   },
   {
@@ -435,7 +435,7 @@ const CHARACTER_TEMPLATES = [
       2: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
       3: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
       4: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
-      5: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      5: { label: "敵1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_any_unit", damage: 10, amount: 10 },
       6: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 }
     }
   }
