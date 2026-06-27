@@ -245,7 +245,8 @@ function getCompactActionLabel(action) {
   }
 
   if (action.type === "damage_and_self_heal") {
-    return `近単${action.damage}+自回${action.amount}`;
+    const rangeText = action.target === "enemy_any_unit" ? "遠単" : "近単";
+    return `${rangeText}${action.damage}+自回${action.amount}`;
   }
 
   if (action.type === "move_self_back") {
