@@ -646,6 +646,15 @@ function ensurePartyCodeDragStyle() {
       box-shadow: 0 0 0 5px rgba(255, 152, 0, 0.28) !important;
       transform: translateY(-2px) scale(1.02);
     }
+
+    .tap-selected-formation-item {
+      outline: 3px solid #e94560 !important;
+      box-shadow: 0 0 0 5px rgba(233, 69, 96, 0.3) !important;
+    }
+
+    .tap-placeable-cell {
+      cursor: pointer !important;
+    }
   `;
   document.head.appendChild(style);
 }
@@ -1159,6 +1168,7 @@ function initializePlayerFormationBuilder() {
   gameState.playerFormation = {};
   gameState.playerFormationDraggingFromBoard = false;
   gameState.playerFormationInitialized = true;
+  gameState.playerFormationTapSelectedId = null;
 }
 
 function getPlayerFormationEntries() {
@@ -1443,8 +1453,13 @@ function renderPlayerFormationBoard() {
     const cell = document.createElement("div");
     cell.className = "formation-cell";
 
+    const tapSelectedId = gameState.playerFormationTapSelectedId;
+
     if (character) {
       cell.classList.add("filled-formation-cell");
+      if (tapSelectedId === occupantId) {
+        cell.classList.add("tap-selected-formation-item");
+      }
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
         <div class="formation-portrait">
@@ -1458,6 +1473,7 @@ function renderPlayerFormationBoard() {
 
       cell.addEventListener("dragstart", (event) => {
         gameState.playerFormationDraggingFromBoard = true;
+        gameState.playerFormationTapSelectedId = null;
         setPlayerFormationDragData(event, occupantId, position);
         cell.classList.add("dragging-party-code-item");
       });
@@ -1466,12 +1482,39 @@ function renderPlayerFormationBoard() {
         gameState.playerFormationDraggingFromBoard = false;
         clearPlayerFormationDragOverStyles();
       });
+
+      cell.addEventListener("click", () => {
+        const selectedId = gameState.playerFormationTapSelectedId;
+        if (selectedId) {
+          if (selectedId === occupantId) {
+            gameState.playerFormationTapSelectedId = null;
+          } else {
+            movePlayerFormationCharacterToPosition(selectedId, position);
+            gameState.playerFormationTapSelectedId = null;
+          }
+        } else {
+          gameState.playerFormationTapSelectedId = occupantId;
+        }
+        renderPlayerFormationScreen();
+      });
     } else {
       cell.classList.add("empty-formation-cell");
+      if (tapSelectedId) {
+        cell.classList.add("tap-placeable-cell");
+      }
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
-        <div class="empty-label">ここへドロップ</div>
+        <div class="empty-label">${tapSelectedId ? "タップで配置" : "ここへドロップ"}</div>
       `;
+
+      cell.addEventListener("click", () => {
+        const selectedId = gameState.playerFormationTapSelectedId;
+        if (selectedId) {
+          movePlayerFormationCharacterToPosition(selectedId, position);
+          gameState.playerFormationTapSelectedId = null;
+          renderPlayerFormationScreen();
+        }
+      });
     }
 
     cell.addEventListener("dragover", (event) => {
@@ -1522,11 +1565,15 @@ function renderPlayerFormationCharacterList() {
     }
 
     const isPlaced = Number.isInteger(gameState.playerFormation[character.id]);
+    const isTapSelected = gameState.playerFormationTapSelectedId === character.id;
     const card = document.createElement("div");
     card.className = "selection-character-card party-code-draggable";
 
     if (isPlaced) {
       card.classList.add("selected-selection-card");
+    }
+    if (isTapSelected) {
+      card.classList.add("tap-selected-formation-item");
     }
 
     card.draggable = true;
@@ -1545,15 +1592,26 @@ function renderPlayerFormationCharacterList() {
       <div class="selection-action-list">
         <ol>${getSelectionCardActionHtml(character)}</ol>
       </div>
-      <div class="selection-card-footer">${isPlaced ? "配置中" : "盤面へドラッグ"}</div>
+      <div class="selection-card-footer">${isPlaced ? "配置中" : isTapSelected ? "選択中 → マスをタップ" : "タップで選択 / ドラッグ"}</div>
     `;
 
     card.querySelector(".selection-card-name-row").appendChild(
       createCharacterDetailButton(character, "自陣配置")
     );
 
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      if (gameState.playerFormationTapSelectedId === character.id) {
+        gameState.playerFormationTapSelectedId = null;
+      } else {
+        gameState.playerFormationTapSelectedId = character.id;
+      }
+      renderPlayerFormationScreen();
+    });
+
     card.addEventListener("dragstart", (event) => {
       gameState.playerFormationDraggingFromBoard = false;
+      gameState.playerFormationTapSelectedId = null;
       setPlayerFormationDragData(event, character.id, null);
       card.classList.add("dragging-party-code-item");
     });
@@ -1574,7 +1632,7 @@ function renderPlayerFormationScreen() {
   const placedCount = getPlayerFormationEntries().length;
 
   if (descriptionElement) {
-    descriptionElement.textContent = `キャラクターを4体、盤面へドラッグ＆ドロップしてください。現在 ${placedCount} / ${gameState.partySize} 体。`;
+    descriptionElement.textContent = `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ）。現在 ${placedCount} / ${gameState.partySize} 体。`;
   }
 
   if (startButton) {
