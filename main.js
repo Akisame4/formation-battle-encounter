@@ -685,6 +685,8 @@ function bindEvents() {
       watchForGuestToJoin((guestName) => {
         document.getElementById("online-waiting-status").textContent = `${guestName} が参加しました！`;
         document.getElementById("online-waiting-setup-button").disabled = false;
+        syncDebugModeFromTitle();
+        openPlayerFormationForBattle("online");
       });
     } catch (e) {
       showOnlineLobbyError("エラー: " + e.message);
