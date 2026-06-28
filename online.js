@@ -133,16 +133,19 @@ function watchForGuestToJoin(onGuestJoined) {
   if (onlineState.roomListener) {
     fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).off("value", onlineState.roomListener);
   }
+  const ref = fbeDb.ref(`fbe/rooms/${onlineState.roomId}`);
   const handler = (snap) => {
     const room = snap.val();
     if (!room) return;
     if (room.guestId && room.guestName) {
+      ref.off("value", handler);
+      onlineState.roomListener = null;
       onlineState.opponentName = room.guestName;
       onGuestJoined(room.guestName);
     }
   };
   onlineState.roomListener = handler;
-  fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).on("value", handler);
+  ref.on("value", handler);
 }
 
 // ============================================================
