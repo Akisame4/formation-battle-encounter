@@ -87,9 +87,8 @@ function rotatePartyFormationPositionForEnemy(position) {
   const row = Math.floor(numericPosition / 3);
   const column = numericPosition % 3;
   const rotatedRow = 2 - row;
-  const rotatedColumn = 2 - column;
 
-  return rotatedRow * 3 + rotatedColumn;
+  return rotatedRow * 3 + column;
 }
 
 function getPartyFormationFromBoard(board) {
