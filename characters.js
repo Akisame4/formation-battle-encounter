@@ -238,11 +238,11 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に10ダメージ", type: "damage", target: "enemy_front_unit", damage: 10 },
-      2: { label: "敵最前列1体に10ダメージ", type: "damage", target: "enemy_front_unit", damage: 10 },
-      3: { label: "味方全体を10回復", type: "heal_all", target: "self", amount: 10 },
-      4: { label: "味方全体に防御10", type: "guard_all", target: "self", guard: 10 },
-      5: { label: "味方1体を20回復", type: "heal", target: "ally_unit", amount: 20 },
+      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
+      3: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      4: { label: "味方全体に防御20", type: "guard_all", target: "self", guard: 20 },
+      5: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
       6: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" }
     }
   },
@@ -393,10 +393,10 @@ const CHARACTER_TEMPLATES = [
     actions: {
       1: { label: "最後列に移動", type: "move_self_back", target: "self" },
       2: { label: "最後列に移動", type: "move_self_back", target: "self" },
-      3: { label: "敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 10, backRowMultiplier: 2 },
-      4: { label: "敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 20, backRowMultiplier: 2 },
-      5: { label: "敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 30, backRowMultiplier: 2 },
-      6: { label: "敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 30, backRowMultiplier: 2 }
+      3: { label: "自分と同じ列の敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 10, backRowMultiplier: 2 },
+      4: { label: "自分と同じ列の敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 20, backRowMultiplier: 2 },
+      5: { label: "自分と同じ列の敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 30, backRowMultiplier: 2 },
+      6: { label: "自分と同じ列の敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 40, backRowMultiplier: 2 }
     }
   },
   {

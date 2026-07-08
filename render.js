@@ -207,7 +207,8 @@ function getCompactActionLabel(action) {
   }
 
   if (action.type === "sniper_damage") {
-    return `遠単${action.damage}${action.backRowMultiplier > 1 ? "×後2" : ""}`;
+    const rangeText = action.target === "enemy_column_unit" ? "射撃" : "遠単";
+    return `${rangeText}${action.damage}${action.backRowMultiplier > 1 ? "×後2" : ""}`;
   }
 
   if (action.type === "opposite_damage") {
