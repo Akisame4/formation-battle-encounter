@@ -64,7 +64,8 @@ function isEnemyTargetType(targetType) {
     "enemy_any_cell",
     "enemy_front_row",
     "enemy_unit",
-    "enemy_opposite_unit"
+    "enemy_opposite_unit",
+    "enemy_column_unit"
   ].includes(targetType);
 }
 
@@ -274,6 +275,11 @@ function isSelectableTarget(side, index) {
   if (action.target === "enemy_opposite_unit") {
     const oppositeIndex = getOppositeIndex(gameState.selectedActor.index);
     return index === oppositeIndex && isTargetableUnit(character);
+  }
+
+  if (action.target === "enemy_column_unit") {
+    const actorColumn = getColumn(gameState.selectedActor.index);
+    return getColumn(index) === actorColumn && isTargetableUnit(character);
   }
 
   if (action.target === "enemy_front_unit" || action.target === "enemy_front_row") {

@@ -143,6 +143,16 @@ function chooseEnemyAutoTarget(action) {
     return isTargetableUnit(board[oppositeIndex]) ? { side: targetSide, index: oppositeIndex } : null;
   }
 
+  if (action.target === "enemy_column_unit") {
+    const actorIndex = gameState.selectedActor ? gameState.selectedActor.index : 0;
+    const column = getColumn(actorIndex);
+    const board = getBoardBySide(targetSide);
+    const index = [0, 1, 2]
+      .map(row => getIndex(row, column))
+      .find(candidateIndex => isTargetableUnit(board[candidateIndex]));
+    return index !== undefined ? { side: targetSide, index } : null;
+  }
+
   if (action.target === "enemy_unit") {
     return chooseMovableTarget(targetSide, action);
   }
