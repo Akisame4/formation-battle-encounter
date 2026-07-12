@@ -644,6 +644,144 @@ function confirmBeforeBackToTitleFromPlayerFormation() {
   return window.confirm("タイトルへ戻ります。編集中の自陣配置は失われます。よろしいですか？");
 }
 
+const BATTLE_SNAPSHOT_KEY = "formationBattleEncounterSnapshot";
+const ONLINE_SESSION_KEY = "formationBattleEncounterOnlineSession";
+
+function isBattleScreenVisible() {
+  const mainLayout = document.getElementById("main-layout");
+  return Boolean(mainLayout && mainLayout.style.display === "grid");
+}
+
+function saveBattleSnapshot() {
+  if (!isBattleScreenVisible()) {
+    return;
+  }
+
+  const snapshot = {
+    battleMode: gameState.battleMode,
+    playerBoard: gameState.playerBoard,
+    enemyBoard: gameState.enemyBoard,
+    stageNumber: gameState.stageNumber,
+    maxStage: gameState.maxStage,
+    stageCleared: gameState.stageCleared,
+    currentSide: gameState.currentSide,
+    firstSide: gameState.firstSide,
+    secondSide: gameState.secondSide,
+    turnNumber: gameState.turnNumber,
+    decisiveMomentStartTurn: gameState.decisiveMomentStartTurn,
+    decisiveMomentDamage: gameState.decisiveMomentDamage,
+    decisiveMomentActiveSince: gameState.decisiveMomentActiveSince,
+    selectedActor: gameState.selectedActor,
+    selectedAction: gameState.selectedAction,
+    selectedTarget: gameState.selectedTarget,
+    selectedMoveDestination: gameState.selectedMoveDestination,
+    rolledNumber: gameState.rolledNumber,
+    phase: gameState.phase,
+    gameOver: gameState.gameOver,
+    debugMode: gameState.debugMode,
+    nextUnitId: gameState.nextUnitId,
+    onlineMySide: gameState.onlineMySide,
+    onlineGuestFormationEntries: gameState.onlineGuestFormationEntries
+  };
+
+  try {
+    localStorage.setItem(BATTLE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+
+    if (gameState.battleMode === "online" && typeof onlineState !== "undefined" && onlineState.roomId) {
+      localStorage.setItem(ONLINE_SESSION_KEY, JSON.stringify({
+        roomId: onlineState.roomId,
+        myId: onlineState.myId,
+        mySide: onlineState.mySide,
+        opponentName: onlineState.opponentName
+      }));
+    }
+  } catch (e) {
+    // localStorageが使えない環境では復帰機能なしで継続する
+  }
+}
+
+function clearBattleSnapshot() {
+  try {
+    localStorage.removeItem(BATTLE_SNAPSHOT_KEY);
+    localStorage.removeItem(ONLINE_SESSION_KEY);
+  } catch (e) {
+    // 何もしない
+  }
+}
+
+function loadBattleSnapshot() {
+  try {
+    const raw = localStorage.getItem(BATTLE_SNAPSHOT_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function loadOnlineSession() {
+  try {
+    const raw = localStorage.getItem(ONLINE_SESSION_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+function applyBattleSnapshotToGameState(snapshot) {
+  gameState.battleMode = snapshot.battleMode;
+  gameState.playerBoard = snapshot.playerBoard || [];
+  gameState.enemyBoard = snapshot.enemyBoard || [];
+  gameState.stageNumber = snapshot.stageNumber || 1;
+  gameState.maxStage = snapshot.maxStage || 10;
+  gameState.stageCleared = Boolean(snapshot.stageCleared);
+  gameState.currentSide = snapshot.currentSide || "player";
+  gameState.firstSide = snapshot.firstSide || null;
+  gameState.secondSide = snapshot.secondSide || null;
+  gameState.turnNumber = snapshot.turnNumber || 1;
+  gameState.decisiveMomentStartTurn = snapshot.decisiveMomentStartTurn || 20;
+  gameState.decisiveMomentDamage = snapshot.decisiveMomentDamage || 10;
+  gameState.decisiveMomentActiveSince = (snapshot.decisiveMomentActiveSince != null) ? snapshot.decisiveMomentActiveSince : null;
+  gameState.selectedActor = snapshot.selectedActor || null;
+  gameState.selectedAction = snapshot.selectedAction || null;
+  gameState.selectedTarget = snapshot.selectedTarget || null;
+  gameState.selectedMoveDestination = snapshot.selectedMoveDestination || null;
+  gameState.rolledNumber = (snapshot.rolledNumber != null) ? snapshot.rolledNumber : null;
+  gameState.phase = snapshot.phase || "select_actor";
+  gameState.gameOver = Boolean(snapshot.gameOver);
+  gameState.debugMode = Boolean(snapshot.debugMode);
+  gameState.nextUnitId = snapshot.nextUnitId || 1;
+  gameState.onlineMySide = snapshot.onlineMySide || null;
+  gameState.onlineGuestFormationEntries = snapshot.onlineGuestFormationEntries || null;
+  gameState.animation.locked = false;
+  gameState.animation.movingUnits = [];
+  gameState.enemyAutoRunning = false;
+}
+
+function tryResumeBattleFromSnapshot() {
+  const snapshot = loadBattleSnapshot();
+
+  if (!snapshot || !snapshot.battleMode || !snapshot.playerBoard || !snapshot.playerBoard.length) {
+    return false;
+  }
+
+  applyBattleSnapshotToGameState(snapshot);
+  showBattleScreen();
+
+  if (gameState.battleMode === "online") {
+    resumeOnlineBattleFromSession();
+  } else if (!gameState.gameOver && gameState.phase === "initiative") {
+    decideInitiative();
+  } else {
+    renderAll();
+
+    if (!gameState.gameOver && !isHumanControlledSide(gameState.currentSide)) {
+      scheduleEnemyAutoTurn();
+    }
+  }
+
+  return true;
+}
+
 function syncDebugModeFromTitle() {
   const debugCheckbox = document.getElementById("debug-mode-checkbox");
 
@@ -868,6 +1006,7 @@ function bindEvents() {
     if (gameState.battleMode === "online") {
       cleanupOnlineState();
     }
+    clearBattleSnapshot();
     showTitleScreen();
   });
 
@@ -883,4 +1022,7 @@ function showOnlineLobbyError(msg) {
 }
 
 bindEvents();
-showTitleScreen();
+
+if (!tryResumeBattleFromSnapshot()) {
+  showTitleScreen();
+}

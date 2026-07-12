@@ -486,6 +486,46 @@ function cleanupOnlineState() {
   gameState.onlineMySide = null;
   gameState.onlineGuestFormationEntries = null;
   setOnlineWaitingOverlay(false);
+
+  if (typeof clearBattleSnapshot === "function") {
+    clearBattleSnapshot();
+  }
+}
+
+function resumeOnlineBattleFromSession() {
+  const session = loadOnlineSession();
+
+  if (!session || !session.roomId || !session.myId) {
+    clearBattleSnapshot();
+    showTitleScreen();
+    return;
+  }
+
+  onlineState.roomId = session.roomId;
+  onlineState.myId = session.myId;
+  onlineState.mySide = session.mySide;
+  onlineState.opponentName = session.opponentName;
+
+  initOnlineFirebase();
+
+  fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).once("value")
+    .then((snap) => {
+      const data = snap.val();
+
+      if (data) {
+        applyRemoteBattleState(data);
+      } else {
+        renderAll();
+      }
+
+      startListeningBattle();
+      startWatchingRematch();
+    })
+    .catch(() => {
+      renderAll();
+      startListeningBattle();
+      startWatchingRematch();
+    });
 }
 
 // ============================================================
