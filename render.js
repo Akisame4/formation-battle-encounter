@@ -72,6 +72,7 @@ function renderAll() {
   renderDecisiveMomentBanner();
   renderStatus();
   renderButtons();
+  saveBattleSnapshot();
 }
 
 function getDecisiveMomentDisplayStatus() {
