@@ -685,10 +685,10 @@ function saveBattleSnapshot() {
   };
 
   try {
-    localStorage.setItem(BATTLE_SNAPSHOT_KEY, JSON.stringify(snapshot));
+    sessionStorage.setItem(BATTLE_SNAPSHOT_KEY, JSON.stringify(snapshot));
 
     if (gameState.battleMode === "online" && typeof onlineState !== "undefined" && onlineState.roomId) {
-      localStorage.setItem(ONLINE_SESSION_KEY, JSON.stringify({
+      sessionStorage.setItem(ONLINE_SESSION_KEY, JSON.stringify({
         roomId: onlineState.roomId,
         myId: onlineState.myId,
         mySide: onlineState.mySide,
@@ -696,14 +696,14 @@ function saveBattleSnapshot() {
       }));
     }
   } catch (e) {
-    // localStorageが使えない環境では復帰機能なしで継続する
+    // sessionStorageが使えない環境では復帰機能なしで継続する
   }
 }
 
 function clearBattleSnapshot() {
   try {
-    localStorage.removeItem(BATTLE_SNAPSHOT_KEY);
-    localStorage.removeItem(ONLINE_SESSION_KEY);
+    sessionStorage.removeItem(BATTLE_SNAPSHOT_KEY);
+    sessionStorage.removeItem(ONLINE_SESSION_KEY);
   } catch (e) {
     // 何もしない
   }
@@ -711,7 +711,7 @@ function clearBattleSnapshot() {
 
 function loadBattleSnapshot() {
   try {
-    const raw = localStorage.getItem(BATTLE_SNAPSHOT_KEY);
+    const raw = sessionStorage.getItem(BATTLE_SNAPSHOT_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
@@ -720,7 +720,7 @@ function loadBattleSnapshot() {
 
 function loadOnlineSession() {
   try {
-    const raw = localStorage.getItem(ONLINE_SESSION_KEY);
+    const raw = sessionStorage.getItem(ONLINE_SESSION_KEY);
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
     return null;
