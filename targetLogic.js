@@ -181,18 +181,48 @@ function hasSelectableActor(side) {
   });
 }
 
+function isMeleeCharacterOutOfPosition(side, index, character) {
+  if (!character || !character.actions) {
+    return false;
+  }
+
+  const isMelee = Object.values(character.actions).some((action) => isMeleeAction(action));
+
+  if (!isMelee) {
+    return false;
+  }
+
+  return !isFrontRowPosition(side, index);
+}
+
 function getFirstSelectableActor(side) {
   const board = getBoardBySide(side);
+  const normalCandidates = [];
+  const lowPriorityCandidates = [];
 
   for (let index = 0; index < board.length; index++) {
     const character = board[index];
 
-    if (canActorAct(side, character)) {
-      return { side, index, character };
+    if (!canActorAct(side, character)) {
+      continue;
+    }
+
+    const candidate = { side, index, character };
+
+    if (isMeleeCharacterOutOfPosition(side, index, character)) {
+      lowPriorityCandidates.push(candidate);
+    } else {
+      normalCandidates.push(candidate);
     }
   }
 
-  return null;
+  const pool = normalCandidates.length > 0 ? normalCandidates : lowPriorityCandidates;
+
+  if (pool.length === 0) {
+    return null;
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 function isTwoStepMoveAction(action) {
