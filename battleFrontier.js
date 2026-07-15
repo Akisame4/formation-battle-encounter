@@ -360,9 +360,66 @@ function startBattleFrontierBattle() {
   resetGame();
 }
 
+function pickRandomAndRemove(array) {
+  const index = Math.floor(Math.random() * array.length);
+  return array.splice(index, 1)[0];
+}
+
+function isBattleFrontierMeleeCharacter(id) {
+  const template = getCharacterTemplateById(id);
+
+  if (!template || !template.actions) {
+    return false;
+  }
+
+  return Object.values(template.actions).some((action) => isMeleeAction(action));
+}
+
 function createBattleFrontierEnemyBoard(enemyIds) {
-  const positions = [7, 6, 8, 4];
-  const entries = (enemyIds || []).map((id, index) => ({ id, position: positions[index] }));
+  const ids = (enemyIds || []).slice();
+
+  // 敵側は前列=[6,7,8]、後ろ6マス=中列[3,4,5]＋後列[0,1,2]
+  const availableFront = [6, 7, 8];
+  const availableBackRow = [0, 1, 2];
+  const availableBackSix = [0, 1, 2, 3, 4, 5];
+
+  const entries = [];
+
+  // テルルは特別扱いで必ず後列（[0,1,2]）に配置する
+  const teruruIndex = ids.indexOf("teruru");
+
+  if (teruruIndex >= 0) {
+    ids.splice(teruruIndex, 1);
+
+    const position = pickRandomAndRemove(availableBackRow);
+    const sixIndex = availableBackSix.indexOf(position);
+
+    if (sixIndex >= 0) {
+      availableBackSix.splice(sixIndex, 1);
+    }
+
+    // createPartyBoardFromFormationが敵側の座標を180度回転（行のみ反転）させるため、
+    // 先に同じ回転を適用しておくことで最終的に意図した位置に配置されるようにする
+    entries.push({ id: "teruru", position: rotatePartyFormationPositionForEnemy(position) });
+  }
+
+  ids.forEach((id) => {
+    let position = null;
+
+    if (isBattleFrontierMeleeCharacter(id) && availableFront.length > 0) {
+      // 近距離攻撃を持つキャラは可能な限り前列へ
+      position = pickRandomAndRemove(availableFront);
+    } else if (availableBackSix.length > 0) {
+      // 遠距離攻撃を持つキャラ（および前列が埋まった近距離キャラ）は後ろ6マスからランダム
+      position = pickRandomAndRemove(availableBackSix);
+    } else if (availableFront.length > 0) {
+      position = pickRandomAndRemove(availableFront);
+    }
+
+    if (position !== null) {
+      entries.push({ id, position: rotatePartyFormationPositionForEnemy(position) });
+    }
+  });
 
   return createPartyBoardFromFormation(entries, "enemy");
 }
