@@ -21,10 +21,6 @@
         <span>検証モード：手動ターンで出目を選べるようにする</span>
       </label>
 
-      <button class="primary-button" id="battlefrontier-resume-button" style="display:none; margin-bottom:16px;">
-        バトルフロンティア：前回の続きから
-      </button>
-
       <div class="mode-grid">
         <div class="mode-card">
           <h2>オートバトル</h2>
@@ -73,7 +69,10 @@
             勝利後は倒した相手と1体交換でき、周を重ねるほど強い相手が出やすくなります。負けたら終了です。
           </p>
 
-          <button class="primary-button" id="start-battlefrontier-button">バトルフロンティア開始</button>
+          <div style="display:flex; gap:8px;">
+            <button class="primary-button" id="start-battlefrontier-button" style="flex:1;">最初から</button>
+            <button class="primary-button" id="battlefrontier-resume-button" style="flex:1;" disabled>続きから</button>
+          </div>
         </div>
 
         <div class="mode-card">
