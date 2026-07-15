@@ -22,7 +22,7 @@ function showTitleScreen() {
   const resumeButton = document.getElementById("battlefrontier-resume-button");
   if (resumeButton) {
     const canResume = typeof hasBattleFrontierInterrupt === "function" && hasBattleFrontierInterrupt();
-    resumeButton.style.display = canResume ? "" : "none";
+    resumeButton.disabled = !canResume;
   }
 }
 
