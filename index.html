@@ -21,6 +21,10 @@
         <span>検証モード：手動ターンで出目を選べるようにする</span>
       </label>
 
+      <button class="primary-button" id="battlefrontier-resume-button" style="display:none; margin-bottom:16px;">
+        バトルフロンティア：前回の続きから
+      </button>
+
       <div class="mode-grid">
         <div class="mode-card">
           <h2>オートバトル</h2>
@@ -60,6 +64,16 @@
           </p>
 
           <button class="primary-button" id="start-stage-button">ステージ攻略開始</button>
+        </div>
+
+        <div class="mode-card">
+          <h2>バトルフロンティア</h2>
+          <p>
+            6体の候補から4体を選んでパーティを組みます。7連戦勝ち抜くごとに再ドラフト。
+            勝利後は倒した相手と1体交換でき、周を重ねるほど強い相手が出やすくなります。負けたら終了です。
+          </p>
+
+          <button class="primary-button" id="start-battlefrontier-button">バトルフロンティア開始</button>
         </div>
 
         <div class="mode-card">
@@ -219,7 +233,7 @@
 
       <div class="party-code-layout">
         <div class="party-code-left">
-          <div class="party-code-output-area">
+          <div id="player-formation-code-load-area" class="party-code-output-area">
             <label for="player-formation-code-input">パーティコード読み込み</label>
             <textarea id="player-formation-code-input" placeholder="過去に使ったパーティコードを貼り付けると、この画面の自陣配置に反映できます。"></textarea>
             <div class="party-code-output-buttons">
@@ -233,6 +247,8 @@
             <div class="selected-party-title">現在のパーティ</div>
             <div id="player-formation-selected-list" class="selected-party-list"></div>
           </div>
+
+          <div id="player-formation-next-enemy-preview"></div>
 
           <div class="formation-area">
             <div class="formation-title">自陣配置</div>
@@ -262,6 +278,24 @@
           </div>
           <div id="player-formation-character-list" class="character-selection-list"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="battlefrontier-result-screen" class="party-code-screen">
+    <div class="party-code-box">
+      <div class="select-header">
+        <div>
+          <h1>バトルフロンティア：結果</h1>
+        </div>
+      </div>
+
+      <div id="battlefrontier-result-summary" class="select-description"></div>
+      <div id="battlefrontier-result-best" class="select-description"></div>
+
+      <div class="select-header-actions" style="margin-top:24px;">
+        <button id="battlefrontier-result-title-button">タイトルへ戻る</button>
+        <button class="primary-button" id="battlefrontier-result-retry-button">もう一度挑戦</button>
       </div>
     </div>
   </div>
@@ -379,6 +413,7 @@
   <script src="setup.js?v=1"></script>
   <script src="render.js?v=1"></script>
   <script src="online.js?v=1"></script>
+  <script src="battleFrontier.js?v=1"></script>
   <script src="main.js?v=1"></script>
 </body>
 </html>

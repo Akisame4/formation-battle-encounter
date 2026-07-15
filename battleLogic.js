@@ -1246,6 +1246,11 @@ function isAllDefeated(board) {
 
 function checkGameEnd() {
   if (isAllDefeated(gameState.enemyBoard)) {
+    if (gameState.battleMode === "battlefrontier") {
+      gameState.phase = "battlefrontier_victory";
+      return `勝利！ 第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap + 1}勝目。`;
+    }
+
     if (gameState.battleMode === "stage") {
       const currentStage = gameState.stageNumber || 1;
       const maxStage = gameState.maxStage || getStageCount();
@@ -1272,6 +1277,10 @@ function checkGameEnd() {
     gameState.gameOver = true;
     gameState.stageCleared = false;
     gameState.phase = "game_over";
+
+    if (gameState.battleMode === "battlefrontier") {
+      return `敗北……。第${gameState.battleFrontier.lap}周・通算${gameState.battleFrontier.totalWins}勝でストップ。`;
+    }
 
     if (gameState.battleMode === "stage") {
       const currentStage = gameState.stageNumber || 1;
@@ -1441,6 +1450,7 @@ function passCurrentSideTurn() {
       gameState.animation.movingUnits = [];
       logMessage(`\n\n${gameEndText}`);
       renderAll();
+      handleBattleFrontierGameEnd();
       return;
     }
 
@@ -1492,6 +1502,7 @@ function finishTurnAfterAnimations(actedCharacter) {
 ${gameEndText}`);
       renderAll();
       if (gameState.battleMode === "online") pushBattleState();
+      handleBattleFrontierGameEnd();
       return;
     }
 
@@ -1521,6 +1532,7 @@ ${decisiveText}`);
 ${decisiveGameEndText}`);
           renderAll();
           if (gameState.battleMode === "online") pushBattleState();
+          handleBattleFrontierGameEnd();
           return;
         }
 
@@ -1560,6 +1572,7 @@ function proceedAfterTurn(actedCharacter) {
 ${gameEndText}`);
         renderAll();
         if (gameState.battleMode === "online") pushBattleState();
+        handleBattleFrontierGameEnd();
         return;
       }
 

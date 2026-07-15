@@ -45,6 +45,7 @@ const onlineState = {
 // ============================================================
 
 function showOnlineLobbyScreen() {
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
   setScreenDisplay("party-code-screen", "none");
   setScreenDisplay("player-formation-screen", "none");
@@ -54,6 +55,7 @@ function showOnlineLobbyScreen() {
 }
 
 function showOnlineWaitingScreen() {
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
   setScreenDisplay("party-code-screen", "none");
   setScreenDisplay("player-formation-screen", "none");

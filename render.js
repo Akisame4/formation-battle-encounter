@@ -1235,6 +1235,7 @@ function renderButtons() {
 
   if (backTitleButton) {
     backTitleButton.disabled = gameState.animation.locked;
+    backTitleButton.textContent = gameState.battleMode === "battlefrontier" ? "中断してタイトルへ" : "タイトルへ";
   }
 
   clearRecommendedButtons();

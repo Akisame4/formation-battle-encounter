@@ -13,14 +13,22 @@ function hideOnlineScreens() {
 
 function showTitleScreen() {
   hideOnlineScreens();
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "flex");
   setScreenDisplay("party-code-screen", "none");
   setScreenDisplay("player-formation-screen", "none");
   setScreenDisplay("main-layout", "none");
+
+  const resumeButton = document.getElementById("battlefrontier-resume-button");
+  if (resumeButton) {
+    const canResume = typeof hasBattleFrontierInterrupt === "function" && hasBattleFrontierInterrupt();
+    resumeButton.style.display = canResume ? "" : "none";
+  }
 }
 
 function showPartyCodeScreen() {
   hideOnlineScreens();
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
   setScreenDisplay("party-code-screen", "flex");
   setScreenDisplay("player-formation-screen", "none");
@@ -29,14 +37,28 @@ function showPartyCodeScreen() {
 
 function showPlayerFormationScreen() {
   hideOnlineScreens();
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
   setScreenDisplay("party-code-screen", "none");
   setScreenDisplay("player-formation-screen", "flex");
   setScreenDisplay("main-layout", "none");
+
+  const codeLoadArea = document.getElementById("player-formation-code-load-area");
+  const backButton = document.getElementById("player-formation-back-button");
+  const isBattleFrontier = gameState.battleMode === "battlefrontier";
+
+  if (codeLoadArea && !isBattleFrontier) {
+    codeLoadArea.style.display = "";
+  }
+
+  if (backButton) {
+    backButton.textContent = isBattleFrontier ? "中断してタイトルへ" : "タイトルへ戻る";
+  }
 }
 
 function showBattleScreen() {
   hideOnlineScreens();
+  if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
   setScreenDisplay("party-code-screen", "none");
   setScreenDisplay("player-formation-screen", "none");
@@ -99,6 +121,8 @@ function resetGame() {
       gameState.onlineGuestFormationEntries || [],
       "enemy"
     );
+  } else if (gameState.battleMode === "battlefrontier") {
+    gameState.enemyBoard = createBattleFrontierEnemyBoard(gameState.battleFrontier.currentEnemyIds);
   } else {
     gameState.enemyBoard = createEnemyBoardForVersusBattle(gameState.lastVersusEnemyCode);
   }
@@ -1408,6 +1432,11 @@ function startBattleWithPlayerFormation() {
     return;
   }
 
+  if (gameState.battleMode === "battlefrontier") {
+    startBattleFrontierBattle();
+    return;
+  }
+
   if (gameState.battleMode === "stage") {
     gameState.stageNumber = 1;
     gameState.maxStage = getStageCount();
@@ -1559,7 +1588,11 @@ function renderPlayerFormationCharacterList() {
 
   listElement.innerHTML = "";
 
-  getCharacterPool().forEach((character) => {
+  const availableCharacters = gameState.battleMode === "battlefrontier"
+    ? gameState.battleFrontier.availableCharacterIds.map(id => getCharacterByIdFromPool(id)).filter(character => character)
+    : getCharacterPool();
+
+  availableCharacters.forEach((character) => {
     if (!character || !character.id) {
       return;
     }
@@ -1635,19 +1668,40 @@ function renderPlayerFormationScreen() {
     descriptionElement.textContent = `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ）。現在 ${placedCount} / ${gameState.partySize} 体。`;
   }
 
+  const isBattleFrontier = gameState.battleMode === "battlefrontier";
+  const swapCountValid = !isBattleFrontier || typeof isBattleFrontierSwapCountValid !== "function" || isBattleFrontierSwapCountValid();
+
   if (startButton) {
-    startButton.disabled = !isPlayerFormationReady();
+    startButton.disabled = !isPlayerFormationReady() || !swapCountValid;
+
+    if (isBattleFrontier) {
+      startButton.textContent = gameState.battleFrontier.preSwapRosterIds ? "この編成で次の対戦へ" : "この編成でバトル開始";
+    } else {
+      startButton.textContent = "この陣形で開始";
+    }
   }
 
   if (statusElement) {
-    statusElement.textContent = isPlayerFormationReady()
-      ? "4体そろいました。この陣形で開始できます。"
-      : "4体を盤面に配置すると開始できます。";
+    if (isBattleFrontier && !swapCountValid) {
+      statusElement.textContent = "交換できるのは1体までです。入れ替えは1体だけにしてください。";
+    } else {
+      statusElement.textContent = isPlayerFormationReady()
+        ? "4体そろいました。この陣形で開始できます。"
+        : "4体を盤面に配置すると開始できます。";
+    }
   }
 
   renderPlayerFormationSelectedList();
   renderPlayerFormationBoard();
   renderPlayerFormationCharacterList();
+
+  const previewElement = document.getElementById("player-formation-next-enemy-preview");
+
+  if (isBattleFrontier && typeof renderBattleFrontierNextEnemyPreview === "function") {
+    renderBattleFrontierNextEnemyPreview();
+  } else if (previewElement) {
+    previewElement.innerHTML = "";
+  }
 }
 
 function installPlayerFormationOutsideDropHandlers() {
@@ -1735,6 +1789,10 @@ function getBattleModeDescriptionText() {
   if (gameState.battleMode === "online") {
     const side = gameState.onlineMySide === "player" ? "味方側" : "敵側";
     return `オンライン対戦（あなた: ${side}）：相手とリアルタイムで対戦します。`;
+  }
+
+  if (gameState.battleMode === "battlefrontier") {
+    return `バトルフロンティア：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
   }
 
   return "対人バトル：味方側も敵側も手動で操作します。";

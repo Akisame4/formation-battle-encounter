@@ -49,6 +49,21 @@ const gameState = {
   onlineMySide: null,
   onlineGuestFormationEntries: null,
 
+  battleFrontier: {
+    lap: 1,
+    winsThisLap: 0,
+    totalWins: 0,
+    rosterIds: [],
+    rosterPositions: {},
+    draftCandidateIds: [],
+    availableCharacterIds: [],
+    preSwapRosterIds: null,
+    currentEnemyIds: [],
+    nextEnemyIds: [],
+    nextEnemyPreviewId: null,
+    bestRecord: { totalWins: 0, lap: 1 }
+  },
+
   nextUnitId: 1,
 
   animation: {
