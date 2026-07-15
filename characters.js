@@ -1,6 +1,7 @@
 const CHARACTER_TEMPLATES = [
   {
     id: "olive",
+    rank: "B",
     name: "オリーブ",
     job: "ファイター",
     role: "ミスあり高火力",
@@ -20,6 +21,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "chaco",
+    rank: "B",
     name: "チャコ",
     job: "ガーディアン",
     role: "防御・味方保護",
@@ -39,6 +41,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "chilchil",
+    rank: "A",
     name: "チルチル",
     job: "グラップラー",
     role: "攻撃・押し込み",
@@ -58,6 +61,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "lunaluna",
+    rank: "B",
     name: "ルナルナ",
     job: "ウォリアー",
     role: "自己防御型アタッカー",
@@ -77,6 +81,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "jay",
+    rank: "B",
     name: "ジェイ",
     job: "アサシン",
     role: "後列即死・自滅あり",
@@ -96,6 +101,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "shinonome",
+    rank: "C",
     name: "シノノメ",
     job: "炎メイジ",
     role: "遠距離・横列火力",
@@ -115,6 +121,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "moni",
+    rank: "C",
     name: "モニ",
     job: "トリックスター",
     role: "遠距離・位置操作",
@@ -134,6 +141,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "cocon",
+    rank: "B",
     name: "ココン",
     job: "シャーマン",
     role: "遠距離・全体回復",
@@ -153,6 +161,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "dean",
+    rank: "C",
     name: "ディーン",
     job: "スカウト",
     role: "遠距離・味方移動",
@@ -172,6 +181,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "yue",
+    rank: "A",
     name: "ユエ",
     job: "セージ",
     role: "遠距離・単体回復",
@@ -191,6 +201,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "indra",
+    rank: "C",
     name: "インドラ",
     job: "雷メイジ",
     role: "遠距離・縦列火力",
@@ -210,6 +221,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "kashu",
+    rank: "B",
     name: "カシュー",
     job: "バード",
     role: "左右攻撃バッファー",
@@ -229,6 +241,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "cafe",
+    rank: "C",
     name: "カフェ",
     job: "ダンサー",
     role: "軽支援・前列支援",
@@ -248,6 +261,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "godo",
+    rank: "B",
     name: "ゴドー",
     job: "ソルジャー",
     role: "移動不可前衛",
@@ -267,6 +281,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "dragon",
+    rank: "A",
     name: "ドラゴン",
     job: "ブラッドナイト",
     role: "吸血前衛",
@@ -286,6 +301,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "nano",
+    rank: "C",
     name: "ナノ",
     job: "ウィッチ",
     role: "低火力妨害役",
@@ -305,6 +321,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "fang",
+    rank: "A",
     name: "ファング",
     job: "バーサーカー",
     role: "自傷高火力",
@@ -324,6 +341,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "maiyu",
+    rank: "B",
     name: "マイユ",
     job: "ウォーロック",
     role: "防御解除",
@@ -343,6 +361,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "ruma",
+    rank: "B",
     name: "ルマ",
     job: "デモニスト",
     role: "全体攻撃＋強自傷",
@@ -362,6 +381,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "rock",
+    rank: "C",
     name: "ロック",
     job: "エンジニア",
     role: "中列防御＋デコイ",
@@ -381,6 +401,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "teruru",
+    rank: "B",
     name: "テルル",
     job: "スナイパー",
     role: "後列狙撃",
@@ -401,6 +422,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "bei",
+    rank: "B",
     name: "ベイ",
     job: "ゴースト",
     role: "対応マス攻撃",
@@ -421,6 +443,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "sai",
+    rank: "B",
     name: "サイ",
     job: "闇医者",
     role: "遠距離・毒",

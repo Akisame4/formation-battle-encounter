@@ -652,12 +652,8 @@ function isBattleScreenVisible() {
   return Boolean(mainLayout && mainLayout.style.display === "grid");
 }
 
-function saveBattleSnapshot() {
-  if (!isBattleScreenVisible()) {
-    return;
-  }
-
-  const snapshot = {
+function buildBattleSnapshotData() {
+  return {
     battleMode: gameState.battleMode,
     playerBoard: gameState.playerBoard,
     enemyBoard: gameState.enemyBoard,
@@ -683,6 +679,14 @@ function saveBattleSnapshot() {
     onlineMySide: gameState.onlineMySide,
     onlineGuestFormationEntries: gameState.onlineGuestFormationEntries
   };
+}
+
+function saveBattleSnapshot() {
+  if (!isBattleScreenVisible()) {
+    return;
+  }
+
+  const snapshot = buildBattleSnapshotData();
 
   try {
     sessionStorage.setItem(BATTLE_SNAPSHOT_KEY, JSON.stringify(snapshot));
@@ -885,6 +889,24 @@ function bindEvents() {
     openPlayerFormationForBattle("stage");
   });
 
+  document.getElementById("start-battlefrontier-button").addEventListener("click", () => {
+    syncDebugModeFromTitle();
+    startBattleFrontier();
+  });
+
+  document.getElementById("battlefrontier-resume-button").addEventListener("click", () => {
+    syncDebugModeFromTitle();
+    resumeBattleFrontierFromInterrupt();
+  });
+
+  document.getElementById("battlefrontier-result-title-button").addEventListener("click", () => {
+    showTitleScreen();
+  });
+
+  document.getElementById("battlefrontier-result-retry-button").addEventListener("click", () => {
+    retryBattleFrontier();
+  });
+
   document.getElementById("open-party-code-button").addEventListener("click", () => {
     openPartyCodeBuilder();
   });
@@ -927,6 +949,11 @@ function bindEvents() {
   });
 
   document.getElementById("player-formation-back-button").addEventListener("click", () => {
+    if (gameState.battleMode === "battlefrontier") {
+      interruptBattleFrontier();
+      return;
+    }
+
     if (!confirmBeforeBackToTitleFromPlayerFormation()) {
       return;
     }
@@ -1007,6 +1034,12 @@ function bindEvents() {
       cleanupOnlineState();
     }
     clearBattleSnapshot();
+
+    if (gameState.battleMode === "battlefrontier") {
+      interruptBattleFrontier();
+      return;
+    }
+
     showTitleScreen();
   });
 
