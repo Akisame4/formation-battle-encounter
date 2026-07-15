@@ -72,6 +72,7 @@ function openCharacterSelection(mode) {
 
 function openPlayerFormationForBattle(mode) {
   gameState.pendingBattleMode = mode;
+  gameState.battleMode = mode;
   gameState.lastBattleCode = document.getElementById("battle-code-input").value.trim();
   gameState.lastVersusEnemyCode = document.getElementById("versus-enemy-code-input").value.trim();
   openPlayerFormationBuilder();
