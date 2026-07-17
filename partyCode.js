@@ -24,7 +24,30 @@ const PARTY_CHARACTER_CODE_MAP = {
   rock: "J",
   teruru: "K",
   bei: "L",
-  sai: "M"
+  sai: "M",
+  olive_prototype: "N",
+  fang_prototype: "O",
+  chilchil_prototype: "P",
+  godo_prototype: "Q",
+  lunaluna_prototype: "R",
+  dragon_prototype: "S",
+  jay_prototype: "T",
+  chaco_prototype: "U",
+  rock_prototype: "V",
+  shinonome_prototype: "W",
+  indra_prototype: "X",
+  ruma_prototype: "Y",
+  teruru_prototype: "Z",
+  cocon_prototype: "a",
+  yue_prototype: "b",
+  cafe_prototype: "c",
+  kashu_prototype: "d",
+  moni_prototype: "e",
+  nano_prototype: "f",
+  dean_prototype: "g",
+  maiyu_prototype: "h",
+  sai_prototype: "i",
+  bei_prototype: "j"
 };
 
 function getCharacterIdFromPartyCodeSymbol(symbol) {
