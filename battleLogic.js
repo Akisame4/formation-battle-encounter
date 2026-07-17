@@ -77,6 +77,26 @@ function applyImmovable(character) {
   return true;
 }
 
+function applyBurnDamageHalving(actor, damage) {
+  if (!actor || !actor.burn) {
+    return damage;
+  }
+
+  actor.burn = false;
+  return Math.ceil(damage / 20) * 10;
+}
+
+function consumeChargeStock(actor) {
+  if (!actor || !(actor.chargeStock > 0)) {
+    return 0;
+  }
+
+  const stock = actor.chargeStock;
+  actor.chargeStock = 0;
+  actor.chargeActive = false;
+  return stock;
+}
+
 function calculateActionDamage(actor, baseDamage) {
   const detail = {
     baseDamage: baseDamage || 0,
@@ -87,6 +107,12 @@ function calculateActionDamage(actor, baseDamage) {
   };
 
   let damage = detail.baseDamage;
+  const burnedDamage = applyBurnDamageHalving(actor, damage);
+
+  if (burnedDamage !== damage) {
+    detail.burnHalved = true;
+    damage = burnedDamage;
+  }
 
   if (detail.damageDealtDecrease > 0) {
     damage = Math.max(0, damage - detail.damageDealtDecrease);
@@ -96,6 +122,13 @@ function calculateActionDamage(actor, baseDamage) {
   if (detail.attackBuff > 0) {
     damage += detail.attackBuff;
     actor.attackBuff = 0;
+  }
+
+  const chargeBonus = consumeChargeStock(actor);
+
+  if (chargeBonus > 0) {
+    damage += chargeBonus;
+    detail.chargeBonus = chargeBonus;
   }
 
   detail.damageAfterActorModifiers = damage;
@@ -186,6 +219,12 @@ function healCharacter(character, amount) {
   return character.hp - beforeHp;
 }
 
+function accumulateChargeStockFromDamage(character, actualDamage) {
+  if (character && character.chargeActive && actualDamage > 0) {
+    character.chargeStock = (character.chargeStock || 0) + actualDamage;
+  }
+}
+
 function damageCharacter(character, damage) {
   if (!character || character.hp <= 0) {
     return { actualDamage: 0, reduced: 0 };
@@ -202,6 +241,7 @@ function damageCharacter(character, damage) {
     character.hp = 0;
   }
 
+  accumulateChargeStockFromDamage(character, actualDamage);
   return { actualDamage, reduced };
 }
 
@@ -217,7 +257,9 @@ function directDamageCharacter(character, damage) {
     character.hp = 0;
   }
 
-  return { actualDamage: beforeHp - character.hp };
+  const actualDamage = beforeHp - character.hp;
+  accumulateChargeStockFromDamage(character, actualDamage);
+  return { actualDamage };
 }
 
 function defeatCharacter(character) {
@@ -717,6 +759,296 @@ function placeDecoy(side, index, hp) {
   return decoy;
 }
 
+function placeClone(side, index, actor) {
+  const board = getBoardBySide(side);
+
+  if (index === null || index < 0 || index > 8 || board[index]) {
+    return null;
+  }
+
+  const clone = Object.assign({}, actor, {
+    hp: 10,
+    maxHp: 10,
+    guard: 0,
+    cooldown: 0,
+    attackBuff: 0,
+    damageTakenIncrease: 0,
+    damageDealtDecrease: 0,
+    immovable: 0,
+    poisonDamage: 0,
+    burn: false,
+    paralysis: false,
+    tauntedBy: null,
+    chargeActive: false,
+    chargeStock: 0,
+    isClone: true,
+    unitId: `unit-${gameState.nextUnitId}`
+  });
+
+  gameState.nextUnitId++;
+  board[index] = clone;
+  return clone;
+}
+
+function rollParalysisFailure() {
+  return Math.floor(Math.random() * 6) + 1 === 1;
+}
+
+function cleanseCharacter(character) {
+  if (!character) {
+    return;
+  }
+
+  character.poisonDamage = 0;
+  character.burn = false;
+  character.paralysis = false;
+  character.damageDealtDecrease = 0;
+  character.damageTakenIncrease = 0;
+}
+
+function splashDamageToOwnAllies(side, actor, amount) {
+  const texts = [];
+
+  getAliveCharactersOnSide(side).forEach((character) => {
+    if (character === actor) {
+      return;
+    }
+
+    const result = damageCharacter(character, amount);
+
+    if (result.actualDamage > 0) {
+      texts.push(`${character.name}に${result.actualDamage}`);
+    }
+  });
+
+  return texts.length > 0 ? `巻き込みで${texts.join("、")}ダメージ。` : "";
+}
+
+function buffFrontRowCharacters(side, amount) {
+  const board = getBoardBySide(side);
+  let count = 0;
+
+  getFrontRowIndexes(side).forEach((index) => {
+    if (applyAttackBuff(board[index], amount)) {
+      count++;
+    }
+  });
+
+  return count;
+}
+
+function getDecoyCountOnSide(side) {
+  return getBoardBySide(side).filter((character) => character && character.isDecoy && character.hp > 0).length;
+}
+
+function applyDecoyBuffToAction(action, side) {
+  if (!action || !action.decoyBuff) {
+    return action;
+  }
+
+  const bonus = getDecoyCountOnSide(side) * 10;
+
+  if (bonus <= 0) {
+    return action;
+  }
+
+  const field = action.decoyBuff === "guard" ? "guard" : action.decoyBuff === "heal" ? "amount" : "damage";
+  return Object.assign({}, action, { [field]: (action[field] || 0) + bonus });
+}
+
+function applyRandomStatusEffect(target) {
+  if (!isAliveRealCharacter(target)) {
+    return "";
+  }
+
+  const options = ["poison", "burn", "paralysis", "damageDealtDecrease", "damageTakenIncrease"];
+  const choice = options[Math.floor(Math.random() * options.length)];
+
+  if (choice === "poison") {
+    applyPoison(target, 10);
+    return `${target.name}に毒を付与した。`;
+  }
+
+  if (choice === "burn") {
+    target.burn = true;
+    return `${target.name}にやけどを付与した。`;
+  }
+
+  if (choice === "paralysis") {
+    target.paralysis = true;
+    return `${target.name}に麻痺を付与した。`;
+  }
+
+  if (choice === "damageDealtDecrease") {
+    applyDebuff(target, "damageDealtDecrease", 10);
+    return `${target.name}の与ダメージを減少させた。`;
+  }
+
+  applyDebuff(target, "damageTakenIncrease", 10);
+  return `${target.name}の被ダメージを増加させた。`;
+}
+
+function getPrimaryActionTargets(action) {
+  if (!action) {
+    return [];
+  }
+
+  if (action.target === "enemy_any_cell") {
+    const targetSide = getTargetSideForAction(action);
+    const centerIndex = gameState.selectedTarget ? gameState.selectedTarget.index : null;
+
+    if (!targetSide || centerIndex === null) {
+      return [];
+    }
+
+    const board = getBoardBySide(targetSide);
+    return getAreaIndexes(centerIndex, action.range, targetSide)
+      .map(index => board[index])
+      .filter(character => isTargetableUnit(character));
+  }
+
+  const target = getTargetCharacter();
+  return isTargetableUnit(target) ? [target] : [];
+}
+
+function getMultiHitCandidateIndexes(action, side) {
+  if (action.target === "enemy_front_unit" || action.target === "enemy_front_row") {
+    return getCurrentFrontUnitIndexes(side);
+  }
+
+  if (action.target === "enemy_column_unit") {
+    const actorIndex = gameState.selectedActor ? gameState.selectedActor.index : null;
+
+    if (actorIndex === null) {
+      return [];
+    }
+
+    const column = getColumn(actorIndex);
+    return [0, 1, 2].map(row => getIndex(row, column)).filter(index => index !== null);
+  }
+
+  return getBoardBySide(side).map((character, index) => index);
+}
+
+function applyMultiHitExtraDamage(action, actor) {
+  if (!action.hitCount || action.hitCount <= 1 || !gameState.selectedTarget) {
+    return "";
+  }
+
+  const side = gameState.selectedTarget.side;
+  const primaryIndex = gameState.selectedTarget.index;
+  const board = getBoardBySide(side);
+  const candidates = getMultiHitCandidateIndexes(action, side)
+    .filter(index => index !== primaryIndex && isTargetableUnit(board[index]));
+
+  if (candidates.length === 0) {
+    return "";
+  }
+
+  const shuffled = shuffleArray(candidates, Math.random);
+  const extraCount = Math.min(action.hitCount - 1, shuffled.length);
+  const texts = [];
+
+  for (let i = 0; i < extraCount; i++) {
+    const target = board[shuffled[i]];
+
+    if (!isTargetableUnit(target)) {
+      continue;
+    }
+
+    const result = performDamage(actor, target, action.damage);
+    texts.push(`${target.name}に${result.actualDamage}`);
+  }
+
+  return texts.length > 0 ? ` さらに${texts.join("、")}ダメージ。` : "";
+}
+
+function applyActionSideEffects(actor, action) {
+  if (!action || !actor) {
+    return "";
+  }
+
+  const texts = [];
+
+  if (action.applyTaunt || action.applyBurn || action.applyParalysis || action.applyRandomStatus) {
+    const primaryTargets = getPrimaryActionTargets(action);
+
+    if (action.applyTaunt) {
+      primaryTargets.forEach((target) => {
+        target.tauntedBy = { side: gameState.selectedActor.side, index: gameState.selectedActor.index };
+      });
+
+      if (primaryTargets.length > 0) {
+        texts.push(`${primaryTargets.map(target => target.name).join("、")}に挑発を付与した。`);
+      }
+    }
+
+    if (action.applyBurn) {
+      primaryTargets.forEach((target) => {
+        target.burn = true;
+      });
+
+      if (primaryTargets.length > 0) {
+        texts.push(`${primaryTargets.map(target => target.name).join("、")}にやけどを付与した。`);
+      }
+    }
+
+    if (action.applyParalysis) {
+      primaryTargets.forEach((target) => {
+        target.paralysis = true;
+      });
+
+      if (primaryTargets.length > 0) {
+        texts.push(`${primaryTargets.map(target => target.name).join("、")}に麻痺を付与した。`);
+      }
+    }
+
+    if (action.applyRandomStatus) {
+      primaryTargets.forEach((target) => {
+        const text = applyRandomStatusEffect(target);
+
+        if (text) {
+          texts.push(text);
+        }
+      });
+    }
+  }
+
+  if (action.guardFrontAmount) {
+    const count = guardFrontRowCharacters(gameState.currentSide, action.guardFrontAmount);
+    texts.push(`味方前列${count}体に防御${action.guardFrontAmount}を付与した。`);
+  }
+
+  if (action.splashAllies) {
+    const text = splashDamageToOwnAllies(gameState.currentSide, actor, action.splashAllies);
+
+    if (text) {
+      texts.push(text);
+    }
+  }
+
+  if (action.cleanseSelf) {
+    cleanseCharacter(actor);
+    texts.push(`${actor.name} は自身の状態異常を取り除いた。`);
+  }
+
+  if (action.bonusSelfDamage) {
+    const result = directDamageCharacter(actor, action.bonusSelfDamage);
+    texts.push(`${actor.name} は自分に${result.actualDamage}ダメージを受けた。`);
+  }
+
+  if (action.hitCount > 1) {
+    const text = applyMultiHitExtraDamage(action, actor);
+
+    if (text) {
+      texts.push(text);
+    }
+  }
+
+  return texts.length > 0 ? `
+${texts.join("")}` : "";
+}
+
 function executeAction() {
   const actorBoard = getBoardBySide(gameState.selectedActor.side);
   const actor = actorBoard[gameState.selectedActor.index];
@@ -1141,6 +1473,97 @@ function executeAction() {
 
   if (action.type === "move") {
     return actionStartPrefix + executeMove(action);
+  }
+
+  if (action.type === "charge_self") {
+    actor.chargeActive = true;
+    return actionStartPrefix + `${actor.name} は力を溜め込み始めた。`;
+  }
+
+  if (action.type === "self_poison") {
+    applyPoison(actor, action.poisonDamage || 10);
+    return actionStartPrefix + `${actor.name} は自らに毒を仕込んだ。`;
+  }
+
+  if (action.type === "splash_allies") {
+    const text = splashDamageToOwnAllies(gameState.currentSide, actor, action.damage);
+    return actionStartPrefix + (text ? `${actor.name} は周囲を巻き込んだ。${text}` : `${actor.name} は周囲を巻き込もうとしたが、対象がいなかった。`);
+  }
+
+  if (action.type === "self_clone") {
+    if (!gameState.selectedTarget) {
+      return actionStartPrefix + "配置先が選ばれていません。";
+    }
+
+    const clone = placeClone(gameState.currentSide, gameState.selectedTarget.index, actor);
+    return actionStartPrefix + (clone ? `${actor.name} は分身を生み出した。` : `${actor.name} は分身を生み出せなかった。`);
+  }
+
+  if (action.type === "heal_all_and_heal_target") {
+    const target = getTargetCharacter();
+    const totalHealed = healAllCharacters(gameState.currentSide, action.amount);
+    const bonusHealed = target ? healCharacter(target, action.bonusAmount) : 0;
+    return actionStartPrefix + `${actor.name} は味方全体を合計${totalHealed}回復した。${target ? `${target.name} はさらに${bonusHealed}回復した。` : ""}`;
+  }
+
+  if (action.type === "heal_and_self_defeat") {
+    const target = getTargetCharacter();
+
+    if (!target) {
+      return actionStartPrefix + "対象がいません。";
+    }
+
+    const healed = healCharacter(target, action.amount);
+    defeatCharacter(actor);
+    return actionStartPrefix + `${actor.name} は ${target.name} を ${healed} 回復し、力を使い果たして倒れた。`;
+  }
+
+  if (action.type === "opposite_row_damage") {
+    const oppositeIndex = getOppositeIndex(gameState.selectedActor.index);
+    const targetSide = getEnemySide(gameState.currentSide);
+    const indexes = getAreaIndexes(oppositeIndex, "horizontal_3", targetSide);
+    const board = getBoardBySide(targetSide);
+    const damage = getActionDamage(actor, action.damage);
+    const damagedNames = [];
+
+    indexes.forEach((index) => {
+      const target = board[index];
+
+      if (isTargetableUnit(target)) {
+        const result = damageCharacter(target, applyIncomingDamageIncrease(target, damage));
+        damagedNames.push(`${target.name}に${result.actualDamage}`);
+      }
+    });
+
+    if (damagedNames.length === 0) {
+      return actionStartPrefix + `${actor.name} の対応横列攻撃は誰にも当たらなかった。`;
+    }
+
+    return actionStartPrefix + `${actor.name} の対応横列攻撃。${damagedNames.join("、")} ダメージ。`;
+  }
+
+  if (action.type === "attack_buff_front_all") {
+    const count = buffFrontRowCharacters(gameState.currentSide, action.amount);
+    return actionStartPrefix + `${actor.name} は味方前列${count}体の次の攻撃ダメージを+${action.amount}した。`;
+  }
+
+  if (action.type === "enemy_all_damage_and_splash_allies") {
+    const targetSide = getEnemySide(gameState.currentSide);
+    const damagedNames = [];
+    const damage = getActionDamage(actor, action.damage);
+
+    getBoardBySide(targetSide).forEach((target) => {
+      if (isTargetableUnit(target)) {
+        const result = damageCharacter(target, applyIncomingDamageIncrease(target, damage));
+        damagedNames.push(`${target.name}に${result.actualDamage}`);
+      }
+    });
+
+    if (damagedNames.length === 0) {
+      return actionStartPrefix + `${actor.name} の全体攻撃は誰にも当たらなかった。`;
+    }
+
+    return actionStartPrefix + `${actor.name} の全体攻撃。${damagedNames.join("、")} ダメージ。`;
   }
 
   return actionStartPrefix + "何も起こらなかった。";
@@ -1602,7 +2025,21 @@ function executeCurrentActionWithVisualEffect() {
   try {
     const actorBoard = getBoardBySide(gameState.selectedActor.side);
     const actedCharacter = actorBoard[gameState.selectedActor.index];
-    const resultText = appendActionEndPoisonText(executeAction(), actedCharacter);
+    let coreResultText;
+    let sideEffectText = "";
+
+    if (actedCharacter && actedCharacter.paralysis && rollParalysisFailure()) {
+      coreResultText = `${actedCharacter.name} は麻痺により行動できなかった。`;
+    } else {
+      if (gameState.selectedAction && gameState.selectedAction.decoyBuff) {
+        gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
+      }
+
+      coreResultText = executeAction();
+      sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction);
+    }
+
+    const resultText = appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter);
 
     logMessage(`
 ${resultText}`);

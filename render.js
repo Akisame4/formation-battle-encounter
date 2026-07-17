@@ -72,6 +72,9 @@ function renderAll() {
   renderDecisiveMomentBanner();
   renderStatus();
   renderButtons();
+  if (typeof renderBattleFrontierStreakDisplay === "function") {
+    renderBattleFrontierStreakDisplay();
+  }
   saveBattleSnapshot();
 }
 
@@ -177,9 +180,74 @@ function renderBattleTurnInfo() {
   element.textContent = lines.join("\n");
 }
 
+function getCompactActionLabelFlagSuffix(action) {
+  if (!action) {
+    return "";
+  }
+
+  let suffix = "";
+
+  if (action.applyTaunt) suffix += "+挑発";
+  if (action.applyBurn) suffix += "+やけど";
+  if (action.applyParalysis) suffix += "+麻痺";
+  if (action.applyRandomStatus) suffix += "+状態付与";
+  if (action.guardFrontAmount) suffix += `+前防${action.guardFrontAmount}`;
+  if (action.splashAllies) suffix += `+巻き込み${action.splashAllies}`;
+  if (action.cleanseSelf) suffix += "+状態回復";
+  if (action.decoyBuff) suffix += "+デコイバフ";
+  if (action.bonusSelfDamage) suffix += `+自傷${action.bonusSelfDamage}`;
+  if (action.hitCount > 1) suffix += `+${action.hitCount}撃`;
+
+  return suffix;
+}
+
 function getCompactActionLabel(action) {
   if (!action) {
     return "不明";
+  }
+
+  return `${getCompactActionLabelBase(action)}${getCompactActionLabelFlagSuffix(action)}`;
+}
+
+function getCompactActionLabelBase(action) {
+  if (!action) {
+    return "不明";
+  }
+
+  if (action.type === "charge_self") {
+    return "溜め込み";
+  }
+
+  if (action.type === "self_poison") {
+    return "自傷毒";
+  }
+
+  if (action.type === "splash_allies") {
+    return `巻き込み${action.damage}`;
+  }
+
+  if (action.type === "self_clone") {
+    return "分身";
+  }
+
+  if (action.type === "heal_all_and_heal_target") {
+    return `全回${action.amount}+単回${action.bonusAmount}`;
+  }
+
+  if (action.type === "heal_and_self_defeat") {
+    return `単回${action.amount}+自爆`;
+  }
+
+  if (action.type === "opposite_row_damage") {
+    return `対応横${action.damage}`;
+  }
+
+  if (action.type === "attack_buff_front_all") {
+    return `前列攻強${action.amount}`;
+  }
+
+  if (action.type === "enemy_all_damage_and_splash_allies") {
+    return `敵全${action.damage}`;
   }
 
   if (action.type === "miss") {
@@ -645,6 +713,22 @@ function getCellBadges(character, side, index) {
     badges.push({ className: "badge-cooldown", text: `毒${character.poisonDamage}` });
   }
 
+  if (character && character.hp > 0 && character.burn) {
+    badges.push({ className: "badge-cooldown", text: "やけど" });
+  }
+
+  if (character && character.hp > 0 && character.paralysis) {
+    badges.push({ className: "badge-cooldown", text: "麻痺" });
+  }
+
+  if (character && character.hp > 0 && character.tauntedBy) {
+    badges.push({ className: "badge-cooldown", text: "挑発" });
+  }
+
+  if (character && character.hp > 0 && character.chargeActive) {
+    badges.push({ className: "badge-guard", text: `溜込${character.chargeStock > 0 ? character.chargeStock : ""}` });
+  }
+
   if (character && character.hp > 0 && character.cooldown > 0 && !canActorAct(side, character)) {
     badges.push({ className: "badge-cooldown", text: "待" });
   }
@@ -707,6 +791,10 @@ function renderBoard(board, elementId, side) {
       const hpKey = getUnitHpKey(side, index, character);
 
       cell.classList.add(side === "enemy" ? "enemy-cell" : "player-cell");
+
+      if (character.isPrototype) {
+        cell.classList.add("is-prototype-card");
+      }
 
       if (previousHpValue > currentHpValue) {
         cell.classList.add("damage-flash");
@@ -903,7 +991,7 @@ function renderCardList() {
     row.className = "party-card-row";
 
     source.board.forEach((character, index) => {
-      if (!character || character.isDecoy) {
+      if (!character || character.isDecoy || character.isClone) {
         return;
       }
 
@@ -912,6 +1000,9 @@ function renderCardList() {
 
       if (isActiveCard(source.side, index)) {
         card.classList.add("active-card");
+      }
+      if (character.isPrototype) {
+        card.classList.add("is-prototype-card");
       }
 
       let actionHtml = "";
@@ -937,6 +1028,10 @@ function renderCardList() {
       const damageDealtText = character.damageDealtDecrease > 0 ? ` / 与ダメ-${character.damageDealtDecrease}` : "";
       const immovableText = character.immovable > 0 ? " / 移動不可" : "";
       const poisonText = character.poisonDamage > 0 ? ` / 毒${character.poisonDamage}` : "";
+      const burnText = character.burn ? " / やけど" : "";
+      const paralysisText = character.paralysis ? " / 麻痺" : "";
+      const tauntText = character.tauntedBy ? " / 挑発中" : "";
+      const chargeText = character.chargeActive ? ` / 溜め込み中${character.chargeStock > 0 ? `(${character.chargeStock})` : ""}` : "";
       const cooldownText = character.cooldown > 0 && !canActorAct(source.side, character) ? " / 次回使用不可" : "";
 
       card.innerHTML = `
@@ -949,7 +1044,7 @@ function renderCardList() {
             <div class="card-title-row"><div class="card-title">${character.name}</div></div>
             <div class="card-subtitle">${character.job}</div>
             <div class="card-status">
-              HP ${character.hp} / ${character.maxHp}${guardText}${attackBuffText}${damageTakenText}${damageDealtText}${immovableText}${poisonText}${cooldownText}
+              HP ${character.hp} / ${character.maxHp}${guardText}${attackBuffText}${damageTakenText}${damageDealtText}${immovableText}${poisonText}${burnText}${paralysisText}${tauntText}${chargeText}${cooldownText}
             </div>
           </div>
         </div>

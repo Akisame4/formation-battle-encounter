@@ -256,6 +256,10 @@ function getCharacterPool() {
   return pool;
 }
 
+function getSelectableCharacterPool() {
+  return getCharacterPool().filter(character => !character.isPrototype);
+}
+
 function resetCharacterRuntimeStatus(character) {
   character.hp = character.maxHp;
   character.guard = 0;
@@ -265,6 +269,11 @@ function resetCharacterRuntimeStatus(character) {
   character.damageDealtDecrease = 0;
   character.immovable = 0;
   character.poisonDamage = 0;
+  character.burn = false;
+  character.paralysis = false;
+  character.tauntedBy = null;
+  character.chargeActive = false;
+  character.chargeStock = 0;
   character.unitId = `unit-${gameState.nextUnitId}`;
   gameState.nextUnitId++;
 }
@@ -404,6 +413,26 @@ function getCharacterRuntimeStatusHtml(character) {
     statusItems.push("移動不可");
   }
 
+  if (character.poisonDamage > 0) {
+    statusItems.push(`毒 ${character.poisonDamage}`);
+  }
+
+  if (character.burn) {
+    statusItems.push("やけど");
+  }
+
+  if (character.paralysis) {
+    statusItems.push("麻痺");
+  }
+
+  if (character.tauntedBy) {
+    statusItems.push("挑発中");
+  }
+
+  if (character.chargeActive) {
+    statusItems.push(`溜め込み中${character.chargeStock > 0 ? `(${character.chargeStock})` : ""}`);
+  }
+
   if (character.cooldown > 0) {
     statusItems.push("次回使用不可");
   }
@@ -470,6 +499,12 @@ function openCharacterDetailModal(character, contextLabel = "") {
   const contextHtml = contextLabel
     ? `<div class="character-detail-context">${escapeHtml(contextLabel)}</div>`
     : "";
+
+  const dialogElement = overlay.querySelector(".character-detail-dialog");
+
+  if (dialogElement) {
+    dialogElement.classList.toggle("is-prototype-detail", !!character.isPrototype);
+  }
 
   content.innerHTML = `
     <div class="character-detail-header">
@@ -625,6 +660,7 @@ function initializePartyCodeBuilderIfNeeded() {
   gameState.partyCodeBuilderOutput = "";
   gameState.partyCodeBuilderInitialized = true;
   gameState.partyCodeBuilderDraggingFromBoard = false;
+  gameState.partyCodeBuilderTapSelectedId = null;
 }
 
 function getCharacterByIdFromPool(id) {
@@ -679,6 +715,19 @@ function ensurePartyCodeDragStyle() {
 
     .tap-placeable-cell {
       cursor: pointer !important;
+      border-color: #0075a8 !important;
+      background: #e7f7ff !important;
+      animation: tapPlaceablePulse 1.1s ease-in-out infinite;
+    }
+
+    @keyframes tapPlaceablePulse {
+      0%, 100% {
+        box-shadow: 0 0 0 4px rgba(0, 117, 168, 0.32);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(0, 117, 168, 0.12);
+      }
     }
   `;
   document.head.appendChild(style);
@@ -982,9 +1031,16 @@ function renderPartyCodeFormationBoard() {
     const character = occupantId ? getCharacterByIdFromPool(occupantId) : null;
     const cell = document.createElement("div");
     cell.className = "formation-cell";
+    const tapSelectedId = gameState.partyCodeBuilderTapSelectedId;
 
     if (character) {
       cell.classList.add("filled-formation-cell");
+      if (tapSelectedId === occupantId) {
+        cell.classList.add("tap-selected-formation-item");
+      }
+      if (character.isPrototype) {
+        cell.classList.add("is-prototype-card");
+      }
 
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
@@ -999,6 +1055,7 @@ function renderPartyCodeFormationBoard() {
 
       cell.addEventListener("dragstart", (event) => {
         gameState.partyCodeBuilderDraggingFromBoard = true;
+        gameState.partyCodeBuilderTapSelectedId = null;
         setPartyCodeDragData(event, occupantId, position);
         cell.classList.add("dragging-party-code-item");
       });
@@ -1007,12 +1064,39 @@ function renderPartyCodeFormationBoard() {
         gameState.partyCodeBuilderDraggingFromBoard = false;
         clearPartyCodeDragOverStyles();
       });
+
+      cell.addEventListener("click", () => {
+        const selectedId = gameState.partyCodeBuilderTapSelectedId;
+        if (selectedId) {
+          if (selectedId === occupantId) {
+            gameState.partyCodeBuilderTapSelectedId = null;
+          } else {
+            movePartyCodeBuilderCharacterToPosition(selectedId, position);
+            gameState.partyCodeBuilderTapSelectedId = null;
+          }
+        } else {
+          gameState.partyCodeBuilderTapSelectedId = occupantId;
+        }
+        renderPartyCodeBuilderScreen();
+      });
     } else {
       cell.classList.add("empty-formation-cell");
+      if (tapSelectedId) {
+        cell.classList.add("tap-placeable-cell");
+      }
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
-        <div class="empty-label">ここへドロップ</div>
+        <div class="empty-label">${tapSelectedId ? "タップで配置" : "ここへドロップ"}</div>
       `;
+
+      cell.addEventListener("click", () => {
+        const selectedId = gameState.partyCodeBuilderTapSelectedId;
+        if (selectedId) {
+          movePartyCodeBuilderCharacterToPosition(selectedId, position);
+          gameState.partyCodeBuilderTapSelectedId = null;
+          renderPartyCodeBuilderScreen();
+        }
+      });
     }
 
     cell.addEventListener("dragover", (event) => {
@@ -1062,11 +1146,18 @@ function renderPartyCodeCharacterList() {
 
   pool.forEach((character) => {
     const isSelected = selectedIds.includes(character.id);
+    const isTapSelected = gameState.partyCodeBuilderTapSelectedId === character.id;
     const card = document.createElement("div");
     card.className = "selection-character-card party-code-draggable";
 
     if (isSelected) {
       card.classList.add("selected-selection-card");
+    }
+    if (isTapSelected) {
+      card.classList.add("tap-selected-formation-item");
+    }
+    if (character.isPrototype) {
+      card.classList.add("is-prototype-card");
     }
 
     card.draggable = true;
@@ -1085,15 +1176,26 @@ function renderPartyCodeCharacterList() {
       <div class="selection-action-list">
         <ol>${getSelectionCardActionHtml(character)}</ol>
       </div>
-      <div class="selection-card-footer">${isSelected ? "配置中" : "盤面へドラッグ"}</div>
+      <div class="selection-card-footer">${isSelected ? "配置中" : isTapSelected ? "選択中 → マスをタップ" : "タップで選択 / ドラッグ"}</div>
     `;
 
     card.querySelector(".selection-card-name-row").appendChild(
       createCharacterDetailButton(character, "パーティコード作成")
     );
 
+    card.addEventListener("click", (event) => {
+      if (event.target.closest("button")) return;
+      if (gameState.partyCodeBuilderTapSelectedId === character.id) {
+        gameState.partyCodeBuilderTapSelectedId = null;
+      } else {
+        gameState.partyCodeBuilderTapSelectedId = character.id;
+      }
+      renderPartyCodeBuilderScreen();
+    });
+
     card.addEventListener("dragstart", (event) => {
       gameState.partyCodeBuilderDraggingFromBoard = false;
+      gameState.partyCodeBuilderTapSelectedId = null;
       setPartyCodeDragData(event, character.id, null);
       card.classList.add("dragging-party-code-item");
     });
@@ -1114,7 +1216,7 @@ function renderPartyCodeBuilderScreen() {
   const placedCount = getPartyCodeBuilderEntries().length;
 
   if (descriptionElement) {
-    descriptionElement.textContent = `キャラクターを4体、盤面へドラッグ＆ドロップしてください。盤面外へ出すと外れます。現在 ${placedCount} / ${gameState.partySize} 体。`;
+    descriptionElement.textContent = `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ＆ドロップ）。盤面外へ出すと外れます。現在 ${placedCount} / ${gameState.partySize} 体。`;
   }
 
   updatePartyCodeBuilderAutoOutput();
@@ -1490,6 +1592,9 @@ function renderPlayerFormationBoard() {
       if (tapSelectedId === occupantId) {
         cell.classList.add("tap-selected-formation-item");
       }
+      if (character.isPrototype) {
+        cell.classList.add("is-prototype-card");
+      }
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
         <div class="formation-portrait">
@@ -1591,7 +1696,7 @@ function renderPlayerFormationCharacterList() {
 
   const availableCharacters = gameState.battleMode === "battlefrontier"
     ? gameState.battleFrontier.availableCharacterIds.map(id => getCharacterByIdFromPool(id)).filter(character => character)
-    : getCharacterPool();
+    : getSelectableCharacterPool();
 
   availableCharacters.forEach((character) => {
     if (!character || !character.id) {
@@ -1608,6 +1713,9 @@ function renderPlayerFormationCharacterList() {
     }
     if (isTapSelected) {
       card.classList.add("tap-selected-formation-item");
+    }
+    if (character.isPrototype) {
+      card.classList.add("is-prototype-card");
     }
 
     card.draggable = true;
@@ -1667,6 +1775,10 @@ function renderPlayerFormationScreen() {
 
   if (descriptionElement) {
     descriptionElement.textContent = `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ）。現在 ${placedCount} / ${gameState.partySize} 体。`;
+  }
+
+  if (typeof renderBattleFrontierStreakDisplay === "function") {
+    renderBattleFrontierStreakDisplay();
   }
 
   const isBattleFrontier = gameState.battleMode === "battlefrontier";
@@ -1793,7 +1905,7 @@ function getBattleModeDescriptionText() {
   }
 
   if (gameState.battleMode === "battlefrontier") {
-    return `バトルフロンティア：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
+    return `バトルファクトリー：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
   }
 
   return "対人バトル：味方側も敵側も手動で操作します。";
@@ -1886,7 +1998,7 @@ function createEnemyBoardForAutoBattle(codeText) {
 
 function createRandomEnemyBoard(randomFunction) {
   const board = Array(9).fill(null);
-  const pool = getCharacterPool();
+  const pool = getSelectableCharacterPool();
   const shuffledCharacters = shuffleArray(pool, randomFunction).slice(0, gameState.partySize);
   const positions = getDefaultPartyPositions("enemy");
 

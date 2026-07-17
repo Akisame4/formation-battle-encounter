@@ -258,6 +258,53 @@ function isMoveDestinationSelectionPhase() {
   return gameState.phase === "select_move_destination" || gameState.phase === "confirm";
 }
 
+function isTauntTargetReachable(action, side, index) {
+  const board = getBoardBySide(side);
+  const character = board[index];
+
+  if (!isTargetableUnit(character)) {
+    return false;
+  }
+
+  if (action.target === "enemy_front_unit" || action.target === "enemy_front_row") {
+    return getCurrentFrontUnitIndexes(side).includes(index);
+  }
+
+  if (action.target === "enemy_back_unit") {
+    return getCurrentBackUnitIndexes(side).includes(index);
+  }
+
+  if (action.target === "enemy_any_unit" || action.target === "enemy_unit") {
+    return true;
+  }
+
+  if (action.target === "enemy_column_unit") {
+    return gameState.selectedActor ? getColumn(index) === getColumn(gameState.selectedActor.index) : false;
+  }
+
+  if (action.target === "enemy_opposite_unit") {
+    return gameState.selectedActor ? index === getOppositeIndex(gameState.selectedActor.index) : false;
+  }
+
+  return false;
+}
+
+function getTauntForcedTargetIndex(action, side) {
+  if (!gameState.selectedActor || !isEnemyTargetType(action.target)) {
+    return null;
+  }
+
+  const actorBoard = getBoardBySide(gameState.selectedActor.side);
+  const tauntActor = actorBoard[gameState.selectedActor.index];
+
+  if (!tauntActor || !tauntActor.tauntedBy || tauntActor.tauntedBy.side !== side) {
+    return null;
+  }
+
+  const tauntIndex = tauntActor.tauntedBy.index;
+  return isTauntTargetReachable(action, side, tauntIndex) ? tauntIndex : null;
+}
+
 function isSelectableTarget(side, index) {
   if (
     gameState.gameOver ||
@@ -280,6 +327,12 @@ function isSelectableTarget(side, index) {
 
   if (side !== targetSide) {
     return false;
+  }
+
+  const forcedTauntIndex = getTauntForcedTargetIndex(action, side);
+
+  if (forcedTauntIndex !== null) {
+    return index === forcedTauntIndex;
   }
 
   if (action.target === "ally_empty_cell") {

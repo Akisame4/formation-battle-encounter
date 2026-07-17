@@ -118,6 +118,12 @@ function chooseEnemyAutoTarget(action) {
     return null;
   }
 
+  const tauntedIndex = getTauntForcedTargetIndex(action, targetSide);
+
+  if (tauntedIndex !== null) {
+    return { side: targetSide, index: tauntedIndex };
+  }
+
   if (action.target === "enemy_front_unit") {
     return chooseFrontTarget(targetSide);
   }
@@ -165,7 +171,9 @@ function chooseEnemyAutoTarget(action) {
     if (
       action.type === "heal" ||
       action.type === "heal_and_guard" ||
-      action.type === "guard"
+      action.type === "guard" ||
+      action.type === "heal_all_and_heal_target" ||
+      action.type === "heal_and_self_defeat"
     ) {
       return chooseLowestHpAllyTarget(targetSide);
     }

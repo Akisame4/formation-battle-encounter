@@ -307,6 +307,20 @@ h3 {
   margin-top: 2px;
 }
 
+.battlefrontier-streak-display {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #fff3cd;
+  border: 1px solid #e0a800;
+  color: #6b4c00;
+  font-size: 13px;
+  font-weight: 900;
+}
+
 .card-list-inner {
   display: grid;
   grid-template-rows: 1fr 1fr;
@@ -466,6 +480,34 @@ h3 {
   background: #e3f2fd;
 }
 
+.character-card.is-prototype-card {
+  background: #14141a;
+  color: #f5f5f5;
+  border-color: #888;
+}
+
+.character-card.is-prototype-card .card-subtitle {
+  color: #ffcf6e;
+}
+
+.character-card.is-prototype-card .card-status {
+  color: #e2e2e2;
+}
+
+.character-card.is-prototype-card .action-list {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.character-card.is-prototype-card .card-main {
+  border-bottom-color: #555;
+}
+
+.character-card.is-prototype-card.active-card {
+  background: #14202a;
+  outline-color: #4fc3f7;
+  box-shadow: 0 0 0 4px rgba(79, 195, 247, 0.3);
+}
+
 .title-area {
   display: none;
 }
@@ -529,6 +571,32 @@ h3 {
 
 .player-cell {
   background: #f1f5ff;
+}
+
+.cell.is-prototype-card {
+  background: #14141a;
+  border-color: #888;
+  color: #f5f5f5;
+}
+
+.cell.is-prototype-card .board-portrait {
+  background: #1f1f1f;
+  border-color: #999;
+}
+
+.cell.is-prototype-card .character-name,
+.cell.is-prototype-card .hp {
+  color: #f5f5f5;
+}
+
+.cell.is-prototype-card.cooldown-cell:not(.selectable-target):not(.selected-target) {
+  background: #2e2e2e;
+  border-color: #777;
+}
+
+.cell.is-prototype-card.cooldown-cell .character-name,
+.cell.is-prototype-card.cooldown-cell .hp {
+  opacity: 1;
 }
 
 .board-character {
@@ -1164,9 +1232,13 @@ button.recommended-button {
   height: 58px;
 }
 
+.selection-card-info {
+  min-width: 0;
+}
+
 .selection-card-name-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
   min-width: 0;
@@ -1174,12 +1246,13 @@ button.recommended-button {
 
 .selection-card-name {
   min-width: 0;
+  flex: 1 1 auto;
   font-weight: 900;
   font-size: 18px;
   line-height: 1.2;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
 }
 
 .selection-card-job {
@@ -1224,6 +1297,46 @@ button.recommended-button {
   color: #333;
   border-top: 1px dashed #ccc;
   padding-top: 6px;
+}
+
+.selection-character-card.is-prototype-card {
+  background: #14141a;
+  border-color: #888;
+  color: #f5f5f5;
+}
+
+.selection-character-card.is-prototype-card .selection-card-job {
+  color: #ffcf6e;
+}
+
+.selection-character-card.is-prototype-card .selection-card-role,
+.selection-character-card.is-prototype-card .selection-card-hp {
+  color: #e2e2e2;
+}
+
+.selection-character-card.is-prototype-card .selection-action-list {
+  border-top-color: #555;
+}
+
+.selection-character-card.is-prototype-card .selection-action-list li {
+  color: #f0f0f0;
+}
+
+.selection-character-card.is-prototype-card .selection-card-footer {
+  color: #e2e2e2;
+  border-top-color: #555;
+}
+
+.selection-character-card.is-prototype-card .character-detail-button {
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #999;
+}
+
+.selection-character-card.is-prototype-card.selected-selection-card {
+  background: #14202a;
+  border-color: #4fc3f7;
+  box-shadow: 0 0 0 3px rgba(79, 195, 247, 0.3);
 }
 
 @media (max-width: 1200px) {
@@ -1353,6 +1466,26 @@ button.recommended-button {
 .active-formation-cell {
   border-color: #1976d2;
   box-shadow: 0 0 0 4px rgba(25, 118, 210, 0.2);
+}
+
+.filled-formation-cell.is-prototype-card {
+  background: #14141a;
+  border-color: #888;
+  color: #f5f5f5;
+}
+
+.filled-formation-cell.is-prototype-card .formation-row-label {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.filled-formation-cell.is-prototype-card .formation-name {
+  color: #f5f5f5;
+}
+
+.filled-formation-cell.is-prototype-card .formation-portrait {
+  background: #1f1f1f;
+  border-color: #999;
 }
 
 .formation-row-label {
@@ -1726,7 +1859,54 @@ button.recommended-button {
 
 .character-detail-compact {
   font-weight: 900;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.character-detail-dialog.is-prototype-detail {
+  background: #14141a;
+  color: #f5f5f5;
+  border-color: #888;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-header {
+  border-bottom-color: #555;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-job {
+  color: #ffcf6e;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-role {
+  color: #e2e2e2;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-context {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-status span {
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #999;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-action-table th,
+.character-detail-dialog.is-prototype-detail .character-detail-action-table td {
+  border-color: #555;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-action-table thead th {
+  background: #2a2a2a;
+  color: #fff;
+}
+
+.character-detail-dialog.is-prototype-detail .character-detail-close-button {
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #999;
 }
 
 @media (max-width: 700px) {

@@ -11,8 +11,11 @@ const BATTLE_FRONTIER_BEST_RECORD_KEY = "formationBattleEncounterFrontierBestRec
 const BATTLE_FRONTIER_INTERRUPT_KEY = "formationBattleEncounterFrontierInterrupt";
 const BATTLE_FRONTIER_WINS_PER_LAP = 7;
 
-const BATTLE_FRONTIER_RANK_BASE_WEIGHT = { C: 60, B: 25, A: 10 };
-const BATTLE_FRONTIER_RANK_LAP_GROWTH = { C: -4, B: 2, A: 3 };
+// A〜Fの6段階。Fが最も出現しやすく（既存キャラの主な帯）、
+// A〜Cは今後追加予定のバトルフロンティア専用キャラ向けの上位帯。
+// 周を重ねるごとに下位ランクの重みが下がり、上位ランクの重みが上がる。
+const BATTLE_FRONTIER_RANK_BASE_WEIGHT = { F: 60, E: 40, D: 20, C: 10, B: 5, A: 2 };
+const BATTLE_FRONTIER_RANK_LAP_GROWTH = { F: -4, E: -2, D: 1, C: 2, B: 3, A: 4 };
 
 function getBattleFrontierRankWeight(rank, lap) {
   const base = BATTLE_FRONTIER_RANK_BASE_WEIGHT[rank] || 1;
@@ -22,9 +25,16 @@ function getBattleFrontierRankWeight(rank, lap) {
   return Math.max(1, base + growth * extraLaps);
 }
 
-function drawWeightedCharacterIds(count, lap, excludeIds) {
+function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks) {
   const excludeSet = new Set(excludeIds || []);
-  const pool = CHARACTER_TEMPLATES.filter((character) => character.rank && !excludeSet.has(character.id));
+  const allowedRankSet = allowedRanks ? new Set(allowedRanks) : null;
+  const pool = CHARACTER_TEMPLATES.filter((character) => {
+    if (!character.rank || excludeSet.has(character.id)) {
+      return false;
+    }
+
+    return !allowedRankSet || allowedRankSet.has(character.rank);
+  });
   const picked = [];
 
   for (let i = 0; i < count && pool.length > 0; i++) {
@@ -213,6 +223,26 @@ function hideBattleFrontierScreens() {
   setScreenDisplay("battlefrontier-result-screen", "none");
 }
 
+function renderBattleFrontierStreakDisplay() {
+  const isActive = gameState.battleMode === "battlefrontier" && !!gameState.battleFrontier;
+  const text = isActive ? `現在${gameState.battleFrontier.totalWins || 0}連勝中` : "";
+
+  ["battlefrontier-streak-display", "player-formation-battlefrontier-streak"].forEach((elementId) => {
+    const element = document.getElementById(elementId);
+
+    if (!element) {
+      return;
+    }
+
+    if (isActive) {
+      element.textContent = text;
+      element.style.display = "";
+    } else {
+      element.style.display = "none";
+    }
+  });
+}
+
 function createBattleFrontierSelectableCard(character, isSelected, onClick) {
   const card = document.createElement("div");
   card.className = "selection-character-card";
@@ -262,7 +292,7 @@ function startBattleFrontier() {
   gameState.battleFrontier.bestRecord = loadBattleFrontierBestRecord();
   gameState.battleMode = "battlefrontier";
 
-  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, []);
+  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, [], ["D", "E", "F"]);
 
   openBattleFrontierFormationBuilder(false);
 }

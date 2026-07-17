@@ -1,7 +1,7 @@
 const CHARACTER_TEMPLATES = [
   {
     id: "olive",
-    rank: "B",
+    rank: "E",
     name: "オリーブ",
     job: "ファイター",
     role: "ミスあり高火力",
@@ -21,7 +21,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "chaco",
-    rank: "B",
+    rank: "E",
     name: "チャコ",
     job: "ガーディアン",
     role: "防御・味方保護",
@@ -41,7 +41,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "chilchil",
-    rank: "A",
+    rank: "D",
     name: "チルチル",
     job: "グラップラー",
     role: "攻撃・押し込み",
@@ -61,7 +61,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "lunaluna",
-    rank: "B",
+    rank: "D",
     name: "ルナルナ",
     job: "ウォリアー",
     role: "自己防御型アタッカー",
@@ -81,7 +81,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "jay",
-    rank: "B",
+    rank: "E",
     name: "ジェイ",
     job: "アサシン",
     role: "後列即死・自滅あり",
@@ -101,7 +101,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "shinonome",
-    rank: "C",
+    rank: "F",
     name: "シノノメ",
     job: "炎メイジ",
     role: "遠距離・横列火力",
@@ -121,7 +121,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "moni",
-    rank: "C",
+    rank: "F",
     name: "モニ",
     job: "トリックスター",
     role: "遠距離・位置操作",
@@ -141,7 +141,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "cocon",
-    rank: "B",
+    rank: "E",
     name: "ココン",
     job: "シャーマン",
     role: "遠距離・全体回復",
@@ -161,7 +161,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "dean",
-    rank: "C",
+    rank: "F",
     name: "ディーン",
     job: "スカウト",
     role: "遠距離・味方移動",
@@ -181,7 +181,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "yue",
-    rank: "A",
+    rank: "D",
     name: "ユエ",
     job: "セージ",
     role: "遠距離・単体回復",
@@ -201,7 +201,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "indra",
-    rank: "C",
+    rank: "F",
     name: "インドラ",
     job: "雷メイジ",
     role: "遠距離・縦列火力",
@@ -221,7 +221,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "kashu",
-    rank: "B",
+    rank: "E",
     name: "カシュー",
     job: "バード",
     role: "左右攻撃バッファー",
@@ -241,7 +241,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "cafe",
-    rank: "C",
+    rank: "F",
     name: "カフェ",
     job: "ダンサー",
     role: "軽支援・前列支援",
@@ -261,7 +261,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "godo",
-    rank: "B",
+    rank: "D",
     name: "ゴドー",
     job: "ソルジャー",
     role: "移動不可前衛",
@@ -281,7 +281,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "dragon",
-    rank: "A",
+    rank: "D",
     name: "ドラゴン",
     job: "ブラッドナイト",
     role: "吸血前衛",
@@ -301,7 +301,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "nano",
-    rank: "C",
+    rank: "F",
     name: "ナノ",
     job: "ウィッチ",
     role: "低火力妨害役",
@@ -321,7 +321,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "fang",
-    rank: "A",
+    rank: "D",
     name: "ファング",
     job: "バーサーカー",
     role: "自傷高火力",
@@ -341,7 +341,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "maiyu",
-    rank: "B",
+    rank: "E",
     name: "マイユ",
     job: "ウォーロック",
     role: "防御解除",
@@ -361,7 +361,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "ruma",
-    rank: "B",
+    rank: "E",
     name: "ルマ",
     job: "デモニスト",
     role: "全体攻撃＋強自傷",
@@ -381,7 +381,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "rock",
-    rank: "C",
+    rank: "F",
     name: "ロック",
     job: "エンジニア",
     role: "中列防御＋デコイ",
@@ -401,7 +401,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "teruru",
-    rank: "B",
+    rank: "E",
     name: "テルル",
     job: "スナイパー",
     role: "後列狙撃",
@@ -422,7 +422,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "bei",
-    rank: "B",
+    rank: "E",
     name: "ベイ",
     job: "ゴースト",
     role: "対応マス攻撃",
@@ -443,7 +443,7 @@ const CHARACTER_TEMPLATES = [
   },
   {
     id: "sai",
-    rank: "B",
+    rank: "E",
     name: "サイ",
     job: "闇医者",
     role: "遠距離・毒",
@@ -460,6 +460,492 @@ const CHARACTER_TEMPLATES = [
       4: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
       5: { label: "敵1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_any_unit", damage: 10, amount: 10 },
       6: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 }
+    }
+  },
+  {
+    id: "olive_prototype",
+    isPrototype: true,
+    rank: "D",
+    name: "プロトO",
+    job: "ファイター",
+    role: "プロトタイプ：ミス3回・2体攻撃",
+    image: "assets/olive.png",
+    hp: 100,
+    maxHp: 100,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "ミス", type: "miss", target: "self" },
+      2: { label: "ミス", type: "miss", target: "self" },
+      3: { label: "ミス", type: "miss", target: "self" },
+      4: { label: "敵最前列（最大2体）に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30, hitCount: 2 },
+      5: { label: "敵最前列（最大2体）に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60, hitCount: 2 },
+      6: { label: "敵最前列（最大2体）に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60, hitCount: 2 }
+    }
+  },
+  {
+    id: "fang_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトF",
+    job: "バーサーカー",
+    role: "プロトタイプ：ミスなし・全力自傷高火力",
+    image: "assets/fang.png",
+    hp: 70,
+    maxHp: 70,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に30ダメージ、自分に10ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 30, selfDamage: 10 },
+      2: { label: "敵最前列1体に40ダメージ、自分に20ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 40, selfDamage: 20 },
+      3: { label: "敵最前列1体に50ダメージ、自分に30ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 50, selfDamage: 30 },
+      4: { label: "敵最前列1体に60ダメージ、自分に40ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 60, selfDamage: 40 },
+      5: { label: "敵最前列1体に70ダメージ、自分に50ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 70, selfDamage: 50 },
+      6: { label: "敵最前列1体に70ダメージ、自分に50ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 70, selfDamage: 50 }
+    }
+  },
+  {
+    id: "chilchil_prototype",
+    isPrototype: true,
+    rank: "A",
+    name: "プロトChi",
+    job: "グラップラー",
+    role: "プロトタイプ：溜め込みで一撃を強化",
+    image: "assets/chilchil.png",
+    hp: 100,
+    maxHp: 100,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に20ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 20, moveDirection: "push" },
+      3: { label: "自分に溜め込み状態を付与する", type: "charge_self", target: "self" },
+      4: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
+      5: { label: "敵最前列1体に30ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 30, moveDirection: "push" },
+      6: { label: "自分に溜め込み状態を付与する", type: "charge_self", target: "self" }
+    }
+  },
+  {
+    id: "godo_prototype",
+    isPrototype: true,
+    rank: "A",
+    name: "プロトG",
+    job: "ソルジャー",
+    role: "プロトタイプ：高HP移動不可前衛",
+    image: "assets/godo.png",
+    hp: 160,
+    maxHp: 160,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に10ダメージ", type: "damage", target: "enemy_front_unit", damage: 10 },
+      2: { label: "敵最前列1体に20ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 20 },
+      3: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      4: { label: "敵最前列1体に30ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 30 },
+      5: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
+      6: { label: "敵最前列1体に40ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 40 }
+    }
+  },
+  {
+    id: "lunaluna_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトL",
+    job: "ウォリアー",
+    role: "プロトタイプ：挑発と前列防御の切り替え",
+    image: "assets/lunaluna.png",
+    hp: 130,
+    maxHp: 130,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に10ダメージ、挑発を付与", type: "damage", target: "enemy_front_unit", damage: 10, applyTaunt: true },
+      2: { label: "敵最前列1体に10ダメージ、味方前列に防御10", type: "damage", target: "enemy_front_unit", damage: 10, guardFrontAmount: 10 },
+      3: { label: "敵最前列1体に20ダメージ、挑発を付与", type: "damage", target: "enemy_front_unit", damage: 20, applyTaunt: true },
+      4: { label: "敵最前列1体に20ダメージ、自分に防御20", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 20, guard: 20 },
+      5: { label: "敵最前列1体に30ダメージ、挑発を付与", type: "damage", target: "enemy_front_unit", damage: 30, applyTaunt: true },
+      6: { label: "敵最前列1体に30ダメージ、自分に防御10", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 30, guard: 10 }
+    }
+  },
+  {
+    id: "dragon_prototype",
+    isPrototype: true,
+    rank: "B",
+    name: "プロトDra",
+    job: "ブラッドナイト",
+    role: "プロトタイプ：吸血と状態回復の前衛",
+    image: "assets/dragon.png",
+    hp: 110,
+    maxHp: 110,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10 },
+      2: { label: "敵最前列1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10 },
+      3: { label: "敵最前列1体に10ダメージ、自分を10回復、自身の状態異常を回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10, cleanseSelf: true },
+      4: { label: "敵最前列1体に20ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 10 },
+      5: { label: "敵最前列1体に20ダメージ、自分を10回復、自身の状態異常を回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 10, cleanseSelf: true },
+      6: { label: "敵最前列1体に30ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 30, amount: 10 }
+    }
+  },
+  {
+    id: "jay_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトJ",
+    job: "アサシン",
+    role: "プロトタイプ：自爆巻き込みと分身",
+    image: "assets/jay.png",
+    hp: 90,
+    maxHp: 90,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "自爆し、他の味方全員に50ダメージ", type: "self_defeat", target: "self", splashAllies: 50 },
+      2: { label: "自分の分身を味方の空きマスに出す（HP10）", type: "self_clone", target: "ally_empty_cell" },
+      3: { label: "敵最前列1体に防御貫通50ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 50 },
+      4: { label: "敵最前列1体に防御貫通60ダメージ、自分に10ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 60, bonusSelfDamage: 10 },
+      5: { label: "敵後列1体を即死させる", type: "instant_defeat", target: "enemy_back_unit" },
+      6: { label: "敵後列1体を即死させる", type: "instant_defeat", target: "enemy_back_unit" }
+    }
+  },
+  {
+    id: "chaco_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトCha",
+    job: "ガーディアン",
+    role: "プロトタイプ：挑発を持つ防御役",
+    image: "assets/chaco.png",
+    hp: 130,
+    maxHp: 130,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に20ダメージ、挑発を付与", type: "damage", target: "enemy_front_unit", damage: 20, applyTaunt: true },
+      3: { label: "味方前列に防御10", type: "guard_front", target: "self", guard: 10 },
+      4: { label: "味方前列に防御20", type: "guard_front", target: "self", guard: 20 },
+      5: { label: "味方1体に防御30", type: "guard", target: "ally_unit", guard: 30 },
+      6: { label: "味方全体に防御20", type: "guard_all", target: "self", guard: 20 }
+    }
+  },
+  {
+    id: "rock_prototype",
+    isPrototype: true,
+    rank: "D",
+    name: "プロトR",
+    job: "エンジニア",
+    role: "プロトタイプ：デコイの数で強化",
+    image: "assets/rock.png",
+    hp: 90,
+    maxHp: 90,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に20ダメージ（デコイの数だけ強化）", type: "damage", target: "enemy_any_unit", damage: 20, decoyBuff: "damage" },
+      3: { label: "味方中列に防御10", type: "guard_middle", target: "self", guard: 10 },
+      4: { label: "味方中列に防御10（デコイの数だけ強化）", type: "guard_middle", target: "self", guard: 10, decoyBuff: "guard" },
+      5: { label: "自軍の空きマスにHP20のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 20 },
+      6: { label: "自軍の空きマスにHP20のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 20 }
+    }
+  },
+  {
+    id: "shinonome_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトS",
+    job: "炎メイジ",
+    role: "プロトタイプ：やけどを付与する炎術師",
+    image: "assets/shinonome.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ、やけどを付与", type: "damage", target: "enemy_any_unit", damage: 10, applyBurn: true },
+      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "横一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 10 },
+      4: { label: "横一列に各10ダメージ、やけどを付与", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 10, applyBurn: true },
+      5: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
+      6: { label: "横一列に各20ダメージ、やけどを付与", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20, applyBurn: true }
+    }
+  },
+  {
+    id: "indra_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトI",
+    job: "雷メイジ",
+    role: "プロトタイプ：麻痺を付与する雷術師",
+    image: "assets/indra.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ、麻痺を付与", type: "damage", target: "enemy_any_unit", damage: 10, applyParalysis: true },
+      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "縦一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 10 },
+      4: { label: "縦一列に各10ダメージ、麻痺を付与", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 10, applyParalysis: true },
+      5: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
+      6: { label: "縦一列に各20ダメージ、麻痺を付与", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20, applyParalysis: true }
+    }
+  },
+  {
+    id: "ruma_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトRu",
+    job: "デモニスト",
+    role: "プロトタイプ：巻き込みと全体攻撃",
+    image: "assets/ruma.png",
+    hp: 50,
+    maxHp: 50,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "他の味方全員に10ダメージ", type: "splash_allies", target: "self", damage: 10 },
+      2: { label: "敵全体に20ダメージ、他の味方全員に10ダメージ", type: "enemy_all_damage_and_splash_allies", target: "self", damage: 20, splashAllies: 10 },
+      3: { label: "敵全体に30ダメージ、他の味方全員に20ダメージ", type: "enemy_all_damage_and_splash_allies", target: "self", damage: 30, splashAllies: 20 },
+      4: { label: "敵全体に40ダメージ、他の味方全員に30ダメージ", type: "enemy_all_damage_and_splash_allies", target: "self", damage: 40, splashAllies: 30 },
+      5: { label: "敵全体に50ダメージ、他の味方全員に40ダメージ", type: "enemy_all_damage_and_splash_allies", target: "self", damage: 50, splashAllies: 40 },
+      6: { label: "敵全体に60ダメージ、他の味方全員に50ダメージ", type: "enemy_all_damage_and_splash_allies", target: "self", damage: 60, splashAllies: 50 }
+    }
+  },
+  {
+    id: "teruru_prototype",
+    isPrototype: true,
+    rank: "B",
+    name: "プロトT",
+    job: "スナイパー",
+    role: "プロトタイプ：後列狙撃",
+    gender: "女",
+    image: "assets/teruru.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "最後列に移動", type: "move_self_back", target: "self" },
+      2: { label: "最後列に移動", type: "move_self_back", target: "self" },
+      3: { label: "自分と同じ列の敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 10, backRowMultiplier: 2 },
+      4: { label: "自分と同じ列の敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 20, backRowMultiplier: 2 },
+      5: { label: "自分と同じ列の敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 30, backRowMultiplier: 2 },
+      6: { label: "自分と同じ列の敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 40, backRowMultiplier: 2 }
+    }
+  },
+  {
+    id: "cocon_prototype",
+    isPrototype: true,
+    rank: "A",
+    name: "プロトCoc",
+    job: "シャーマン",
+    role: "プロトタイプ：全体回復＋単体追加回復",
+    image: "assets/cocon.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      3: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      4: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      5: { label: "味方全体を20回復、選んだ1体はさらに10回復", type: "heal_all_and_heal_target", target: "ally_unit", amount: 20, bonusAmount: 10 },
+      6: { label: "味方全体を20回復、選んだ1体はさらに20回復", type: "heal_all_and_heal_target", target: "ally_unit", amount: 20, bonusAmount: 20 }
+    }
+  },
+  {
+    id: "yue_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトY",
+    job: "セージ",
+    role: "プロトタイプ：全回復と引き換えの自爆",
+    image: "assets/yue.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      3: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
+      4: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
+      5: { label: "味方1体を40回復", type: "heal", target: "ally_unit", amount: 40 },
+      6: { label: "味方1体を200回復し、自分は力を使い果たして倒れる", type: "heal_and_self_defeat", target: "ally_unit", amount: 200 }
+    }
+  },
+  {
+    id: "cafe_prototype",
+    isPrototype: true,
+    rank: "D",
+    name: "プロトCaf",
+    job: "ダンサー",
+    role: "プロトタイプ：自傷を伴う支援型",
+    image: "assets/cafe.png",
+    hp: 90,
+    maxHp: 90,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に30ダメージ、自分に10ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 30, selfDamage: 10 },
+      2: { label: "敵最前列1体に40ダメージ、自分に20ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 40, selfDamage: 20 },
+      3: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      4: { label: "味方全体に防御20", type: "guard_all", target: "self", guard: 20 },
+      5: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
+      6: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" }
+    }
+  },
+  {
+    id: "kashu_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトK",
+    job: "バード",
+    role: "プロトタイプ：前列強化を持つバッファー",
+    image: "assets/kashu.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
+      3: { label: "左右の味方全員の次の攻撃ダメージ+10", type: "attack_buff_horizontal_all", target: "self", amount: 10, maxTargets: 2 },
+      4: { label: "味方前列の次の攻撃ダメージ+10", type: "attack_buff_front_all", target: "self", amount: 10 },
+      5: { label: "左右の味方全員の次の攻撃ダメージ+20", type: "attack_buff_horizontal_all", target: "self", amount: 20, maxTargets: 2 },
+      6: { label: "味方前列の次の攻撃ダメージ+20", type: "attack_buff_front_all", target: "self", amount: 20 }
+    }
+  },
+  {
+    id: "moni_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトM",
+    job: "トリックスター",
+    role: "プロトタイプ：押込・引寄の2体攻撃",
+    image: "assets/moni.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push" },
+      2: { label: "敵1体に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push" },
+      3: { label: "敵（最大2体）に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push", hitCount: 2 },
+      4: { label: "敵1体に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull" },
+      5: { label: "敵1体に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull" },
+      6: { label: "敵（最大2体）に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull", hitCount: 2 }
+    }
+  },
+  {
+    id: "nano_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトN",
+    job: "ウィッチ",
+    role: "プロトタイプ：妨害の2体攻撃",
+    image: "assets/nano.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "sideways" },
+      2: { label: "敵（最大2体）に10ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "sideways", hitCount: 2 },
+      3: { label: "敵1体に10ダメージ、被ダメージ+10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageTakenIncrease", amount: 10 },
+      4: { label: "敵（最大2体）に10ダメージ、被ダメージ+10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageTakenIncrease", amount: 10, hitCount: 2 },
+      5: { label: "敵1体に10ダメージ、与ダメージ-10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageDealtDecrease", amount: 10 },
+      6: { label: "敵（最大2体）に10ダメージ、与ダメージ-10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageDealtDecrease", amount: 10, hitCount: 2 }
+    }
+  },
+  {
+    id: "dean_prototype",
+    isPrototype: true,
+    rank: "D",
+    name: "プロトDe",
+    job: "スカウト",
+    role: "プロトタイプ：射撃と遠貫を持つスカウト",
+    image: "assets/dean.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "自分と同じ列の敵1体に30ダメージ", type: "sniper_damage", target: "enemy_column_unit", damage: 30 },
+      2: { label: "自分と同じ列の敵1体に30ダメージ", type: "sniper_damage", target: "enemy_column_unit", damage: 30 },
+      3: { label: "敵1体に防御貫通30ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 30 },
+      4: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
+      5: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
+      6: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" }
+    }
+  },
+  {
+    id: "maiyu_prototype",
+    isPrototype: true,
+    rank: "B",
+    name: "プロトMa",
+    job: "ウォーロック",
+    role: "プロトタイプ：防御解除とランダム状態異常",
+    image: "assets/maiyu.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体の防御を解除", type: "clear_guard", target: "enemy_any_unit" },
+      2: { label: "敵1体の防御を解除し、10ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 10 },
+      3: { label: "敵1体の防御を解除し、10ダメージ、ランダムな状態異常を付与", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 10, applyRandomStatus: true },
+      4: { label: "敵1体の防御を解除し、20ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20 },
+      5: { label: "敵1体の防御を解除し、20ダメージ、ランダムな状態異常を付与", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20, applyRandomStatus: true },
+      6: { label: "敵1体の防御を解除し、30ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 30 }
+    }
+  },
+  {
+    id: "sai_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトSa",
+    job: "闇医者",
+    role: "プロトタイプ：毒特化・自傷毒あり",
+    gender: "男",
+    image: "assets/sai.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
+      2: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
+      3: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
+      4: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
+      5: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
+      6: { label: "自分に毒を付与する", type: "self_poison", target: "self", poisonDamage: 10 }
+    }
+  },
+  {
+    id: "bei_prototype",
+    isPrototype: true,
+    rank: "C",
+    name: "プロトB",
+    job: "ゴースト",
+    role: "プロトタイプ：対応マス横列攻撃",
+    gender: "女",
+    image: "assets/bei.png",
+    hp: 80,
+    maxHp: 80,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      2: { label: "自分の対応マスを含む横一列の敵に各30ダメージ", type: "opposite_row_damage", target: "enemy_opposite_unit", damage: 30 },
+      3: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      4: { label: "自分の対応マスの敵に60ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 60 },
+      5: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      6: { label: "自分の対応マスの敵に70ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 70 }
     }
   }
 ];
