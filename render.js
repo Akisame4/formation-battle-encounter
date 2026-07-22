@@ -685,6 +685,10 @@ function getCellBadges(character, side, index) {
     badges.push({ className: "badge-center", text: "TARGET" });
   }
 
+  if (isSelectableSecondHitTarget(side, index)) {
+    badges.push({ className: "badge-center", text: "追撃" });
+  }
+
   if (isAffectedCell(side, index)) {
     badges.push({ className: "badge-hit", text: "HIT" });
   }
@@ -816,7 +820,7 @@ function renderBoard(board, elementId, side) {
         cell.classList.add("selected-actor");
       }
 
-      if (isSelectableTarget(side, index) || isSelectableMoveDestination(side, index)) {
+      if (isSelectableTarget(side, index) || isSelectableMoveDestination(side, index) || isSelectableSecondHitTarget(side, index)) {
         cell.classList.add("selectable-target");
       }
 
@@ -856,7 +860,7 @@ function renderBoard(board, elementId, side) {
         </div>
       `;
     } else {
-      if (isSelectableTarget(side, index) || isSelectableMoveDestination(side, index)) {
+      if (isSelectableTarget(side, index) || isSelectableMoveDestination(side, index) || isSelectableSecondHitTarget(side, index)) {
         cell.classList.add("selectable-target");
       }
 
@@ -1160,6 +1164,15 @@ function renderStatus() {
 
     status.textContent =
       `第${gameState.turnNumber}ターン / ${getSideName(gameState.currentSide)}ターン：${actor.name} の出目は ${gameState.rolledNumber}。「${gameState.selectedAction.label}」${target ? `${target.name} の移動先` : "移動先"}の空きマスを選んでください。`;
+    return;
+  }
+
+  if (gameState.phase === "select_second_hit_target") {
+    const pending = gameState.pendingMultiHit;
+    const actor = pending ? getBoardBySide(pending.actorSide)[pending.actorIndex] : null;
+
+    status.textContent =
+      `第${gameState.turnNumber}ターン / ${getSideName(gameState.currentSide)}ターン：${actor ? actor.name : ""} の追撃対象を選んでください（追撃表示のマス）。`;
     return;
   }
 

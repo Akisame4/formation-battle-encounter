@@ -109,6 +109,11 @@ function handleCellClick(side, index) {
     ・任意移動では、別の空きマスクリック → 移動先変更
     ・対象不要行動の場合、選択中キャラを再クリック → 実行
   */
+  if (gameState.phase === "select_second_hit_target") {
+    handleSecondHitTargetClick(side, index);
+    return;
+  }
+
   if (gameState.phase === "confirm") {
     if (gameState.selectedAction && isTwoStepMoveAction(gameState.selectedAction) && gameState.selectedMoveDestination) {
       if (
@@ -413,9 +418,33 @@ function handleExecuteButtonClick() {
   const actorBoard = getBoardBySide(gameState.selectedActor.side);
   const actedCharacter = actorBoard[gameState.selectedActor.index];
 
-  const resultText = appendActionEndPoisonText(executeAction(), actedCharacter);
+  const { resultText, pendingMultiHit } = resolveSelectedActionForHumanTurn(actedCharacter);
   logMessage(`\n${resultText}`);
 
+  if (pendingMultiHit) {
+    gameState.pendingMultiHit = pendingMultiHit;
+    gameState.phase = "select_second_hit_target";
+    gameState.animation.locked = false;
+    renderAll();
+    return;
+  }
+
+  proceedAfterTurn(actedCharacter);
+}
+
+function handleSecondHitTargetClick(side, index) {
+  const pending = gameState.pendingMultiHit;
+
+  if (!pending || side !== pending.targetSide || !pending.candidates.includes(index)) {
+    return;
+  }
+
+  const actorBoard = getBoardBySide(pending.actorSide);
+  const actedCharacter = actorBoard[pending.actorIndex];
+  const resultText = resolvePendingMultiHitChoice(index);
+  logMessage(`\n${resultText}`);
+
+  gameState.phase = "resolving";
   proceedAfterTurn(actedCharacter);
 }
 

@@ -36,6 +36,13 @@ function showPartyCodeScreen() {
 }
 
 function showPlayerFormationScreen() {
+  // 直前の対戦の再開用スナップショットが残っていると、この画面（キャラ交換含む）
+  // 滞在中にリロードした際、終了済みの対戦を誤って復元し、誰もいない対戦画面で
+  // スタックしてしまうため、ここで無効化しておく。
+  if (typeof clearBattleSnapshot === "function") {
+    clearBattleSnapshot();
+  }
+
   hideOnlineScreens();
   if (typeof hideBattleFrontierScreens === "function") hideBattleFrontierScreens();
   setScreenDisplay("title-screen", "none");
@@ -1773,16 +1780,19 @@ function renderPlayerFormationScreen() {
   const selectedCount = (gameState.playerFormationSelectedIds || []).length;
   const placedCount = getPlayerFormationEntries().length;
 
+  const isBattleFrontier = gameState.battleMode === "battlefrontier";
+  const isSwapMode = isBattleFrontier && !!gameState.battleFrontier.preSwapRosterIds;
+  const swapCountValid = !isBattleFrontier || typeof isBattleFrontierSwapCountValid !== "function" || isBattleFrontierSwapCountValid();
+
   if (descriptionElement) {
-    descriptionElement.textContent = `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ）。現在 ${placedCount} / ${gameState.partySize} 体。`;
+    descriptionElement.textContent = isSwapMode
+      ? `編成を交換できます（倒した敵のキャラクターとも交換可能）。交換できるのは1体まで。現在 ${placedCount} / ${gameState.partySize} 体。`
+      : `キャラクターを4体、盤面へ配置してください（タップ選択 or ドラッグ）。現在 ${placedCount} / ${gameState.partySize} 体。`;
   }
 
   if (typeof renderBattleFrontierStreakDisplay === "function") {
     renderBattleFrontierStreakDisplay();
   }
-
-  const isBattleFrontier = gameState.battleMode === "battlefrontier";
-  const swapCountValid = !isBattleFrontier || typeof isBattleFrontierSwapCountValid !== "function" || isBattleFrontierSwapCountValid();
 
   if (startButton) {
     startButton.disabled = !isPlayerFormationReady() || !swapCountValid;

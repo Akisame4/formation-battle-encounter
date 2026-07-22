@@ -407,6 +407,16 @@ function hasEmptyCellOnSide(side) {
   return board.some((character) => !character);
 }
 
+function isSelectableSecondHitTarget(side, index) {
+  const pending = gameState.pendingMultiHit;
+
+  if (!pending || gameState.phase !== "select_second_hit_target") {
+    return false;
+  }
+
+  return side === pending.targetSide && pending.candidates.includes(index);
+}
+
 function isSelectableMoveDestination(side, index) {
   if (
     gameState.gameOver ||

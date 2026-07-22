@@ -243,7 +243,12 @@ function serializeBoard(board) {
       ddd: char.damageDealtDecrease || 0,
       im: char.immovable || 0,
       pd: char.poisonDamage || 0,
-      uid: char.unitId || ""
+      uid: char.unitId || "",
+      brn: char.burn ? 1 : 0,
+      par: char.paralysis ? 1 : 0,
+      tb: char.tauntedBy ? { s: char.tauntedBy.side, i: char.tauntedBy.index } : null,
+      ca: char.chargeActive ? 1 : 0,
+      cs: char.chargeStock || 0
     };
   });
   return obj;
@@ -290,6 +295,11 @@ function deserializeBoard(serialized) {
       char.immovable = data.im || 0;
       char.poisonDamage = data.pd || 0;
       char.unitId = data.uid || "";
+      char.burn = !!data.brn;
+      char.paralysis = !!data.par;
+      char.tauntedBy = data.tb ? { side: data.tb.s, index: data.tb.i } : null;
+      char.chargeActive = !!data.ca;
+      char.chargeStock = data.cs || 0;
     }
     result[i] = char;
   });
