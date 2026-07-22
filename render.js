@@ -733,6 +733,25 @@ function getCellBadges(character, side, index) {
     badges.push({ className: "badge-guard", text: `溜込${character.chargeStock > 0 ? character.chargeStock : ""}` });
   }
 
+  if (character && character.hp > 0 && character.personality) {
+    const personalityAttackBonus = getPersonalityAttackBonus(character);
+    const personalityDefenseBonus = getPersonalityDefenseBonus(character);
+
+    if (personalityAttackBonus > 0 || personalityDefenseBonus > 0) {
+      const parts = [];
+
+      if (personalityAttackBonus > 0) {
+        parts.push(`攻+${personalityAttackBonus}`);
+      }
+
+      if (personalityDefenseBonus > 0) {
+        parts.push(`防+${personalityDefenseBonus}`);
+      }
+
+      badges.push({ className: "badge-personality", text: parts.join(" ") });
+    }
+  }
+
   if (character && character.hp > 0 && character.cooldown > 0 && !canActorAct(side, character)) {
     badges.push({ className: "badge-cooldown", text: "待" });
   }
@@ -798,6 +817,13 @@ function renderBoard(board, elementId, side) {
 
       if (character.isPrototype) {
         cell.classList.add("is-prototype-card");
+      }
+
+      if (
+        character.personality &&
+        (getPersonalityAttackBonus(character) > 0 || getPersonalityDefenseBonus(character) > 0)
+      ) {
+        cell.classList.add("personality-active");
       }
 
       if (previousHpValue > currentHpValue) {

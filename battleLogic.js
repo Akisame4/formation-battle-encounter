@@ -25,6 +25,137 @@ function applyAttackBuff(character, amount) {
   return true;
 }
 
+// ============================================================
+// 性格（プロトタイプ専用の常時パッシブ特性）
+// ============================================================
+
+const PERSONALITY_TYPES = {
+  ANALYST: "分析家",
+  DIPLOMAT: "外交官",
+  SENTINEL: "番人",
+  EXPLORER: "探検家"
+};
+
+const PERSONALITY_DESCRIPTIONS = {
+  [PERSONALITY_TYPES.ANALYST]: "前後にいる味方の数だけ攻撃力+10",
+  [PERSONALITY_TYPES.DIPLOMAT]: "横に味方がいる数だけ攻撃力+10",
+  [PERSONALITY_TYPES.SENTINEL]: "最前列にいると防御力+10",
+  [PERSONALITY_TYPES.EXPLORER]: "周囲に味方がいないと攻撃力・防御力ともに+10"
+};
+
+function getPersonalityDescriptionText(personality) {
+  return PERSONALITY_DESCRIPTIONS[personality] || "";
+}
+
+function getRoleDisplayText(character) {
+  if (!character) {
+    return "";
+  }
+
+  if (character.isPrototype && character.personality) {
+    return `${character.personality}：${getPersonalityDescriptionText(character.personality)}`;
+  }
+
+  return character.role || "";
+}
+
+function locateCharacterOnBoard(character) {
+  if (!character) {
+    return null;
+  }
+
+  let index = gameState.playerBoard.indexOf(character);
+
+  if (index !== -1) {
+    return { side: "player", index };
+  }
+
+  index = gameState.enemyBoard.indexOf(character);
+
+  if (index !== -1) {
+    return { side: "enemy", index };
+  }
+
+  return null;
+}
+
+function getPersonalityRowDepth(side, index) {
+  return getRowsFromFront(side).findIndex(row => row.includes(index));
+}
+
+function countAlliesInColumn(board, side, index) {
+  const rows = getRowsFromFront(side);
+  const depth = getPersonalityRowDepth(side, index);
+  const column = getColumn(index);
+  let count = 0;
+
+  for (let d = 0; d < rows.length; d++) {
+    if (d !== depth && isTargetableUnit(board[rows[d][column]])) {
+      count++;
+    }
+  }
+
+  return count;
+}
+
+function isInFrontRow(side, index) {
+  return getPersonalityRowDepth(side, index) === 0;
+}
+
+function countAlliesBesideIndex(board, index) {
+  return getHorizontalAdjacentIndexes(index).filter(i => isTargetableUnit(board[i])).length;
+}
+
+function hasNoAlliesAroundIndex(board, index) {
+  return getAdjacentIndexes(index).every(i => !isTargetableUnit(board[i]));
+}
+
+function getPersonalityAttackBonus(character) {
+  if (!character || !character.personality) {
+    return 0;
+  }
+
+  const position = locateCharacterOnBoard(character);
+
+  if (!position) {
+    return 0;
+  }
+
+  const board = getBoardBySide(position.side);
+
+  switch (character.personality) {
+    case PERSONALITY_TYPES.ANALYST:
+      return countAlliesInColumn(board, position.side, position.index) * 10;
+    case PERSONALITY_TYPES.DIPLOMAT:
+      return countAlliesBesideIndex(board, position.index) * 10;
+    case PERSONALITY_TYPES.EXPLORER:
+      return hasNoAlliesAroundIndex(board, position.index) ? 10 : 0;
+    default:
+      return 0;
+  }
+}
+
+function getPersonalityDefenseBonus(character) {
+  if (!character || !character.personality) {
+    return 0;
+  }
+
+  const position = locateCharacterOnBoard(character);
+
+  if (!position) {
+    return 0;
+  }
+
+  switch (character.personality) {
+    case PERSONALITY_TYPES.SENTINEL:
+      return isInFrontRow(position.side, position.index) ? 10 : 0;
+    case PERSONALITY_TYPES.EXPLORER:
+      return hasNoAlliesAroundIndex(getBoardBySide(position.side), position.index) ? 10 : 0;
+    default:
+      return 0;
+  }
+}
+
 function applyDebuff(character, key, amount) {
   if (!isTargetableUnit(character)) {
     return false;
@@ -102,6 +233,7 @@ function calculateActionDamage(actor, baseDamage) {
     baseDamage: baseDamage || 0,
     damageDealtDecrease: actor && actor.damageDealtDecrease > 0 ? actor.damageDealtDecrease : 0,
     attackBuff: actor && actor.attackBuff > 0 ? actor.attackBuff : 0,
+    personalityAttackBonus: getPersonalityAttackBonus(actor),
     damageAfterActorModifiers: baseDamage || 0,
     finalDamage: baseDamage || 0
   };
@@ -122,6 +254,10 @@ function calculateActionDamage(actor, baseDamage) {
   if (detail.attackBuff > 0) {
     damage += detail.attackBuff;
     actor.attackBuff = 0;
+  }
+
+  if (detail.personalityAttackBonus > 0) {
+    damage += detail.personalityAttackBonus;
   }
 
   const chargeBonus = consumeChargeStock(actor);
@@ -192,6 +328,14 @@ function getDamageDetailText(result) {
     parts.push(`攻撃強化+${result.attackBuff}`);
   }
 
+  if (result.personalityAttackBonus > 0) {
+    parts.push(`性格(攻)+${result.personalityAttackBonus}`);
+  }
+
+  if (result.personalityDefenseBonus > 0) {
+    parts.push(`性格(防)-${result.personalityDefenseBonus}`);
+  }
+
   if (result.incomingDamageIncrease > 0) {
     parts.push(`被ダメ増+${result.incomingDamageIncrease}`);
   }
@@ -230,9 +374,12 @@ function damageCharacter(character, damage) {
     return { actualDamage: 0, reduced: 0 };
   }
 
+  const personalityDefenseBonus = getPersonalityDefenseBonus(character);
+  const damageAfterPersonality = Math.max(0, damage - personalityDefenseBonus);
+
   const guardValue = character.guard || 0;
-  const reduced = Math.min(guardValue, damage);
-  const actualDamage = Math.max(0, damage - reduced);
+  const reduced = (damage - damageAfterPersonality) + Math.min(guardValue, damageAfterPersonality);
+  const actualDamage = Math.max(0, damageAfterPersonality - Math.min(guardValue, damageAfterPersonality));
 
   character.guard = 0;
   character.hp -= actualDamage;
@@ -242,7 +389,7 @@ function damageCharacter(character, damage) {
   }
 
   accumulateChargeStockFromDamage(character, actualDamage);
-  return { actualDamage, reduced };
+  return { actualDamage, reduced, personalityDefenseBonus };
 }
 
 function directDamageCharacter(character, damage) {

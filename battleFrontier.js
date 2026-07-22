@@ -259,7 +259,7 @@ function createBattleFrontierSelectableCard(character, isSelected, onClick) {
       <div class="selection-card-info">
         <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
         <div class="selection-card-job">${character.job}</div>
-        <div class="selection-card-role">${character.role}</div>
+        <div class="selection-card-role">${getRoleDisplayText(character)}</div>
         <div class="selection-card-hp">HP ${character.maxHp}</div>
       </div>
     </div>
