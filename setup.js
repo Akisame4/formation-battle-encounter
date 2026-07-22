@@ -444,6 +444,25 @@ function getCharacterRuntimeStatusHtml(character) {
     statusItems.push("次回使用不可");
   }
 
+  if (character.personality) {
+    const attackBonus = getPersonalityAttackBonus(character);
+    const defenseBonus = getPersonalityDefenseBonus(character);
+
+    if (attackBonus > 0 || defenseBonus > 0) {
+      const bonusParts = [];
+
+      if (attackBonus > 0) {
+        bonusParts.push(`攻+${attackBonus}`);
+      }
+
+      if (defenseBonus > 0) {
+        bonusParts.push(`防+${defenseBonus}`);
+      }
+
+      statusItems.push(`性格発動中(${character.personality}：${bonusParts.join("/")})`);
+    }
+  }
+
   return statusItems.map(item => `<span>${escapeHtml(item)}</span>`).join("");
 }
 
@@ -518,7 +537,7 @@ function openCharacterDetailModal(character, contextLabel = "") {
       ${contextHtml}
       <div id="character-detail-title" class="character-detail-name">${escapeHtml(character.name)}</div>
       <div class="character-detail-job">${escapeHtml(character.job || "")}</div>
-      <div class="character-detail-role">${escapeHtml(character.role || "")}</div>
+      <div class="character-detail-role">${escapeHtml(getRoleDisplayText(character))}</div>
     </div>
 
     <div class="character-detail-status">
@@ -622,7 +641,7 @@ function renderCharacterSelectionScreen() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${character.role}</div>
+          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>
@@ -1176,7 +1195,7 @@ function renderPartyCodeCharacterList() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${character.role}</div>
+          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>
@@ -1734,7 +1753,7 @@ function renderPlayerFormationCharacterList() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${character.role}</div>
+          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>
