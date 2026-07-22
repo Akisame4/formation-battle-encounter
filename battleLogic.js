@@ -930,21 +930,28 @@ function getMultiHitCandidateIndexes(action, side) {
   return getBoardBySide(side).map((character, index) => index);
 }
 
-function applyMultiHitExtraDamage(action, actor) {
-  if (!action.hitCount || action.hitCount <= 1 || !gameState.selectedTarget) {
-    return "";
+function getRemainingMultiHitCandidates(action) {
+  if (!action || !action.hitCount || action.hitCount <= 1 || !gameState.selectedTarget) {
+    return [];
   }
 
   const side = gameState.selectedTarget.side;
   const primaryIndex = gameState.selectedTarget.index;
   const board = getBoardBySide(side);
-  const candidates = getMultiHitCandidateIndexes(action, side)
+
+  return getMultiHitCandidateIndexes(action, side)
     .filter(index => index !== primaryIndex && isTargetableUnit(board[index]));
+}
+
+function applyMultiHitExtraDamage(action, actor) {
+  const candidates = getRemainingMultiHitCandidates(action);
 
   if (candidates.length === 0) {
     return "";
   }
 
+  const side = gameState.selectedTarget.side;
+  const board = getBoardBySide(side);
   const shuffled = shuffleArray(candidates, Math.random);
   const extraCount = Math.min(action.hitCount - 1, shuffled.length);
   const texts = [];
@@ -963,10 +970,24 @@ function applyMultiHitExtraDamage(action, actor) {
   return texts.length > 0 ? ` さらに${texts.join("、")}ダメージ。` : "";
 }
 
-function applyActionSideEffects(actor, action) {
+function applyChosenMultiHitDamage(actor, action, side, index) {
+  const board = getBoardBySide(side);
+  const target = board[index];
+
+  if (!isTargetableUnit(target)) {
+    return "";
+  }
+
+  const result = performDamage(actor, target, action.damage);
+  return ` さらに${target.name}に${result.actualDamage}ダメージ。`;
+}
+
+function applyActionSideEffects(actor, action, options) {
   if (!action || !actor) {
     return "";
   }
+
+  const deferMultiHit = options && options.deferMultiHit;
 
   const texts = [];
 
@@ -1037,7 +1058,7 @@ function applyActionSideEffects(actor, action) {
     texts.push(`${actor.name} は自分に${result.actualDamage}ダメージを受けた。`);
   }
 
-  if (action.hitCount > 1) {
+  if (action.hitCount > 1 && !deferMultiHit) {
     const text = applyMultiHitExtraDamage(action, actor);
 
     if (text) {
@@ -2013,6 +2034,82 @@ ${gameEndText}`);
   }, gameState.animation.hpDuration + gameState.animation.defeatDuration);
 }
 
+function resolveSelectedActionAndGetLogText(actedCharacter) {
+  let coreResultText;
+  let sideEffectText = "";
+
+  if (actedCharacter && actedCharacter.paralysis && rollParalysisFailure()) {
+    coreResultText = `${actedCharacter.name} は麻痺により行動できなかった。`;
+  } else {
+    if (gameState.selectedAction && gameState.selectedAction.decoyBuff) {
+      gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
+    }
+
+    coreResultText = executeAction();
+    sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction);
+  }
+
+  return appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter);
+}
+
+function resolveSelectedActionForHumanTurn(actedCharacter) {
+  if (actedCharacter && actedCharacter.paralysis && rollParalysisFailure()) {
+    return {
+      resultText: appendActionEndPoisonText(`${actedCharacter.name} は麻痺により行動できなかった。`, actedCharacter),
+      pendingMultiHit: null
+    };
+  }
+
+  if (gameState.selectedAction && gameState.selectedAction.decoyBuff) {
+    gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
+  }
+
+  const action = gameState.selectedAction;
+  const coreResultText = executeAction();
+  let sideEffectText = applyActionSideEffects(actedCharacter, action, { deferMultiHit: true });
+  let pendingMultiHit = null;
+
+  if (action && action.hitCount > 1) {
+    const candidates = getRemainingMultiHitCandidates(action);
+
+    if (candidates.length === 1) {
+      sideEffectText += applyChosenMultiHitDamage(actedCharacter, action, gameState.selectedTarget.side, candidates[0]);
+    } else if (candidates.length > 1) {
+      pendingMultiHit = {
+        actorSide: gameState.selectedActor.side,
+        actorIndex: gameState.selectedActor.index,
+        action,
+        targetSide: gameState.selectedTarget.side,
+        candidates
+      };
+    }
+  }
+
+  if (pendingMultiHit) {
+    return { resultText: coreResultText + sideEffectText, pendingMultiHit };
+  }
+
+  return {
+    resultText: appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter),
+    pendingMultiHit: null
+  };
+}
+
+function resolvePendingMultiHitChoice(index) {
+  const pending = gameState.pendingMultiHit;
+  gameState.pendingMultiHit = null;
+
+  if (!pending) {
+    return "";
+  }
+
+  const board = getBoardBySide(pending.actorSide);
+  const actor = board[pending.actorIndex];
+  const text = applyChosenMultiHitDamage(actor, pending.action, pending.targetSide, index);
+
+  return appendActionEndPoisonText(text, actor);
+}
+
 function executeCurrentActionWithVisualEffect() {
   if (!gameState.selectedActor || !gameState.selectedAction) {
     return;
@@ -2025,21 +2122,7 @@ function executeCurrentActionWithVisualEffect() {
   try {
     const actorBoard = getBoardBySide(gameState.selectedActor.side);
     const actedCharacter = actorBoard[gameState.selectedActor.index];
-    let coreResultText;
-    let sideEffectText = "";
-
-    if (actedCharacter && actedCharacter.paralysis && rollParalysisFailure()) {
-      coreResultText = `${actedCharacter.name} は麻痺により行動できなかった。`;
-    } else {
-      if (gameState.selectedAction && gameState.selectedAction.decoyBuff) {
-        gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
-      }
-
-      coreResultText = executeAction();
-      sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction);
-    }
-
-    const resultText = appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter);
+    const resultText = resolveSelectedActionAndGetLogText(actedCharacter);
 
     logMessage(`
 ${resultText}`);

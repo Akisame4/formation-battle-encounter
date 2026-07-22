@@ -24,6 +24,7 @@ const gameState = {
   selectedAction: null,
   selectedTarget: null,
   selectedMoveDestination: null,
+  pendingMultiHit: null,
 
   rolledNumber: null,
   phase: "select_actor",

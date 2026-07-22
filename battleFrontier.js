@@ -359,6 +359,7 @@ function openBattleFrontierFormationBuilder(isSwapMode) {
 
 function startBattleFrontierBattle() {
   if (!isBattleFrontierSwapCountValid()) {
+    alert("交換できるのは1体までです。入れ替えは1体だけにしてください。");
     return;
   }
 

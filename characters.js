@@ -730,10 +730,10 @@ const CHARACTER_TEMPLATES = [
     actions: {
       1: { label: "最後列に移動", type: "move_self_back", target: "self" },
       2: { label: "最後列に移動", type: "move_self_back", target: "self" },
-      3: { label: "自分と同じ列の敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 10, backRowMultiplier: 2 },
-      4: { label: "自分と同じ列の敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 20, backRowMultiplier: 2 },
-      5: { label: "自分と同じ列の敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 30, backRowMultiplier: 2 },
-      6: { label: "自分と同じ列の敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 40, backRowMultiplier: 2 }
+      3: { label: "敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 10, backRowMultiplier: 2 },
+      4: { label: "敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 20, backRowMultiplier: 2 },
+      5: { label: "敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 30, backRowMultiplier: 2 },
+      6: { label: "敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_any_unit", damage: 40, backRowMultiplier: 2 }
     }
   },
   {
