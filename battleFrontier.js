@@ -88,6 +88,14 @@ function drawRandomPrototypeCharacterIds(count, excludeIds) {
   return picked;
 }
 
+// 2周目以降のドラフト候補6体：プロトタイプを最低1体保証し、残りは連勝数に応じた重み抽選で埋める。
+function drawBattleFrontierDraftCandidateIds(totalWins) {
+  const prototypeIds = drawRandomPrototypeCharacterIds(1, []);
+  const nonPrototypeIds = drawWeightedCharacterIds(6 - prototypeIds.length, totalWins, prototypeIds);
+
+  return shuffleArray(prototypeIds.concat(nonPrototypeIds), Math.random);
+}
+
 // 保証されるプロトタイプ数：N周目は(N-1)体を保証し、各周7戦目（週の最終戦）はさらに1体増える。
 function getBattleFrontierGuaranteedPrototypeCount(lap, isFinalBattleOfLap) {
   return Math.max(0, lap - 1) + (isFinalBattleOfLap ? 1 : 0);
@@ -547,7 +555,19 @@ function createBattleFrontierEnemyBoard(enemyIds) {
     }
   });
 
-  return createPartyBoardFromFormation(entries, "enemy");
+  const board = createPartyBoardFromFormation(entries, "enemy");
+
+  // 1周目に登場するプロトタイプ（7戦目の保証枠のみ）は、初登場をやわらげるためHPを半分にする。
+  if (gameState.battleFrontier.lap === 1) {
+    board.forEach((character) => {
+      if (character && character.isPrototype) {
+        character.maxHp = Math.max(1, Math.floor(character.maxHp / 2));
+        character.hp = character.maxHp;
+      }
+    });
+  }
+
+  return board;
 }
 
 // ============================================================
@@ -618,7 +638,7 @@ function advanceBattleFrontierAfterVictory() {
     gameState.battleFrontier.rosterPositions = {};
     gameState.battleFrontier.nextEnemyIds = [];
     gameState.battleFrontier.nextEnemyPreviewId = null;
-    gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.totalWins, []);
+    gameState.battleFrontier.draftCandidateIds = drawBattleFrontierDraftCandidateIds(gameState.battleFrontier.totalWins);
 
     openBattleFrontierFormationBuilder(false);
     return;
