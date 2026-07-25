@@ -478,10 +478,10 @@ const CHARACTER_TEMPLATES = [
     actions: {
       1: { label: "ミス", type: "miss", target: "self" },
       2: { label: "ミス", type: "miss", target: "self" },
-      3: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
-      4: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
-      5: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 },
-      6: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 }
+      3: { label: "敵最前列1体に80ダメージ", type: "damage", target: "enemy_front_unit", damage: 80 },
+      4: { label: "敵最前列1体に80ダメージ", type: "damage", target: "enemy_front_unit", damage: 80 },
+      5: { label: "敵最前列1体に120ダメージ", type: "damage", target: "enemy_front_unit", damage: 120 },
+      6: { label: "敵最前列1体に120ダメージ", type: "damage", target: "enemy_front_unit", damage: 120 }
     }
   },
   {
@@ -499,11 +499,11 @@ const CHARACTER_TEMPLATES = [
     cooldown: 0,
     actions: {
       1: { label: "ミス", type: "miss", target: "none" },
-      2: { label: "敵最前列1体に30ダメージ、自分に10ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 30, selfDamage: 10 },
-      3: { label: "敵最前列1体に40ダメージ、自分に10ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 40, selfDamage: 10 },
-      4: { label: "敵最前列1体に50ダメージ、自分に20ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 50, selfDamage: 20 },
-      5: { label: "敵最前列1体に60ダメージ、自分に30ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 60, selfDamage: 30 },
-      6: { label: "敵最前列1体に70ダメージ、自分に40ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 70, selfDamage: 40 }
+      2: { label: "敵最前列1体に60ダメージ、自分に20ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 60, selfDamage: 20 },
+      3: { label: "敵最前列1体に80ダメージ、自分に20ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 80, selfDamage: 20 },
+      4: { label: "敵最前列1体に100ダメージ、自分に40ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 100, selfDamage: 40 },
+      5: { label: "敵最前列1体に120ダメージ、自分に60ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 120, selfDamage: 60 },
+      6: { label: "敵最前列1体に140ダメージ、自分に80ダメージ", type: "damage_and_self_damage", target: "enemy_front_unit", damage: 140, selfDamage: 80 }
     }
   },
   {
@@ -520,12 +520,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      2: { label: "敵最前列1体に20ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 20, moveDirection: "push" },
-      3: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
-      4: { label: "敵最前列1体に30ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 30, moveDirection: "push" },
-      5: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
-      6: { label: "敵最前列1体に40ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 40, moveDirection: "push" }
+      1: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      2: { label: "敵最前列1体に40ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 40, moveDirection: "push" },
+      3: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 },
+      4: { label: "敵最前列1体に60ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 60, moveDirection: "push" },
+      5: { label: "敵最前列1体に80ダメージ", type: "damage", target: "enemy_front_unit", damage: 80 },
+      6: { label: "敵最前列1体に80ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_front_unit", damage: 80, moveDirection: "push" }
     }
   },
   {
@@ -542,12 +542,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に10ダメージ", type: "damage", target: "enemy_front_unit", damage: 10 },
-      2: { label: "敵最前列1体に20ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 20 },
-      3: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      4: { label: "敵最前列1体に30ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 30 },
-      5: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
-      6: { label: "敵最前列1体に40ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 40 }
+      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に40ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 40 },
+      3: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      4: { label: "敵最前列1体に60ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 60 },
+      5: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 },
+      6: { label: "敵最前列1体に80ダメージ、自分に移動不可", type: "damage_and_self_immovable", target: "enemy_front_unit", damage: 80 }
     }
   },
   {
@@ -564,12 +564,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に10ダメージ", type: "damage", target: "enemy_front_unit", damage: 10 },
-      2: { label: "敵最前列1体に10ダメージ、自分に防御10", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 10, guard: 10 },
-      3: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      4: { label: "敵最前列1体に20ダメージ、自分に防御10", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 20, guard: 10 },
-      5: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
-      6: { label: "敵最前列1体に30ダメージ、自分に防御10", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 30, guard: 10 }
+      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に20ダメージ、自分に防御20", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 20, guard: 20 },
+      3: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      4: { label: "敵最前列1体に40ダメージ、自分に防御20", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 40, guard: 20 },
+      5: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 },
+      6: { label: "敵最前列1体に60ダメージ、自分に防御20", type: "damage_and_self_guard", target: "enemy_front_unit", damage: 60, guard: 20 }
     }
   },
   {
@@ -586,12 +586,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10 },
-      2: { label: "敵最前列1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10 },
-      3: { label: "敵最前列1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 10, amount: 10 },
-      4: { label: "敵最前列1体に20ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 10 },
-      5: { label: "敵最前列1体に20ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 10 },
-      6: { label: "敵最前列1体に30ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 30, amount: 10 }
+      1: { label: "敵最前列1体に20ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 20 },
+      2: { label: "敵最前列1体に20ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 20 },
+      3: { label: "敵最前列1体に20ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 20, amount: 20 },
+      4: { label: "敵最前列1体に40ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 40, amount: 20 },
+      5: { label: "敵最前列1体に40ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 40, amount: 20 },
+      6: { label: "敵最前列1体に60ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_front_unit", damage: 60, amount: 20 }
     }
   },
   {
@@ -609,9 +609,9 @@ const CHARACTER_TEMPLATES = [
     cooldown: 0,
     actions: {
       1: { label: "暗殺失敗。自分が即死する", type: "self_defeat", target: "self" },
-      2: { label: "自分に30ダメージ", type: "self_damage", target: "self", damage: 30 },
-      3: { label: "敵最前列1体に防御貫通30ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 30 },
-      4: { label: "敵最前列1体に防御貫通30ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 30 },
+      2: { label: "自分に60ダメージ", type: "self_damage", target: "self", damage: 60 },
+      3: { label: "敵最前列1体に防御貫通60ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 60 },
+      4: { label: "敵最前列1体に防御貫通60ダメージ", type: "piercing_damage", target: "enemy_front_unit", damage: 60 },
       5: { label: "敵後列1体を即死させる", type: "instant_defeat", target: "enemy_back_unit" },
       6: { label: "敵後列1体を即死させる", type: "instant_defeat", target: "enemy_back_unit" }
     }
@@ -630,12 +630,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      2: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      3: { label: "味方前列に防御10", type: "guard_front", target: "self", guard: 10 },
-      4: { label: "味方前列に防御20", type: "guard_front", target: "self", guard: 20 },
-      5: { label: "味方1体に防御30", type: "guard", target: "ally_unit", guard: 30 },
-      6: { label: "味方全体に防御20", type: "guard_all", target: "self", guard: 20 }
+      1: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      2: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      3: { label: "味方前列に防御20", type: "guard_front", target: "self", guard: 20 },
+      4: { label: "味方前列に防御40", type: "guard_front", target: "self", guard: 40 },
+      5: { label: "味方1体に防御60", type: "guard", target: "ally_unit", guard: 60 },
+      6: { label: "味方全体に防御40", type: "guard_all", target: "self", guard: 40 }
     }
   },
   {
@@ -652,12 +652,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      3: { label: "味方中列に防御10", type: "guard_middle", target: "self", guard: 10 },
-      4: { label: "味方中列に防御10", type: "guard_middle", target: "self", guard: 10 },
-      5: { label: "自軍の空きマスにHP20のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 20 },
-      6: { label: "自軍の空きマスにHP20のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 20 }
+      1: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      3: { label: "味方中列に防御20", type: "guard_middle", target: "self", guard: 20 },
+      4: { label: "味方中列に防御20", type: "guard_middle", target: "self", guard: 20 },
+      5: { label: "自軍の空きマスにHP40のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 40 },
+      6: { label: "自軍の空きマスにHP40のデコイを置く", type: "place_decoy", target: "ally_empty_cell", hp: 40 }
     }
   },
   {
@@ -674,12 +674,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      3: { label: "横一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 10 },
-      4: { label: "横一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 10 },
-      5: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
-      6: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      3: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
+      4: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
+      5: { label: "横一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 40 },
+      6: { label: "横一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 40 }
     }
   },
   {
@@ -696,12 +696,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      3: { label: "縦一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 10 },
-      4: { label: "縦一列に各10ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 10 },
-      5: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
-      6: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      3: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
+      4: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
+      5: { label: "縦一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 40 },
+      6: { label: "縦一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 40 }
     }
   },
   {
@@ -718,12 +718,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "自分に30ダメージ", type: "self_damage", target: "self", damage: 30 },
-      2: { label: "自分に30ダメージ", type: "self_damage", target: "self", damage: 30 },
-      3: { label: "敵全体に10ダメージ、自分に10ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 10, selfDamage: 10 },
-      4: { label: "敵全体に20ダメージ、自分に20ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 20, selfDamage: 20 },
-      5: { label: "敵全体に30ダメージ、自分に30ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 30, selfDamage: 30 },
-      6: { label: "敵全体に40ダメージ、自分に40ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 40, selfDamage: 40 }
+      1: { label: "自分に60ダメージ", type: "self_damage", target: "self", damage: 60 },
+      2: { label: "自分に60ダメージ", type: "self_damage", target: "self", damage: 60 },
+      3: { label: "敵全体に20ダメージ、自分に20ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 20, selfDamage: 20 },
+      4: { label: "敵全体に40ダメージ、自分に40ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 40, selfDamage: 40 },
+      5: { label: "敵全体に60ダメージ、自分に60ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 60, selfDamage: 60 },
+      6: { label: "敵全体に80ダメージ、自分に80ダメージ", type: "enemy_all_damage_and_self_damage", target: "self", damage: 80, selfDamage: 80 }
     }
   },
   {
@@ -743,10 +743,10 @@ const CHARACTER_TEMPLATES = [
     actions: {
       1: { label: "最後列に移動", type: "move_self_back", target: "self" },
       2: { label: "最後列に移動", type: "move_self_back", target: "self" },
-      3: { label: "自分と同じ列の敵1体に10ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 10, backRowMultiplier: 2 },
-      4: { label: "自分と同じ列の敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 20, backRowMultiplier: 2 },
-      5: { label: "自分と同じ列の敵1体に30ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 30, backRowMultiplier: 2 },
-      6: { label: "自分と同じ列の敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 40, backRowMultiplier: 2 }
+      3: { label: "自分と同じ列の敵1体に20ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 20, backRowMultiplier: 2 },
+      4: { label: "自分と同じ列の敵1体に40ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 40, backRowMultiplier: 2 },
+      5: { label: "自分と同じ列の敵1体に60ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 60, backRowMultiplier: 2 },
+      6: { label: "自分と同じ列の敵1体に80ダメージ。後列にいるときは攻撃力2倍", type: "sniper_damage", target: "enemy_column_unit", damage: 80, backRowMultiplier: 2 }
     }
   },
   {
@@ -763,12 +763,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      3: { label: "味方全体を10回復", type: "heal_all", target: "self", amount: 10 },
-      4: { label: "味方全体を10回復", type: "heal_all", target: "self", amount: 10 },
-      5: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
-      6: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      4: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
+      5: { label: "味方全体を40回復", type: "heal_all", target: "self", amount: 40 },
+      6: { label: "味方全体を40回復", type: "heal_all", target: "self", amount: 40 }
     }
   },
   {
@@ -785,12 +785,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      3: { label: "味方1体を20回復", type: "heal", target: "ally_unit", amount: 20 },
-      4: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
-      5: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
-      6: { label: "味方1体を40回復", type: "heal", target: "ally_unit", amount: 40 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "味方1体を40回復", type: "heal", target: "ally_unit", amount: 40 },
+      4: { label: "味方1体を60回復", type: "heal", target: "ally_unit", amount: 60 },
+      5: { label: "味方1体を60回復", type: "heal", target: "ally_unit", amount: 60 },
+      6: { label: "味方1体を80回復", type: "heal", target: "ally_unit", amount: 80 }
     }
   },
   {
@@ -807,11 +807,11 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に20ダメージ", type: "damage", target: "enemy_front_unit", damage: 20 },
-      2: { label: "敵最前列1体に30ダメージ", type: "damage", target: "enemy_front_unit", damage: 30 },
-      3: { label: "味方全体を20回復", type: "heal_all", target: "self", amount: 20 },
-      4: { label: "味方全体に防御20", type: "guard_all", target: "self", guard: 20 },
-      5: { label: "味方1体を30回復", type: "heal", target: "ally_unit", amount: 30 },
+      1: { label: "敵最前列1体に40ダメージ", type: "damage", target: "enemy_front_unit", damage: 40 },
+      2: { label: "敵最前列1体に60ダメージ", type: "damage", target: "enemy_front_unit", damage: 60 },
+      3: { label: "味方全体を40回復", type: "heal_all", target: "self", amount: 40 },
+      4: { label: "味方全体に防御40", type: "guard_all", target: "self", guard: 40 },
+      5: { label: "味方1体を60回復", type: "heal", target: "ally_unit", amount: 60 },
       6: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" }
     }
   },
@@ -829,12 +829,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      3: { label: "左右の味方全員の次の攻撃ダメージ+10", type: "attack_buff_horizontal_all", target: "self", amount: 10, maxTargets: 2 },
-      4: { label: "左右の味方全員の次の攻撃ダメージ+10", type: "attack_buff_horizontal_all", target: "self", amount: 10, maxTargets: 2 },
-      5: { label: "左右の味方全員の次の攻撃ダメージ+20", type: "attack_buff_horizontal_all", target: "self", amount: 20, maxTargets: 2 },
-      6: { label: "左右の味方全員の次の攻撃ダメージ+20", type: "attack_buff_horizontal_all", target: "self", amount: 20, maxTargets: 2 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "左右の味方全員の次の攻撃ダメージ+20", type: "attack_buff_horizontal_all", target: "self", amount: 20, maxTargets: 2 },
+      4: { label: "左右の味方全員の次の攻撃ダメージ+20", type: "attack_buff_horizontal_all", target: "self", amount: 20, maxTargets: 2 },
+      5: { label: "左右の味方全員の次の攻撃ダメージ+40", type: "attack_buff_horizontal_all", target: "self", amount: 40, maxTargets: 2 },
+      6: { label: "左右の味方全員の次の攻撃ダメージ+40", type: "attack_buff_horizontal_all", target: "self", amount: 40, maxTargets: 2 }
     }
   },
   {
@@ -851,12 +851,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push" },
-      2: { label: "敵1体に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push" },
-      3: { label: "敵（最大2体）に10ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "push", hitCount: 2 },
-      4: { label: "敵1体に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull" },
-      5: { label: "敵1体に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull" },
-      6: { label: "敵（最大2体）に10ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "pull", hitCount: 2 }
+      1: { label: "敵1体に20ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "push" },
+      2: { label: "敵1体に20ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "push" },
+      3: { label: "敵（最大2体）に20ダメージ、その敵を1列奥へ押し込む", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "push", hitCount: 2 },
+      4: { label: "敵1体に20ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "pull" },
+      5: { label: "敵1体に20ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "pull" },
+      6: { label: "敵（最大2体）に20ダメージ、その敵を1列前へ引き寄せる", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "pull", hitCount: 2 }
     }
   },
   {
@@ -873,12 +873,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "sideways" },
-      2: { label: "敵（最大2体）に10ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 10, moveDirection: "sideways", hitCount: 2 },
-      3: { label: "敵1体に10ダメージ、被ダメージ+10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageTakenIncrease", amount: 10 },
-      4: { label: "敵（最大2体）に10ダメージ、被ダメージ+10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageTakenIncrease", amount: 10, hitCount: 2 },
-      5: { label: "敵1体に10ダメージ、与ダメージ-10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageDealtDecrease", amount: 10 },
-      6: { label: "敵（最大2体）に10ダメージ、与ダメージ-10", type: "damage_and_debuff", target: "enemy_any_unit", damage: 10, debuff: "damageDealtDecrease", amount: 10, hitCount: 2 }
+      1: { label: "敵1体に20ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "sideways" },
+      2: { label: "敵（最大2体）に20ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "sideways", hitCount: 2 },
+      3: { label: "敵1体に20ダメージ、被ダメージ+20", type: "damage_and_debuff", target: "enemy_any_unit", damage: 20, debuff: "damageTakenIncrease", amount: 20 },
+      4: { label: "敵（最大2体）に20ダメージ、被ダメージ+20", type: "damage_and_debuff", target: "enemy_any_unit", damage: 20, debuff: "damageTakenIncrease", amount: 20, hitCount: 2 },
+      5: { label: "敵1体に20ダメージ、与ダメージ-20", type: "damage_and_debuff", target: "enemy_any_unit", damage: 20, debuff: "damageDealtDecrease", amount: 20 },
+      6: { label: "敵（最大2体）に20ダメージ、与ダメージ-20", type: "damage_and_debuff", target: "enemy_any_unit", damage: 20, debuff: "damageDealtDecrease", amount: 20, hitCount: 2 }
     }
   },
   {
@@ -895,9 +895,9 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      3: { label: "敵1体に防御貫通30ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 30 },
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      3: { label: "敵1体に防御貫通60ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 60 },
       4: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       5: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       6: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" }
@@ -918,11 +918,11 @@ const CHARACTER_TEMPLATES = [
     cooldown: 0,
     actions: {
       1: { label: "敵1体の防御を解除", type: "clear_guard", target: "enemy_any_unit" },
-      2: { label: "敵1体の防御を解除し、10ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 10 },
-      3: { label: "敵1体の防御を解除し、10ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 10 },
-      4: { label: "敵1体の防御を解除し、20ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20 },
-      5: { label: "敵1体の防御を解除し、20ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20 },
-      6: { label: "敵1体の防御を解除し、30ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 30 }
+      2: { label: "敵1体の防御を解除し、20ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20 },
+      3: { label: "敵1体の防御を解除し、20ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 20 },
+      4: { label: "敵1体の防御を解除し、40ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 40 },
+      5: { label: "敵1体の防御を解除し、40ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 40 },
+      6: { label: "敵1体の防御を解除し、60ダメージ", type: "clear_guard_and_damage", target: "enemy_any_unit", damage: 60 }
     }
   },
   {
@@ -940,12 +940,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      2: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
-      3: { label: "敵1体に10ダメージ", type: "damage", target: "enemy_any_unit", damage: 10 },
-      4: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 },
-      5: { label: "敵1体に10ダメージ、自分を10回復", type: "damage_and_self_heal", target: "enemy_any_unit", damage: 10, amount: 10 },
-      6: { label: "敵1体に10ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 10, poisonDamage: 10 }
+      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に20ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 20, poisonDamage: 20 },
+      3: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
+      4: { label: "敵1体に20ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 20, poisonDamage: 20 },
+      5: { label: "敵1体に20ダメージ、自分を20回復", type: "damage_and_self_heal", target: "enemy_any_unit", damage: 20, amount: 20 },
+      6: { label: "敵1体に20ダメージ、毒を付与", type: "damage_and_poison", target: "enemy_any_unit", damage: 20, poisonDamage: 20 }
     }
   },
   {
@@ -964,11 +964,11 @@ const CHARACTER_TEMPLATES = [
     cooldown: 0,
     actions: {
       1: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
-      2: { label: "自分の対応マスの敵に50ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 50 },
+      2: { label: "自分の対応マスの敵に100ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 100 },
       3: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
-      4: { label: "自分の対応マスの敵に60ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 60 },
+      4: { label: "自分の対応マスの敵に120ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 120 },
       5: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
-      6: { label: "自分の対応マスの敵に70ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 70 }
+      6: { label: "自分の対応マスの敵に140ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 140 }
     }
   }
 ];
