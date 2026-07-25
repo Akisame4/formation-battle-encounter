@@ -13,23 +13,25 @@ const BATTLE_FRONTIER_WINS_PER_LAP = 7;
 
 // A〜Gの7段階。Gが最も出現しやすく（既存キャラの主な帯）、
 // A〜Cはバトルフロンティア専用キャラ（プロトタイプ）向けの上位帯。
-// 周を重ねるごとに下位ランクの重みが下がり、上位ランクの重みが上がる。
+// 連勝数が増えるごとに下位ランクの重みが下がり、上位ランクの重みが上がる。
 const BATTLE_FRONTIER_RANK_BASE_WEIGHT = { G: 90, F: 60, E: 40, D: 20, C: 10, B: 5, A: 2 };
 const BATTLE_FRONTIER_RANK_LAP_GROWTH = { G: -6, F: -4, E: -2, D: 1, C: 2, B: 3, A: 4 };
 
 // 1周目の敵専用ルール：D以下（プロトタイプを除く）のみを出し、
-// 1周目最後の7戦目だけ必ずプロトタイプを1体混ぜる。2周目以降は通常の重み抽選に戻る。
+// 1周目最後の7戦目だけ必ずプロトタイプを1体混ぜる。2周目以降は下の「保証プロトタイプ数」ルールに従う。
 const BATTLE_FRONTIER_LAP1_ENEMY_RANKS = ["D", "E", "F", "G"];
 
-function getBattleFrontierRankWeight(rank, lap) {
+// ランクの重みは周ではなく連勝数(totalWins)に応じて連続的に変化させる。
+// 1周(7連勝)ごとの変化量が従来と同じ幅になるよう、1勝あたりの変化量を7分の1にしている。
+function getBattleFrontierRankWeight(rank, totalWins) {
   const base = BATTLE_FRONTIER_RANK_BASE_WEIGHT[rank] || 1;
   const growth = BATTLE_FRONTIER_RANK_LAP_GROWTH[rank] || 0;
-  const extraLaps = Math.max(0, (lap || 1) - 1);
+  const growthPerWin = growth / BATTLE_FRONTIER_WINS_PER_LAP;
 
-  return Math.max(1, base + growth * extraLaps);
+  return Math.max(1, base + growthPerWin * Math.max(0, totalWins || 0));
 }
 
-function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks, excludePrototypes) {
+function drawWeightedCharacterIds(count, totalWins, excludeIds, allowedRanks, excludePrototypes) {
   const excludeSet = new Set(excludeIds || []);
   const allowedRankSet = allowedRanks ? new Set(allowedRanks) : null;
   const pool = CHARACTER_TEMPLATES.filter((character) => {
@@ -46,7 +48,7 @@ function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks, excludeP
   const picked = [];
 
   for (let i = 0; i < count && pool.length > 0; i++) {
-    const weights = pool.map((character) => getBattleFrontierRankWeight(character.rank, lap));
+    const weights = pool.map((character) => getBattleFrontierRankWeight(character.rank, totalWins));
     const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
     let roll = Math.random() * totalWeight;
     let selectedIndex = pool.length - 1;
@@ -72,53 +74,71 @@ function isPrototypeCharacterId(id) {
   return !!(template && template.isPrototype);
 }
 
-function drawRandomPrototypeCharacterId(excludeIds) {
+function drawRandomPrototypeCharacterIds(count, excludeIds) {
   const excludeSet = new Set(excludeIds || []);
   const pool = CHARACTER_TEMPLATES.filter((character) => character.isPrototype && !excludeSet.has(character.id));
+  const picked = [];
 
-  if (pool.length === 0) {
-    return null;
+  for (let i = 0; i < count && pool.length > 0; i++) {
+    const index = Math.floor(Math.random() * pool.length);
+    picked.push(pool[index].id);
+    pool.splice(index, 1);
   }
 
-  return pool[Math.floor(Math.random() * pool.length)].id;
+  return picked;
+}
+
+// 保証されるプロトタイプ数：N周目は(N-1)体を保証し、各周7戦目（週の最終戦）はさらに1体増える。
+function getBattleFrontierGuaranteedPrototypeCount(lap, isFinalBattleOfLap) {
+  return Math.max(0, lap - 1) + (isFinalBattleOfLap ? 1 : 0);
 }
 
 // 1周目専用の敵抽選：D以下（プロトタイプ除く）のみ。7戦目だけ1体をプロトタイプに差し替える。
-function drawBattleFrontierLap1EnemyIds(isFinalBattleOfLap, excludeIds) {
-  if (!isFinalBattleOfLap) {
-    return drawWeightedCharacterIds(gameState.partySize, 1, excludeIds, BATTLE_FRONTIER_LAP1_ENEMY_RANKS, true);
+function drawBattleFrontierLap1EnemyIds(isFinalBattleOfLap, totalWins, excludeIds) {
+  const guaranteedPrototypeCount = Math.min(
+    gameState.partySize,
+    getBattleFrontierGuaranteedPrototypeCount(1, isFinalBattleOfLap)
+  );
+
+  if (guaranteedPrototypeCount === 0) {
+    return drawWeightedCharacterIds(gameState.partySize, totalWins, excludeIds, BATTLE_FRONTIER_LAP1_ENEMY_RANKS, true);
   }
 
+  const prototypeIds = drawRandomPrototypeCharacterIds(guaranteedPrototypeCount, excludeIds);
   const nonPrototypeIds = drawWeightedCharacterIds(
-    gameState.partySize - 1,
-    1,
-    excludeIds,
+    gameState.partySize - prototypeIds.length,
+    totalWins,
+    (excludeIds || []).concat(prototypeIds),
     BATTLE_FRONTIER_LAP1_ENEMY_RANKS,
     true
   );
-  const prototypeId = drawRandomPrototypeCharacterId((excludeIds || []).concat(nonPrototypeIds));
 
-  if (prototypeId) {
-    return nonPrototypeIds.concat(prototypeId);
-  }
-
-  // 選べるプロトタイプが残っていない場合は、枠が欠けないようD以下で埋める
-  const fallbackId = drawWeightedCharacterIds(
-    1,
-    1,
-    (excludeIds || []).concat(nonPrototypeIds),
-    BATTLE_FRONTIER_LAP1_ENEMY_RANKS,
-    true
-  );
-  return nonPrototypeIds.concat(fallbackId);
+  return prototypeIds.concat(nonPrototypeIds);
 }
 
-function drawBattleFrontierEnemyIds(battleNumberInLap, lap, excludeIds) {
+// 2周目以降の敵抽選：N周目は(N-1)体、7戦目はさらに1体を加えたプロトタイプ数を保証。
+// 残り枠は連勝数に応じたランク重み抽選（プロトタイプ除く）で埋める。
+function drawBattleFrontierEnemyIds(battleNumberInLap, lap, totalWins, excludeIds) {
+  const isFinalBattleOfLap = battleNumberInLap === BATTLE_FRONTIER_WINS_PER_LAP;
+
   if (lap === 1) {
-    return drawBattleFrontierLap1EnemyIds(battleNumberInLap === BATTLE_FRONTIER_WINS_PER_LAP, excludeIds);
+    return drawBattleFrontierLap1EnemyIds(isFinalBattleOfLap, totalWins, excludeIds);
   }
 
-  return drawWeightedCharacterIds(gameState.partySize, lap, excludeIds);
+  const guaranteedPrototypeCount = Math.min(
+    gameState.partySize,
+    getBattleFrontierGuaranteedPrototypeCount(lap, isFinalBattleOfLap)
+  );
+  const prototypeIds = drawRandomPrototypeCharacterIds(guaranteedPrototypeCount, excludeIds);
+  const nonPrototypeIds = drawWeightedCharacterIds(
+    gameState.partySize - prototypeIds.length,
+    totalWins,
+    (excludeIds || []).concat(prototypeIds),
+    null,
+    true
+  );
+
+  return prototypeIds.concat(nonPrototypeIds);
 }
 
 // 次の対戦相手プレビュー：プロトタイプがいれば必ずそれを優先して見せる
@@ -366,7 +386,7 @@ function startBattleFrontier() {
   gameState.battleFrontier.bestRecord = loadBattleFrontierBestRecord();
   gameState.battleMode = "battlefrontier";
 
-  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, [], ["E", "F", "G"]);
+  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.totalWins, [], ["E", "F", "G"]);
 
   openBattleFrontierFormationBuilder(false);
 }
@@ -453,6 +473,7 @@ function startBattleFrontierBattle() {
     gameState.battleFrontier.currentEnemyIds = drawBattleFrontierEnemyIds(
       gameState.battleFrontier.winsThisLap + 1,
       gameState.battleFrontier.lap,
+      gameState.battleFrontier.totalWins,
       gameState.battleFrontier.rosterIds
     );
   }
@@ -597,7 +618,7 @@ function advanceBattleFrontierAfterVictory() {
     gameState.battleFrontier.rosterPositions = {};
     gameState.battleFrontier.nextEnemyIds = [];
     gameState.battleFrontier.nextEnemyPreviewId = null;
-    gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, []);
+    gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.totalWins, []);
 
     openBattleFrontierFormationBuilder(false);
     return;
@@ -606,6 +627,7 @@ function advanceBattleFrontierAfterVictory() {
   gameState.battleFrontier.nextEnemyIds = drawBattleFrontierEnemyIds(
     gameState.battleFrontier.winsThisLap + 1,
     gameState.battleFrontier.lap,
+    gameState.battleFrontier.totalWins,
     gameState.battleFrontier.rosterIds
   );
   gameState.battleFrontier.nextEnemyPreviewId = pickBattleFrontierPreviewId(gameState.battleFrontier.nextEnemyIds);
