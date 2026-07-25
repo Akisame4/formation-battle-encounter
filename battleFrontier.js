@@ -11,11 +11,15 @@ const BATTLE_FRONTIER_BEST_RECORD_KEY = "formationBattleEncounterFrontierBestRec
 const BATTLE_FRONTIER_INTERRUPT_KEY = "formationBattleEncounterFrontierInterrupt";
 const BATTLE_FRONTIER_WINS_PER_LAP = 7;
 
-// A〜Fの6段階。Fが最も出現しやすく（既存キャラの主な帯）、
-// A〜Cは今後追加予定のバトルフロンティア専用キャラ向けの上位帯。
+// A〜Gの7段階。Gが最も出現しやすく（既存キャラの主な帯）、
+// A〜Cはバトルフロンティア専用キャラ（プロトタイプ）向けの上位帯。
 // 周を重ねるごとに下位ランクの重みが下がり、上位ランクの重みが上がる。
-const BATTLE_FRONTIER_RANK_BASE_WEIGHT = { F: 60, E: 40, D: 20, C: 10, B: 5, A: 2 };
-const BATTLE_FRONTIER_RANK_LAP_GROWTH = { F: -4, E: -2, D: 1, C: 2, B: 3, A: 4 };
+const BATTLE_FRONTIER_RANK_BASE_WEIGHT = { G: 90, F: 60, E: 40, D: 20, C: 10, B: 5, A: 2 };
+const BATTLE_FRONTIER_RANK_LAP_GROWTH = { G: -6, F: -4, E: -2, D: 1, C: 2, B: 3, A: 4 };
+
+// 1周目の敵専用ルール：D以下（プロトタイプを除く）のみを出し、
+// 1周目最後の7戦目だけ必ずプロトタイプを1体混ぜる。2周目以降は通常の重み抽選に戻る。
+const BATTLE_FRONTIER_LAP1_ENEMY_RANKS = ["D", "E", "F", "G"];
 
 function getBattleFrontierRankWeight(rank, lap) {
   const base = BATTLE_FRONTIER_RANK_BASE_WEIGHT[rank] || 1;
@@ -25,11 +29,15 @@ function getBattleFrontierRankWeight(rank, lap) {
   return Math.max(1, base + growth * extraLaps);
 }
 
-function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks) {
+function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks, excludePrototypes) {
   const excludeSet = new Set(excludeIds || []);
   const allowedRankSet = allowedRanks ? new Set(allowedRanks) : null;
   const pool = CHARACTER_TEMPLATES.filter((character) => {
     if (!character.rank || excludeSet.has(character.id)) {
+      return false;
+    }
+
+    if (excludePrototypes && character.isPrototype) {
       return false;
     }
 
@@ -57,6 +65,72 @@ function drawWeightedCharacterIds(count, lap, excludeIds, allowedRanks) {
   }
 
   return picked;
+}
+
+function isPrototypeCharacterId(id) {
+  const template = getCharacterTemplateById(id);
+  return !!(template && template.isPrototype);
+}
+
+function drawRandomPrototypeCharacterId(excludeIds) {
+  const excludeSet = new Set(excludeIds || []);
+  const pool = CHARACTER_TEMPLATES.filter((character) => character.isPrototype && !excludeSet.has(character.id));
+
+  if (pool.length === 0) {
+    return null;
+  }
+
+  return pool[Math.floor(Math.random() * pool.length)].id;
+}
+
+// 1周目専用の敵抽選：D以下（プロトタイプ除く）のみ。7戦目だけ1体をプロトタイプに差し替える。
+function drawBattleFrontierLap1EnemyIds(isFinalBattleOfLap, excludeIds) {
+  if (!isFinalBattleOfLap) {
+    return drawWeightedCharacterIds(gameState.partySize, 1, excludeIds, BATTLE_FRONTIER_LAP1_ENEMY_RANKS, true);
+  }
+
+  const nonPrototypeIds = drawWeightedCharacterIds(
+    gameState.partySize - 1,
+    1,
+    excludeIds,
+    BATTLE_FRONTIER_LAP1_ENEMY_RANKS,
+    true
+  );
+  const prototypeId = drawRandomPrototypeCharacterId((excludeIds || []).concat(nonPrototypeIds));
+
+  if (prototypeId) {
+    return nonPrototypeIds.concat(prototypeId);
+  }
+
+  // 選べるプロトタイプが残っていない場合は、枠が欠けないようD以下で埋める
+  const fallbackId = drawWeightedCharacterIds(
+    1,
+    1,
+    (excludeIds || []).concat(nonPrototypeIds),
+    BATTLE_FRONTIER_LAP1_ENEMY_RANKS,
+    true
+  );
+  return nonPrototypeIds.concat(fallbackId);
+}
+
+function drawBattleFrontierEnemyIds(battleNumberInLap, lap, excludeIds) {
+  if (lap === 1) {
+    return drawBattleFrontierLap1EnemyIds(battleNumberInLap === BATTLE_FRONTIER_WINS_PER_LAP, excludeIds);
+  }
+
+  return drawWeightedCharacterIds(gameState.partySize, lap, excludeIds);
+}
+
+// 次の対戦相手プレビュー：プロトタイプがいれば必ずそれを優先して見せる
+function pickBattleFrontierPreviewId(enemyIds) {
+  if (!enemyIds || enemyIds.length === 0) {
+    return null;
+  }
+
+  const prototypeIds = enemyIds.filter((id) => isPrototypeCharacterId(id));
+  const pool = prototypeIds.length > 0 ? prototypeIds : enemyIds;
+
+  return pool[Math.floor(Math.random() * pool.length)];
 }
 
 // ============================================================
@@ -292,7 +366,7 @@ function startBattleFrontier() {
   gameState.battleFrontier.bestRecord = loadBattleFrontierBestRecord();
   gameState.battleMode = "battlefrontier";
 
-  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, [], ["D", "E", "F"]);
+  gameState.battleFrontier.draftCandidateIds = drawWeightedCharacterIds(6, gameState.battleFrontier.lap, [], ["E", "F", "G"]);
 
   openBattleFrontierFormationBuilder(false);
 }
@@ -376,8 +450,8 @@ function startBattleFrontierBattle() {
   if (gameState.battleFrontier.nextEnemyIds && gameState.battleFrontier.nextEnemyIds.length === gameState.partySize) {
     gameState.battleFrontier.currentEnemyIds = gameState.battleFrontier.nextEnemyIds;
   } else {
-    gameState.battleFrontier.currentEnemyIds = drawWeightedCharacterIds(
-      gameState.partySize,
+    gameState.battleFrontier.currentEnemyIds = drawBattleFrontierEnemyIds(
+      gameState.battleFrontier.winsThisLap + 1,
       gameState.battleFrontier.lap,
       gameState.battleFrontier.rosterIds
     );
@@ -529,13 +603,12 @@ function advanceBattleFrontierAfterVictory() {
     return;
   }
 
-  gameState.battleFrontier.nextEnemyIds = drawWeightedCharacterIds(
-    gameState.partySize,
+  gameState.battleFrontier.nextEnemyIds = drawBattleFrontierEnemyIds(
+    gameState.battleFrontier.winsThisLap + 1,
     gameState.battleFrontier.lap,
     gameState.battleFrontier.rosterIds
   );
-  gameState.battleFrontier.nextEnemyPreviewId =
-    gameState.battleFrontier.nextEnemyIds[Math.floor(Math.random() * gameState.battleFrontier.nextEnemyIds.length)] || null;
+  gameState.battleFrontier.nextEnemyPreviewId = pickBattleFrontierPreviewId(gameState.battleFrontier.nextEnemyIds);
 
   openBattleFrontierFormationBuilder(true);
 }

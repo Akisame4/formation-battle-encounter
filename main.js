@@ -724,8 +724,7 @@ function saveBattleSnapshot() {
       sessionStorage.setItem(ONLINE_SESSION_KEY, JSON.stringify({
         roomId: onlineState.roomId,
         myId: onlineState.myId,
-        mySide: onlineState.mySide,
-        opponentName: onlineState.opponentName
+        mySide: onlineState.mySide
       }));
     }
   } catch (e) {
@@ -843,20 +842,21 @@ function bindEvents() {
 
   // オンラインロビー: ルーム作成
   document.getElementById("online-create-button").addEventListener("click", async () => {
-    const name = document.getElementById("online-player-name-input").value.trim();
-    if (!name) { showOnlineLobbyError("プレイヤー名を入力してください"); return; }
+    const modeInput = document.querySelector('input[name="online-room-mode"]:checked');
+    const mode = modeInput ? modeInput.value : "normal";
     showOnlineLobbyError("");
     document.getElementById("online-create-button").disabled = true;
     try {
-      const roomId = await createOnlineRoom(name);
+      const roomId = await createOnlineRoom(mode);
       showOnlineWaitingScreen();
       document.getElementById("online-room-code-text").textContent = roomId;
       document.getElementById("online-waiting-status").textContent = "対戦相手を待っています...";
       document.getElementById("online-waiting-setup-button").disabled = true;
-      watchForGuestToJoin((guestName) => {
-        document.getElementById("online-waiting-status").textContent = `${guestName} が参加しました！`;
+      watchForGuestToJoin(() => {
+        document.getElementById("online-waiting-status").textContent = "対戦相手が参加しました！";
         document.getElementById("online-waiting-setup-button").disabled = false;
         syncDebugModeFromTitle();
+        gameState.onlineTestMode = onlineState.mode === "test";
         openPlayerFormationForBattle("online");
       });
     } catch (e) {
@@ -867,16 +867,15 @@ function bindEvents() {
 
   // オンラインロビー: ルーム参加
   document.getElementById("online-join-button").addEventListener("click", async () => {
-    const name = document.getElementById("online-player-name-input").value.trim();
     const code = document.getElementById("online-join-code-input").value.trim();
-    if (!name) { showOnlineLobbyError("プレイヤー名を入力してください"); return; }
     if (!code) { showOnlineLobbyError("ルームコードを入力してください"); return; }
     showOnlineLobbyError("");
     document.getElementById("online-join-button").disabled = false;
     try {
       document.getElementById("online-join-button").disabled = true;
-      await joinOnlineRoom(code, name);
+      await joinOnlineRoom(code);
       syncDebugModeFromTitle();
+      gameState.onlineTestMode = onlineState.mode === "test";
       openPlayerFormationForBattle("online");
     } catch (e) {
       showOnlineLobbyError("エラー: " + e.message);
@@ -887,6 +886,7 @@ function bindEvents() {
   // 待機室: パーティ設定へ進む
   document.getElementById("online-waiting-setup-button").addEventListener("click", () => {
     syncDebugModeFromTitle();
+    gameState.onlineTestMode = onlineState.mode === "test";
     openPlayerFormationForBattle("online");
   });
 

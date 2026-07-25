@@ -1722,7 +1722,9 @@ function renderPlayerFormationCharacterList() {
 
   const availableCharacters = gameState.battleMode === "battlefrontier"
     ? gameState.battleFrontier.availableCharacterIds.map(id => getCharacterByIdFromPool(id)).filter(character => character)
-    : getSelectableCharacterPool();
+    : (gameState.battleMode === "online" && gameState.onlineTestMode)
+      ? getCharacterPool()
+      : getSelectableCharacterPool();
 
   availableCharacters.forEach((character) => {
     if (!character || !character.id) {

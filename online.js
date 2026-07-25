@@ -33,7 +33,7 @@ const onlineState = {
   roomId: null,
   myId: null,
   mySide: null,
-  opponentName: null,
+  mode: "normal",
   roomListener: null,
   battleListener: null,
   setupListener: null,
@@ -80,28 +80,29 @@ function setOnlineWaitingOverlay(visible, message) {
 // Room management
 // ============================================================
 
-async function createOnlineRoom(playerName) {
+async function createOnlineRoom(mode) {
   initOnlineFirebase();
   const roomId = generateShortId();
   const myId = generateShortId();
+  const normalizedMode = mode === "test" ? "test" : "normal";
 
   await fbeDb.ref(`fbe/rooms/${roomId}`).set({
     status: "waiting",
     hostId: myId,
     guestId: null,
-    hostName: playerName,
-    guestName: null,
+    mode: normalizedMode,
     createdAt: Date.now()
   });
 
   onlineState.roomId = roomId;
   onlineState.myId = myId;
   onlineState.mySide = "player";
+  onlineState.mode = normalizedMode;
 
   return roomId;
 }
 
-async function joinOnlineRoom(roomId, playerName) {
+async function joinOnlineRoom(roomId) {
   initOnlineFirebase();
   const myId = generateShortId();
   const trimmedRoomId = roomId.trim().toUpperCase();
@@ -115,16 +116,15 @@ async function joinOnlineRoom(roomId, playerName) {
 
   await fbeDb.ref(`fbe/rooms/${trimmedRoomId}`).update({
     guestId: myId,
-    guestName: playerName,
     status: "setup"
   });
 
   onlineState.roomId = trimmedRoomId;
   onlineState.myId = myId;
   onlineState.mySide = "enemy";
-  onlineState.opponentName = room.hostName;
+  onlineState.mode = room.mode === "test" ? "test" : "normal";
 
-  return room.hostName;
+  return onlineState.mode;
 }
 
 // ============================================================
@@ -139,11 +139,10 @@ function watchForGuestToJoin(onGuestJoined) {
   const handler = (snap) => {
     const room = snap.val();
     if (!room) return;
-    if (room.guestId && room.guestName) {
+    if (room.guestId) {
       ref.off("value", handler);
       onlineState.roomListener = null;
-      onlineState.opponentName = room.guestName;
-      onGuestJoined(room.guestName);
+      onGuestJoined();
     }
   };
   onlineState.roomListener = handler;
@@ -489,7 +488,7 @@ function cleanupOnlineState() {
   onlineState.roomId = null;
   onlineState.myId = null;
   onlineState.mySide = null;
-  onlineState.opponentName = null;
+  onlineState.mode = "normal";
   onlineState.battleListener = null;
   onlineState.roomListener = null;
   onlineState.setupListener = null;
@@ -497,6 +496,7 @@ function cleanupOnlineState() {
   gameState.battleMode = "auto";
   gameState.onlineMySide = null;
   gameState.onlineGuestFormationEntries = null;
+  gameState.onlineTestMode = false;
   setOnlineWaitingOverlay(false);
 
   if (typeof clearBattleSnapshot === "function") {
@@ -516,7 +516,6 @@ function resumeOnlineBattleFromSession() {
   onlineState.roomId = session.roomId;
   onlineState.myId = session.myId;
   onlineState.mySide = session.mySide;
-  onlineState.opponentName = session.opponentName;
 
   initOnlineFirebase();
 
