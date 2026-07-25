@@ -1077,21 +1077,47 @@ function getMultiHitCandidateIndexes(action, side) {
   return getBoardBySide(side).map((character, index) => index);
 }
 
-function getRemainingMultiHitCandidates(action) {
+// primaryTargetCharacterはオブジェクト参照で渡す。damage_and_moveで主対象が
+// 押込・引寄・横移動により別マスへ動いた後でも、同じキャラを2撃目の対象から
+// 正しく除外するため（インデックス比較だと移動後に自分自身が「別マスの敵」として
+// 再ヒットしてしまうバグがあった）。
+function getRemainingMultiHitCandidates(action, primaryTargetCharacter) {
   if (!action || !action.hitCount || action.hitCount <= 1 || !gameState.selectedTarget) {
     return [];
   }
 
   const side = gameState.selectedTarget.side;
-  const primaryIndex = gameState.selectedTarget.index;
   const board = getBoardBySide(side);
 
   return getMultiHitCandidateIndexes(action, side)
-    .filter(index => index !== primaryIndex && isTargetableUnit(board[index]));
+    .filter(index => board[index] !== primaryTargetCharacter && isTargetableUnit(board[index]));
 }
 
-function applyMultiHitExtraDamage(action, actor) {
-  const candidates = getRemainingMultiHitCandidates(action);
+// 2撃目以降の対象にも、押込・引寄・横移動やデバフなど主対象と同じ追加効果を適用する。
+function applyExtraHitMoveAndDebuff(action, target, side, index) {
+  if (!target || target.hp <= 0) {
+    return "";
+  }
+
+  if (action.type === "damage_and_move" && action.moveDirection) {
+    const moved = action.moveDirection === "sideways"
+      ? moveSideways(side, index)
+      : moveTargetByDirection(side, index, action.moveDirection);
+
+    return moved ? ` ${target.name} は移動した。` : ` ${target.name} は移動しなかった。`;
+  }
+
+  if (action.type === "damage_and_debuff" && action.debuff) {
+    applyDebuff(target, action.debuff, action.amount);
+    const debuffText = action.debuff === "damageTakenIncrease" ? `次に受けるダメージ+${action.amount}` : `次の攻撃ダメージ-${action.amount}`;
+    return ` ${target.name} に${debuffText}を付与した。`;
+  }
+
+  return "";
+}
+
+function applyMultiHitExtraDamage(action, actor, primaryTargetCharacter) {
+  const candidates = getRemainingMultiHitCandidates(action, primaryTargetCharacter);
 
   if (candidates.length === 0) {
     return "";
@@ -1104,17 +1130,19 @@ function applyMultiHitExtraDamage(action, actor) {
   const texts = [];
 
   for (let i = 0; i < extraCount; i++) {
-    const target = board[shuffled[i]];
+    const index = shuffled[i];
+    const target = board[index];
 
     if (!isTargetableUnit(target)) {
       continue;
     }
 
     const result = performDamage(actor, target, action.damage);
-    texts.push(`${target.name}に${result.actualDamage}`);
+    const extraEffectText = applyExtraHitMoveAndDebuff(action, target, side, index);
+    texts.push(`${target.name}に${result.actualDamage}ダメージ。${extraEffectText}`);
   }
 
-  return texts.length > 0 ? ` さらに${texts.join("、")}ダメージ。` : "";
+  return texts.length > 0 ? ` さらに${texts.join(" ")}` : "";
 }
 
 function applyChosenMultiHitDamage(actor, action, side, index) {
@@ -1126,7 +1154,8 @@ function applyChosenMultiHitDamage(actor, action, side, index) {
   }
 
   const result = performDamage(actor, target, action.damage);
-  return ` さらに${target.name}に${result.actualDamage}ダメージ。`;
+  const extraEffectText = applyExtraHitMoveAndDebuff(action, target, side, index);
+  return ` さらに${target.name}に${result.actualDamage}ダメージ。${extraEffectText}`;
 }
 
 function applyActionSideEffects(actor, action, options) {
@@ -1135,6 +1164,7 @@ function applyActionSideEffects(actor, action, options) {
   }
 
   const deferMultiHit = options && options.deferMultiHit;
+  const primaryTargetCharacter = options && options.primaryTargetCharacter;
 
   const texts = [];
 
@@ -1206,7 +1236,7 @@ function applyActionSideEffects(actor, action, options) {
   }
 
   if (action.hitCount > 1 && !deferMultiHit) {
-    const text = applyMultiHitExtraDamage(action, actor);
+    const text = applyMultiHitExtraDamage(action, actor, primaryTargetCharacter);
 
     if (text) {
       texts.push(text);
@@ -2192,8 +2222,12 @@ function resolveSelectedActionAndGetLogText(actedCharacter) {
       gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
     }
 
+    const primaryTargetCharacter = gameState.selectedTarget
+      ? getBoardBySide(gameState.selectedTarget.side)[gameState.selectedTarget.index]
+      : null;
+
     coreResultText = executeAction();
-    sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction);
+    sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction, { primaryTargetCharacter });
   }
 
   return appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter);
@@ -2212,12 +2246,15 @@ function resolveSelectedActionForHumanTurn(actedCharacter) {
   }
 
   const action = gameState.selectedAction;
+  const primaryTargetCharacter = gameState.selectedTarget
+    ? getBoardBySide(gameState.selectedTarget.side)[gameState.selectedTarget.index]
+    : null;
   const coreResultText = executeAction();
-  let sideEffectText = applyActionSideEffects(actedCharacter, action, { deferMultiHit: true });
+  let sideEffectText = applyActionSideEffects(actedCharacter, action, { deferMultiHit: true, primaryTargetCharacter });
   let pendingMultiHit = null;
 
   if (action && action.hitCount > 1) {
-    const candidates = getRemainingMultiHitCandidates(action);
+    const candidates = getRemainingMultiHitCandidates(action, primaryTargetCharacter);
 
     if (candidates.length === 1) {
       sideEffectText += applyChosenMultiHitDamage(actedCharacter, action, gameState.selectedTarget.side, candidates[0]);
