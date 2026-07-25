@@ -674,12 +674,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
-      3: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
-      4: { label: "横一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 20 },
-      5: { label: "横一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 40 },
-      6: { label: "横一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 40 }
+      1: { label: "敵1体に30ダメージ", type: "damage", target: "enemy_any_unit", damage: 30 },
+      2: { label: "敵1体に50ダメージ", type: "damage", target: "enemy_any_unit", damage: 50 },
+      3: { label: "横一列に各30ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 30 },
+      4: { label: "横一列に各30ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 30 },
+      5: { label: "横一列に各50ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 50 },
+      6: { label: "横一列に各50ダメージ", type: "area_damage", target: "enemy_any_cell", range: "horizontal_3", damage: 50 }
     }
   },
   {
@@ -696,12 +696,12 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
-      3: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
-      4: { label: "縦一列に各20ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 20 },
-      5: { label: "縦一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 40 },
-      6: { label: "縦一列に各40ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 40 }
+      1: { label: "敵1体に30ダメージ", type: "damage", target: "enemy_any_unit", damage: 30 },
+      2: { label: "敵1体に50ダメージ", type: "damage", target: "enemy_any_unit", damage: 50 },
+      3: { label: "縦一列に各30ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 30 },
+      4: { label: "縦一列に各30ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 30 },
+      5: { label: "縦一列に各50ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 50 },
+      6: { label: "縦一列に各50ダメージ", type: "area_damage", target: "enemy_any_cell", range: "vertical_3", damage: 50 }
     }
   },
   {
@@ -888,15 +888,15 @@ const CHARACTER_TEMPLATES = [
     name: "プロトDe",
     job: "スカウト",
     role: "プロトタイプ：射撃と遠貫を持つスカウト",
-    personality: "番人",
+    personality: "探検家",
     image: "assets/dean.png",
     hp: 160,
     maxHp: 160,
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵1体に20ダメージ", type: "damage", target: "enemy_any_unit", damage: 20 },
-      2: { label: "敵1体に40ダメージ", type: "damage", target: "enemy_any_unit", damage: 40 },
+      1: { label: "敵1体に防御貫通20ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 20 },
+      2: { label: "敵1体に防御貫通40ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 40 },
       3: { label: "敵1体に防御貫通60ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 60 },
       4: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       5: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
@@ -955,7 +955,7 @@ const CHARACTER_TEMPLATES = [
     name: "プロトB",
     job: "ゴースト",
     role: "プロトタイプ：対応マス横列攻撃",
-    personality: "探検家",
+    personality: "外交官",
     gender: "女",
     image: "assets/bei.png",
     hp: 160,
@@ -963,11 +963,11 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      1: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       2: { label: "自分の対応マスの敵に100ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 100 },
-      3: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      3: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       4: { label: "自分の対応マスの敵に120ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 120 },
-      5: { label: "隣接する空きマスに移動", type: "move_self_adjacent_empty", target: "self" },
+      5: { label: "味方1体を隣接する空きマスへ移動", type: "move", target: "ally_any_empty_cell", move: "ally_adjacent_empty_cell" },
       6: { label: "自分の対応マスの敵に140ダメージ", type: "opposite_damage", target: "enemy_opposite_unit", damage: 140 }
     }
   }
