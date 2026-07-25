@@ -52,7 +52,7 @@ function getCurrentBackUnitIndexes(side) {
 
   return backIndexes.filter((index) => {
     const character = board[index];
-    return isAliveRealCharacter(character);
+    return isTargetableUnit(character);
   });
 }
 
