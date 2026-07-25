@@ -103,15 +103,20 @@
       <h1>オンライン対戦</h1>
       <div class="title-subtitle">Formation Battle Encounter Online</div>
 
-      <div class="online-name-area">
-        <label for="online-player-name-input">プレイヤー名</label>
-        <input id="online-player-name-input" type="text" placeholder="名前を入力（最大12文字）" maxlength="12">
-      </div>
-
       <div class="mode-grid">
         <div class="mode-card">
           <h2>ルームを作る</h2>
           <p>ルームコードを生成して相手に共有します。相手がコードで参加するのを待ちます。</p>
+          <div class="online-room-mode-area">
+            <label class="online-room-mode-option">
+              <input type="radio" name="online-room-mode" value="normal" id="online-room-mode-normal" checked>
+              通常モード（既存キャラのみ）
+            </label>
+            <label class="online-room-mode-option">
+              <input type="radio" name="online-room-mode" value="test" id="online-room-mode-test">
+              試験モード（プロトタイプも使用可）
+            </label>
+          </div>
           <button class="primary-button" id="online-create-button">ルームを作成</button>
         </div>
 

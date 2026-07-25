@@ -49,6 +49,7 @@ const gameState = {
 
   onlineMySide: null,
   onlineGuestFormationEntries: null,
+  onlineTestMode: false,
 
   battleFrontier: {
     lap: 1,
