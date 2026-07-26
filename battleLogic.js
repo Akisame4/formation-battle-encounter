@@ -1093,6 +1093,15 @@ function getRemainingMultiHitCandidates(action, primaryTargetCharacter) {
     .filter(index => board[index] !== primaryTargetCharacter && isTargetableUnit(board[index]));
 }
 
+// 防御貫通系の技（piercing_damage等）は2撃目以降も防御を無視するダメージ計算にする。
+function performMultiHitDamage(actor, target, action) {
+  if (action.type === "piercing_damage" || action.type === "clear_guard_and_damage") {
+    return performDirectDamage(actor, target, action.damage);
+  }
+
+  return performDamage(actor, target, action.damage);
+}
+
 // 2撃目以降の対象にも、押込・引寄・横移動やデバフなど主対象と同じ追加効果を適用する。
 function applyExtraHitMoveAndDebuff(action, target, side, index) {
   if (!target || target.hp <= 0) {
@@ -1137,7 +1146,7 @@ function applyMultiHitExtraDamage(action, actor, primaryTargetCharacter) {
       continue;
     }
 
-    const result = performDamage(actor, target, action.damage);
+    const result = performMultiHitDamage(actor, target, action);
     const extraEffectText = applyExtraHitMoveAndDebuff(action, target, side, index);
     texts.push(`${target.name}に${result.actualDamage}ダメージ。${extraEffectText}`);
   }
@@ -1153,7 +1162,7 @@ function applyChosenMultiHitDamage(actor, action, side, index) {
     return "";
   }
 
-  const result = performDamage(actor, target, action.damage);
+  const result = performMultiHitDamage(actor, target, action);
   const extraEffectText = applyExtraHitMoveAndDebuff(action, target, side, index);
   return ` さらに${target.name}に${result.actualDamage}ダメージ。${extraEffectText}`;
 }
