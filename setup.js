@@ -1064,10 +1064,6 @@ function renderPartyCodeFormationBoard() {
       if (tapSelectedId === occupantId) {
         cell.classList.add("tap-selected-formation-item");
       }
-      if (character.isPrototype) {
-        cell.classList.add("is-prototype-card");
-      }
-
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
         <div class="formation-portrait">
@@ -1182,10 +1178,6 @@ function renderPartyCodeCharacterList() {
     if (isTapSelected) {
       card.classList.add("tap-selected-formation-item");
     }
-    if (character.isPrototype) {
-      card.classList.add("is-prototype-card");
-    }
-
     card.draggable = true;
     card.innerHTML = `
       <div class="selection-card-top">
@@ -1618,9 +1610,6 @@ function renderPlayerFormationBoard() {
       if (tapSelectedId === occupantId) {
         cell.classList.add("tap-selected-formation-item");
       }
-      if (character.isPrototype) {
-        cell.classList.add("is-prototype-card");
-      }
       cell.innerHTML = `
         <div class="formation-row-label">${getPartyCodeBuilderRowLabel(position)}</div>
         <div class="formation-portrait">
@@ -1724,7 +1713,9 @@ function renderPlayerFormationCharacterList() {
     ? gameState.battleFrontier.availableCharacterIds.map(id => getCharacterByIdFromPool(id)).filter(character => character)
     : (gameState.battleMode === "online" && gameState.onlineTestMode)
       ? getCharacterPool()
-      : getSelectableCharacterPool();
+      : gameState.battleMode === "online"
+        ? getCharacterPool().filter(character => character.isPrototype)
+        : getSelectableCharacterPool();
 
   availableCharacters.forEach((character) => {
     if (!character || !character.id) {
@@ -1742,10 +1733,6 @@ function renderPlayerFormationCharacterList() {
     if (isTapSelected) {
       card.classList.add("tap-selected-formation-item");
     }
-    if (character.isPrototype) {
-      card.classList.add("is-prototype-card");
-    }
-
     card.draggable = true;
     card.innerHTML = `
       <div class="selection-card-top">
