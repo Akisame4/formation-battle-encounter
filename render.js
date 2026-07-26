@@ -815,17 +815,6 @@ function renderBoard(board, elementId, side) {
 
       cell.classList.add(side === "enemy" ? "enemy-cell" : "player-cell");
 
-      if (character.isPrototype) {
-        cell.classList.add("is-prototype-card");
-      }
-
-      if (
-        character.personality &&
-        (getPersonalityAttackBonus(character) > 0 || getPersonalityDefenseBonus(character) > 0)
-      ) {
-        cell.classList.add("personality-active");
-      }
-
       if (previousHpValue > currentHpValue) {
         cell.classList.add("damage-flash");
       }
@@ -1030,9 +1019,6 @@ function renderCardList() {
 
       if (isActiveCard(source.side, index)) {
         card.classList.add("active-card");
-      }
-      if (character.isPrototype) {
-        card.classList.add("is-prototype-card");
       }
 
       let actionHtml = "";
