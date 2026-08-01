@@ -25,7 +25,6 @@ const PARTY_CHARACTER_CODE_MAP = {
   teruru: "K",
   bei: "L",
   sai: "M",
-  fon: "k",
   olive_prototype: "N",
   fang_prototype: "O",
   chilchil_prototype: "P",
@@ -48,7 +47,8 @@ const PARTY_CHARACTER_CODE_MAP = {
   dean_prototype: "g",
   maiyu_prototype: "h",
   sai_prototype: "i",
-  bei_prototype: "j"
+  bei_prototype: "j",
+  fon: "k"
 };
 
 function getCharacterIdFromPartyCodeSymbol(symbol) {
