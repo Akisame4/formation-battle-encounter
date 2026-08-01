@@ -131,7 +131,8 @@ function isMeleeAction(action) {
     "damage_and_self_heal",
     "damage_and_debuff",
     "damage_and_self_damage",
-    "damage_and_poison"
+    "damage_and_poison",
+    "scatter_damage"
   ];
 
   return meleeTypes.includes(action.type) && action.target === "enemy_front_unit";

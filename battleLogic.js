@@ -2220,6 +2220,89 @@ ${gameEndText}`);
   }, gameState.animation.hpDuration + gameState.animation.defeatDuration);
 }
 
+// 拡散弾（フォン）: 近単攻撃と同時に、命中した敵に隣接する敵1体へも同じダメージを与える。
+// 演出上「同時にダメージを受ける」ようにするため、隣接候補が複数いて選択が必要な場合も
+// 主対象へのダメージは選択が確定するまで適用せず、選択後に主対象・拡散弾対象へまとめて
+// ダメージを適用する（既存のhitCountの仕組みは主対象に即ダメージを与えてから2撃目を
+// 選ばせるため、同時演出にするには使えない）。
+function getScatterCandidateIndexes(side, primaryIndex) {
+  const board = getBoardBySide(side);
+  return getAdjacentIndexes(primaryIndex).filter(index => isTargetableUnit(board[index]));
+}
+
+function applyScatterDamage(actor, action, side, primaryIndex, scatterIndex) {
+  const board = getBoardBySide(side);
+  const primaryTarget = board[primaryIndex];
+
+  if (!isTargetableUnit(primaryTarget)) {
+    return "対象がいません。";
+  }
+
+  const scatterTarget = scatterIndex !== null ? board[scatterIndex] : null;
+  const primaryResult = performDamage(actor, primaryTarget, action.damage);
+  const scatterResult = isTargetableUnit(scatterTarget) ? performDamage(actor, scatterTarget, action.damage) : null;
+
+  let text = `${actor.name} は ${primaryTarget.name} に ${primaryResult.actualDamage} ダメージを与えた。${primaryResult.reduced > 0 ? ` 防御で${primaryResult.reduced}軽減。` : ""}${getDamageDetailText(primaryResult)}`;
+
+  if (scatterResult) {
+    text += ` 拡散弾が${scatterTarget.name}にも${scatterResult.actualDamage}ダメージ。${scatterResult.reduced > 0 ? `防御で${scatterResult.reduced}軽減。` : ""}${getDamageDetailText(scatterResult)}`;
+  }
+
+  return text;
+}
+
+function executeScatterDamageAuto(actor, action) {
+  if (!gameState.selectedTarget) {
+    return "対象がいません。";
+  }
+
+  const side = gameState.selectedTarget.side;
+  const primaryIndex = gameState.selectedTarget.index;
+  const candidates = getScatterCandidateIndexes(side, primaryIndex);
+  const scatterIndex = candidates.length > 0 ? shuffleArray(candidates, Math.random)[0] : null;
+
+  return applyScatterDamage(actor, action, side, primaryIndex, scatterIndex);
+}
+
+function resolveScatterDamageForHumanTurn(actedCharacter, action) {
+  if (!canUseActionFromActorPosition(action, gameState.selectedActor.side, gameState.selectedActor.index)) {
+    return {
+      resultText: appendActionEndPoisonText(`${actedCharacter.name} は前列にいないため、近接攻撃できなかった。`, actedCharacter),
+      pendingMultiHit: null
+    };
+  }
+
+  if (!gameState.selectedTarget) {
+    return {
+      resultText: appendActionEndPoisonText("対象がいません。", actedCharacter),
+      pendingMultiHit: null
+    };
+  }
+
+  const target = getTargetCharacter();
+  const side = gameState.selectedTarget.side;
+  const primaryIndex = gameState.selectedTarget.index;
+  const candidates = getScatterCandidateIndexes(side, primaryIndex);
+
+  if (candidates.length <= 1) {
+    const resultText = applyScatterDamage(actedCharacter, action, side, primaryIndex, candidates.length === 1 ? candidates[0] : null);
+    return { resultText: appendActionEndPoisonText(resultText, actedCharacter), pendingMultiHit: null };
+  }
+
+  return {
+    resultText: `${actedCharacter.name} は ${target.name} に狙いを定めた。拡散弾の追撃対象を選んでください。`,
+    pendingMultiHit: {
+      isScatter: true,
+      actorSide: gameState.selectedActor.side,
+      actorIndex: gameState.selectedActor.index,
+      action,
+      targetSide: side,
+      primaryIndex,
+      candidates
+    }
+  };
+}
+
 function resolveSelectedActionAndGetLogText(actedCharacter) {
   let coreResultText;
   let sideEffectText = "";
@@ -2231,12 +2314,16 @@ function resolveSelectedActionAndGetLogText(actedCharacter) {
       gameState.selectedAction = applyDecoyBuffToAction(gameState.selectedAction, gameState.selectedActor.side);
     }
 
-    const primaryTargetCharacter = gameState.selectedTarget
-      ? getBoardBySide(gameState.selectedTarget.side)[gameState.selectedTarget.index]
-      : null;
+    if (gameState.selectedAction && gameState.selectedAction.type === "scatter_damage") {
+      coreResultText = executeScatterDamageAuto(actedCharacter, gameState.selectedAction);
+    } else {
+      const primaryTargetCharacter = gameState.selectedTarget
+        ? getBoardBySide(gameState.selectedTarget.side)[gameState.selectedTarget.index]
+        : null;
 
-    coreResultText = executeAction();
-    sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction, { primaryTargetCharacter });
+      coreResultText = executeAction();
+      sideEffectText = applyActionSideEffects(actedCharacter, gameState.selectedAction, { primaryTargetCharacter });
+    }
   }
 
   return appendActionEndPoisonText(coreResultText + sideEffectText, actedCharacter);
@@ -2255,6 +2342,11 @@ function resolveSelectedActionForHumanTurn(actedCharacter) {
   }
 
   const action = gameState.selectedAction;
+
+  if (action && action.type === "scatter_damage") {
+    return resolveScatterDamageForHumanTurn(actedCharacter, action);
+  }
+
   const primaryTargetCharacter = gameState.selectedTarget
     ? getBoardBySide(gameState.selectedTarget.side)[gameState.selectedTarget.index]
     : null;
@@ -2298,6 +2390,12 @@ function resolvePendingMultiHitChoice(index) {
 
   const board = getBoardBySide(pending.actorSide);
   const actor = board[pending.actorIndex];
+
+  if (pending.isScatter) {
+    const text = applyScatterDamage(actor, pending.action, pending.targetSide, pending.primaryIndex, index);
+    return appendActionEndPoisonText(text, actor);
+  }
+
   const text = applyChosenMultiHitDamage(actor, pending.action, pending.targetSide, index);
 
   return appendActionEndPoisonText(text, actor);

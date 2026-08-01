@@ -280,6 +280,10 @@ function getCompactActionLabelBase(action) {
     return `${rangeText}${action.damage}${action.backRowMultiplier > 1 ? "×後2" : ""}`;
   }
 
+  if (action.type === "scatter_damage") {
+    return `近単${action.damage}+拡散弾`;
+  }
+
   if (action.type === "opposite_damage") {
     return `対応${action.damage}`;
   }

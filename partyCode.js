@@ -25,6 +25,7 @@ const PARTY_CHARACTER_CODE_MAP = {
   teruru: "K",
   bei: "L",
   sai: "M",
+  fon: "k",
   olive_prototype: "N",
   fang_prototype: "O",
   chilchil_prototype: "P",

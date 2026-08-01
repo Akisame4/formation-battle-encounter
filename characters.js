@@ -463,6 +463,27 @@ const CHARACTER_TEMPLATES = [
     }
   },
   {
+    id: "fon",
+    rank: "C",
+    name: "フォン",
+    job: "スナイパー",
+    role: "敵最前列1体を攻撃し、隣接する敵1体にも同時にダメージ（拡散弾）",
+    personality: "探検家",
+    image: "assets/fon.png",
+    hp: 180,
+    maxHp: 180,
+    guard: 0,
+    cooldown: 0,
+    actions: {
+      1: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
+      2: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
+      3: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
+      4: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 },
+      5: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 },
+      6: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 }
+    }
+  },
+  {
     id: "olive_prototype",
     isPrototype: true,
     rank: "D",
