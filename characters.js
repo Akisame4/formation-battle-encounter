@@ -985,11 +985,11 @@ const CHARACTER_TEMPLATES = [
     guard: 0,
     cooldown: 0,
     actions: {
-      1: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
-      2: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
+      1: { label: "敵最前列1体に20ダメージ、隣接する敵1体にも20ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 20 },
+      2: { label: "敵最前列1体に30ダメージ、隣接する敵1体にも30ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 30 },
       3: { label: "敵最前列1体に40ダメージ、隣接する敵1体にも40ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 40 },
-      4: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 },
-      5: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 },
+      4: { label: "敵最前列1体に50ダメージ、隣接する敵1体にも50ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 50 },
+      5: { label: "敵最前列1体に60ダメージ、隣接する敵1体にも60ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 60 },
       6: { label: "敵最前列1体に70ダメージ、隣接する敵1体にも70ダメージ", type: "scatter_damage", target: "enemy_front_unit", damage: 70 }
     }
   }
