@@ -3,13 +3,13 @@
 // ============================================================
 
 const ONLINE_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDKW1ulf_DNKHNI4eSO2e73iT3YPpzKh8A",
-  authDomain: "tetris-narabe.firebaseapp.com",
-  databaseURL: "https://tetris-narabe-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tetris-narabe",
-  storageBucket: "tetris-narabe.firebasestorage.app",
-  messagingSenderId: "1029967428629",
-  appId: "1:1029967428629:web:d12a318e1cbe438d21e21c"
+  apiKey: "AIzaSyCpNDPcfVm-x1vhTsKIXU8Cgzv8RUfYwRk",
+  authDomain: "formation-battle-encounter.firebaseapp.com",
+  databaseURL: "https://formation-battle-encounter-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "formation-battle-encounter",
+  storageBucket: "formation-battle-encounter.firebasestorage.app",
+  messagingSenderId: "82609936487",
+  appId: "1:82609936487:web:ef604a20196f6f86d79cc2"
 };
 
 let fbeApp = null;
@@ -23,6 +23,19 @@ function initOnlineFirebase() {
     fbeApp = firebase.initializeApp(ONLINE_FIREBASE_CONFIG, "fbe");
   }
   fbeDb = firebase.database(fbeApp);
+}
+
+// 匿名ログインしてuidを返す（セキュリティルールがauth必須のため）
+// persistenceをSESSIONにして、同じ端末で複数タブを開いた場合でも
+// タブごとに別ユーザー（別uid）として扱われるようにする
+// （localStorage共有だとホスト/ゲストが同一uidになり、自分の部屋に自分で参加できなくなる）
+async function ensureOnlineAuth() {
+  initOnlineFirebase();
+  const auth = firebase.auth(fbeApp);
+  if (auth.currentUser) return auth.currentUser.uid;
+  await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+  const cred = await auth.signInAnonymously();
+  return cred.user.uid;
 }
 
 function generateShortId() {
@@ -81,9 +94,8 @@ function setOnlineWaitingOverlay(visible, message) {
 // ============================================================
 
 async function createOnlineRoom(mode) {
-  initOnlineFirebase();
+  const myId = await ensureOnlineAuth();
   const roomId = generateShortId();
-  const myId = generateShortId();
   const normalizedMode = mode === "test" ? "test" : "normal";
 
   await fbeDb.ref(`fbe/rooms/${roomId}`).set({
@@ -103,8 +115,7 @@ async function createOnlineRoom(mode) {
 }
 
 async function joinOnlineRoom(roomId) {
-  initOnlineFirebase();
-  const myId = generateShortId();
+  const myId = await ensureOnlineAuth();
   const trimmedRoomId = roomId.trim().toUpperCase();
 
   const snap = await fbeDb.ref(`fbe/rooms/${trimmedRoomId}`).once("value");
@@ -517,9 +528,8 @@ function resumeOnlineBattleFromSession() {
   onlineState.myId = session.myId;
   onlineState.mySide = session.mySide;
 
-  initOnlineFirebase();
-
-  fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).once("value")
+  ensureOnlineAuth()
+    .then(() => fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).once("value"))
     .then((snap) => {
       const data = snap.val();
 

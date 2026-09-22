@@ -1,0 +1,48 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "fbe": {
+      "rooms": {
+        "$roomId": {
+          ".read": "auth != null",
+          ".write": "auth != null && ( (!data.exists() && newData.child('hostId').val() === auth.uid) || (data.exists() && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid)) || (data.exists() && data.child('status').val() === 'waiting' && !data.child('guestId').exists() && newData.child('guestId').val() === auth.uid) )",
+          ".validate": "$roomId.matches(/^[A-Z0-9]{6}$/) && newData.hasChildren(['status', 'hostId', 'mode', 'createdAt'])",
+          "status": {
+            ".validate": "newData.isString() && newData.val().matches(/^(waiting|setup|battle|finished)$/)"
+          },
+          "hostId": {
+            ".validate": "newData.isString() && (!data.exists() || data.val() === newData.val())"
+          },
+          "guestId": {
+            ".validate": "newData.isString() && newData.val() !== data.parent().child('hostId').val()"
+          },
+          "mode": {
+            ".validate": "newData.isString() && newData.val().matches(/^(normal|test)$/)"
+          },
+          "createdAt": {
+            ".validate": "newData.isNumber() && (data.exists() ? data.val() === newData.val() : newData.val() <= now + 60000 && newData.val() >= now - 60000)"
+          },
+          "setup": {
+            "$uid": {
+              ".validate": "$uid === data.parent().parent().child('hostId').val() || $uid === data.parent().parent().child('guestId').val() || $uid === newData.parent().parent().child('hostId').val() || $uid === newData.parent().parent().child('guestId').val()",
+              "entries": { ".validate": "newData.hasChildren() || newData.isString()" },
+              "ready": { ".validate": "newData.isBoolean()" },
+              "decisiveMomentTurn": { ".validate": "newData.isNumber() && newData.val() >= 1 && newData.val() <= 100" },
+              "$other": { ".validate": false }
+            }
+          },
+          "battle": {
+            "by": { ".validate": "newData.isString() && newData.val() === auth.uid" },
+            "log": { ".validate": "newData.hasChildren() || newData.isString() || newData.val() === null" },
+            "$other": { ".validate": "true" }
+          },
+          "rematch": {
+            ".validate": "newData.isNumber()"
+          },
+          "$other": { ".validate": false }
+        }
+      }
+    }
+  }
+}
