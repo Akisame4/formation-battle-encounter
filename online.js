@@ -93,8 +93,35 @@ function setOnlineWaitingOverlay(visible, message) {
 // Room management
 // ============================================================
 
+// 作成から12時間以上たった部屋を消す（サーバー処理がないため、部屋の作成・参加のついでに各プレイヤーが掃除する）
+// セキュリティルール側も「12時間以上前の部屋だけ一覧取得・削除できる」形にしてある。
+// 端末の時計がずれていてもルールに弾かれないよう、10分の余裕を持たせる
+const ONLINE_ROOM_TTL_MS = 12 * 60 * 60 * 1000;
+const ONLINE_ROOM_CLEANUP_MARGIN_MS = 10 * 60 * 1000;
+const ONLINE_ROOM_CLEANUP_BATCH = 50;
+
+async function cleanupOldOnlineRooms() {
+  try {
+    const cutoff = Date.now() - ONLINE_ROOM_TTL_MS - ONLINE_ROOM_CLEANUP_MARGIN_MS;
+    const snap = await fbeDb.ref("fbe/rooms")
+      .orderByChild("createdAt")
+      .endAt(cutoff)
+      .limitToFirst(ONLINE_ROOM_CLEANUP_BATCH)
+      .once("value");
+    const removals = [];
+    snap.forEach((child) => {
+      removals.push(child.ref.remove().catch(() => {}));
+    });
+    await Promise.all(removals);
+  } catch (e) {
+    // 掃除に失敗しても対戦には影響させない
+    console.warn("古いルームの掃除に失敗しました", e);
+  }
+}
+
 async function createOnlineRoom(mode) {
   const myId = await ensureOnlineAuth();
+  cleanupOldOnlineRooms();
   const roomId = generateShortId();
   const normalizedMode = mode === "test" ? "test" : "normal";
 
@@ -116,6 +143,7 @@ async function createOnlineRoom(mode) {
 
 async function joinOnlineRoom(roomId) {
   const myId = await ensureOnlineAuth();
+  cleanupOldOnlineRooms();
   const trimmedRoomId = roomId.trim().toUpperCase();
 
   const snap = await fbeDb.ref(`fbe/rooms/${trimmedRoomId}`).once("value");

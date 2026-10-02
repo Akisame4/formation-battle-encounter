@@ -4,9 +4,11 @@
     ".write": false,
     "fbe": {
       "rooms": {
+        ".indexOn": ["createdAt"],
+        ".read": "auth != null && query.orderByChild === 'createdAt' && query.endAt !== null && query.endAt <= now - 43200000 && query.limitToFirst <= 50",
         "$roomId": {
           ".read": "auth != null",
-          ".write": "auth != null && ( (!data.exists() && newData.child('hostId').val() === auth.uid) || (data.exists() && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid)) || (data.exists() && data.child('status').val() === 'waiting' && !data.child('guestId').exists() && newData.child('guestId').val() === auth.uid) )",
+          ".write": "auth != null && ( (!data.exists() && newData.child('hostId').val() === auth.uid) || (data.exists() && (data.child('hostId').val() === auth.uid || data.child('guestId').val() === auth.uid)) || (data.exists() && data.child('status').val() === 'waiting' && !data.child('guestId').exists() && newData.child('guestId').val() === auth.uid) || (data.exists() && !newData.exists() && data.child('createdAt').val() < now - 43200000) )",
           ".validate": "$roomId.matches(/^[A-Z0-9]{6}$/) && newData.hasChildren(['status', 'hostId', 'mode', 'createdAt'])",
           "status": {
             ".validate": "newData.isString() && newData.val().matches(/^(waiting|setup|battle|finished)$/)"
