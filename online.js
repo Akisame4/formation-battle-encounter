@@ -282,7 +282,7 @@ function deserializeBoard(serialized) {
         name: "デコイ",
         job: "デコイ",
         role: "攻撃対象になるお邪魔マス",
-        image: "assets/decoy.png",
+        image: "assets/decoy.webp",
         hp: data.hp,
         maxHp: data.mhp || data.hp,
         guard: data.g || 0,

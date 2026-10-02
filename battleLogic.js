@@ -891,7 +891,7 @@ function placeDecoy(side, index, hp) {
     name: "デコイ",
     job: "デコイ",
     role: "攻撃対象になるお邪魔マス",
-    image: "assets/decoy.png",
+    image: "assets/decoy.webp",
     hp,
     maxHp: hp,
     guard: 0,
