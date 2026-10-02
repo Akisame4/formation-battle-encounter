@@ -21,6 +21,31 @@ function getSideName(side) {
   return side === "player" ? "味方" : "敵";
 }
 
+// オンライン対戦のログは相手にも送られるため、陣営名は書いた側の視点で文字にせず
+// トークンのまま送り、表示する側が自分の視点で「味方/敵」に置き換える。
+const LOG_SIDE_TOKENS = { player: "\u0001P\u0001", enemy: "\u0001E\u0001" };
+
+function getLogSideName(side) {
+  if (gameState.battleMode === "online") {
+    return LOG_SIDE_TOKENS[side];
+  }
+  return getSideName(side);
+}
+
+// 盤面上の陣営（player/enemy）を、見ている人にとっての陣営に変換する
+function toViewSide(side) {
+  if (gameState.battleMode === "online" && gameState.onlineMySide === "enemy") {
+    return getEnemySide(side);
+  }
+  return side;
+}
+
+function resolveLogSideTokens(text) {
+  return String(text)
+    .split(LOG_SIDE_TOKENS.player).join(getSideName("player"))
+    .split(LOG_SIDE_TOKENS.enemy).join(getSideName("enemy"));
+}
+
 function getDirectionMark(side) {
   return side === "player" ? "↑" : "↓";
 }
@@ -143,13 +168,14 @@ function logMessage(text) {
   if (turnNumber !== null) {
     const separatorText = getTurnSeparatorText(turnNumber);
 
-    if (!message.textContent.includes(separatorText)) {
+    // オンラインで受信したログは送信側で区切り線が付いていることがあるので二重に付けない
+    if (!message.textContent.includes(separatorText) && !logText.includes(separatorText)) {
       const prefix = message.textContent.endsWith("\n") ? "\n" : "\n\n";
       logText = `${prefix}${separatorText}\n${logText.replace(/^\n+/, "")}`;
     }
   }
 
-  message.textContent += logText;
+  message.textContent += resolveLogSideTokens(logText);
   message.scrollTop = message.scrollHeight;
 
   if (gameState.battleMode === "online" && typeof accumulateOnlineLog === "function") {
@@ -526,8 +552,10 @@ function ensureInitiativeDiceRollOverlay() {
 }
 
 async function animateInitiativeDiceRoll(options) {
-  const playerRoll = options.playerRoll;
-  const enemyRoll = options.enemyRoll;
+  // オンラインのゲストは自分が enemy 側なので、表示上の味方/敵を入れ替える
+  const swapForViewer = toViewSide("player") !== "player";
+  const playerRoll = swapForViewer ? options.enemyRoll : options.playerRoll;
+  const enemyRoll = swapForViewer ? options.playerRoll : options.enemyRoll;
   const overlay = ensureInitiativeDiceRollOverlay();
   const playerCard = document.getElementById("initiative-player-card");
   const enemyCard = document.getElementById("initiative-enemy-card");
@@ -688,7 +716,7 @@ function setDiceEffectSideClass(side) {
 }
 
 async function animateDiceRoll(options) {
-  const side = options.side || "player";
+  const side = toViewSide(options.side || "player");
   const actorName = options.actorName || "";
   const finalNumber = options.finalNumber;
   const action = options.action || null;

@@ -345,7 +345,7 @@ async function handleRollButtonClick(forcedRollNumber = null) {
   logMessage(
     `
 
-【第${gameState.turnNumber}ターン】${getSideName(gameState.currentSide)}：${actor.name} の出目は ${gameState.rolledNumber}${forcedRollNumber !== null ? "（検証指定）" : ""}。
+【第${gameState.turnNumber}ターン】${getLogSideName(gameState.currentSide)}：${actor.name} の出目は ${gameState.rolledNumber}${forcedRollNumber !== null ? "（検証指定）" : ""}。
 ${gameState.selectedAction.label}`
   );
 

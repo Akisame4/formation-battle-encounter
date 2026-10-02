@@ -1875,6 +1875,21 @@ function isAllDefeated(board) {
 }
 
 function checkGameEnd() {
+  if (gameState.battleMode === "online") {
+    const loserSide = isAllDefeated(gameState.enemyBoard) ? "enemy"
+      : isAllDefeated(gameState.playerBoard) ? "player"
+      : null;
+
+    if (!loserSide) {
+      return "";
+    }
+
+    gameState.gameOver = true;
+    gameState.phase = "game_over";
+    const winnerSide = getEnemySide(loserSide);
+    return `${getLogSideName(winnerSide)}の勝利！ ${getLogSideName(loserSide)}をすべて倒した。`;
+  }
+
   if (isAllDefeated(gameState.enemyBoard)) {
     if (gameState.battleMode === "battlefrontier") {
       gameState.phase = "battlefrontier_victory";
@@ -1995,7 +2010,7 @@ function applyDecisiveMomentDamage() {
       const result = directDamageCharacter(character, damage);
 
       if (result.actualDamage > 0) {
-        damagedTexts.push(`${getSideName(group.side)} ${character.name}に${result.actualDamage}`);
+        damagedTexts.push(`${getLogSideName(group.side)} ${character.name}に${result.actualDamage}`);
       }
     });
   });
@@ -2089,7 +2104,7 @@ function passCurrentSideTurn() {
 
   advanceToNextSideAfterTurn(passingSide);
 
-  logMessage(`\n${getSideName(passingSide)}はターンを終了した。`);
+  logMessage(`\n${getLogSideName(passingSide)}はターンを終了した。`);
 }
 
 function handleActionProgressError(error) {

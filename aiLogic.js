@@ -288,7 +288,7 @@ async function runEnemyAutoTurn() {
   logMessage(
     `
 
-【第${gameState.turnNumber}ターン】${getSideName(gameState.currentSide)}：${actor.name} の出目は ${gameState.rolledNumber}。
+【第${gameState.turnNumber}ターン】${getLogSideName(gameState.currentSide)}：${actor.name} の出目は ${gameState.rolledNumber}。
 ${gameState.selectedAction.label}`
   );
 

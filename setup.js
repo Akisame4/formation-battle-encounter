@@ -2057,7 +2057,7 @@ async function decideInitiative() {
     });
 
     rollLog += `
-味方の先攻ダイス：${playerRoll} / 敵の先攻ダイス：${enemyRoll}`;
+${getLogSideName("player")}の先攻ダイス：${playerRoll} / ${getLogSideName("enemy")}の先攻ダイス：${enemyRoll}`;
 
     if (playerRoll === enemyRoll) {
       rollLog += "\n同点のため振り直し。";
@@ -2087,7 +2087,7 @@ async function decideInitiative() {
 
   logMessage(
     `${rollLog}
-${gameState.currentSide === "player" ? "味方" : "敵"}が先攻です。`
+${getLogSideName(gameState.currentSide)}が先攻です。`
   );
 
   renderAll();
