@@ -896,8 +896,8 @@ const CHARACTER_TEMPLATES = [
     cooldown: 0,
     actions: {
       1: { label: "敵1体に20ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "sideways" },
-      2: { label: "敵1体に20ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "sideways" },
-      3: { label: "敵（最大2体）に20ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 20, moveDirection: "sideways", hitCount: 2 },
+      2: { label: "敵1体に30ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 30, moveDirection: "sideways" },
+      3: { label: "敵（最大2体）に30ダメージ、その敵を左右どちらかへ移動", type: "damage_and_move", target: "enemy_any_unit", damage: 30, moveDirection: "sideways", hitCount: 2 },
       4: { label: "敵1体に防御貫通20ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 20 },
       5: { label: "敵1体に防御貫通20ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 20 },
       6: { label: "敵（最大2体）に防御貫通20ダメージ", type: "piercing_damage", target: "enemy_any_unit", damage: 20, hitCount: 2 }
