@@ -1923,7 +1923,7 @@ function getBattleModeDescriptionText() {
   }
 
   if (gameState.battleMode === "battlefrontier") {
-    return `バトルファクトリー：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
+    return `エンカウント・ドラフト：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
   }
 
   return "対人バトル：味方側も敵側も手動で操作します。";
