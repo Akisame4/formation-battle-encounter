@@ -105,6 +105,15 @@ function getDecisiveMomentDisplayStatus() {
   };
 }
 
+// 決着の刻の発動中は盤面全体を赤くして、ひと目でわかるようにする
+function setDecisiveMomentBoardHighlight(active) {
+  const boardPanel = document.getElementById("board-panel");
+
+  if (boardPanel) {
+    boardPanel.classList.toggle("decisive-moment-active", active);
+  }
+}
+
 function renderDecisiveMomentBanner() {
   const element = document.getElementById("decisive-moment-banner");
 
@@ -115,10 +124,12 @@ function renderDecisiveMomentBanner() {
   if (gameState.gameOver) {
     element.classList.remove("visible");
     element.textContent = "";
+    setDecisiveMomentBoardHighlight(false);
     return;
   }
 
   const status = getDecisiveMomentDisplayStatus();
+  setDecisiveMomentBoardHighlight(status.isActive);
 
   if (!status.isActive) {
     element.classList.remove("visible");

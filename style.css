@@ -1594,6 +1594,34 @@ button.recommended-button {
   }
 }
 
+/* 決着の刻の発動中は盤面を赤くする */
+.board-panel.decisive-moment-active {
+  background: #f6d0d0;
+  border-color: #9b1c1c;
+  animation: decisive-moment-board-glow 1.6s ease-in-out infinite;
+}
+
+.board-panel.decisive-moment-active .cell.empty {
+  background: #e5a0a0;
+  border-color: #7a1010;
+  color: #7a1010;
+}
+
+.board-panel.decisive-moment-active .vs-line {
+  color: #9b1c1c;
+  border-color: #c0392b;
+}
+
+@keyframes decisive-moment-board-glow {
+  0%, 100% {
+    box-shadow: inset 0 0 24px rgba(180, 0, 0, 0.25), 0 0 8px rgba(180, 0, 0, 0.35);
+  }
+
+  50% {
+    box-shadow: inset 0 0 48px rgba(180, 0, 0, 0.45), 0 0 18px rgba(180, 0, 0, 0.6);
+  }
+}
+
 /* キャラクター詳細モーダル */
 .character-detail-button {
   flex: 0 0 auto;
