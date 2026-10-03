@@ -94,15 +94,18 @@ function setOnlineWaitingOverlay(visible, message) {
 // ============================================================
 
 // 作成から12時間以上たった部屋を消す（サーバー処理がないため、部屋の作成・参加のついでに各プレイヤーが掃除する）
-// セキュリティルール側も「12時間以上前の部屋だけ一覧取得・削除できる」形にしてある。
-// 端末の時計がずれていてもルールに弾かれないよう、10分の余裕を持たせる
+// セキュリティルールでは query.endAt の大小比較が効かず等価比較しか通らないため、
+// 「サーバー時刻を1時間単位で切り捨てて12時間引いた値」と完全一致する endAt の問い合わせだけを許可している。
+// ここでも同じ値をサーバー時刻から計算する（ルールとそろえるため、定数を変えるときは database.rules.json も直す）
 const ONLINE_ROOM_TTL_MS = 12 * 60 * 60 * 1000;
-const ONLINE_ROOM_CLEANUP_MARGIN_MS = 10 * 60 * 1000;
+const ONLINE_ROOM_CLEANUP_BUCKET_MS = 60 * 60 * 1000;
 const ONLINE_ROOM_CLEANUP_BATCH = 50;
 
 async function cleanupOldOnlineRooms() {
   try {
-    const cutoff = Date.now() - ONLINE_ROOM_TTL_MS - ONLINE_ROOM_CLEANUP_MARGIN_MS;
+    const offsetSnap = await fbeDb.ref(".info/serverTimeOffset").once("value");
+    const serverNow = Date.now() + (offsetSnap.val() || 0);
+    const cutoff = serverNow - (serverNow % ONLINE_ROOM_CLEANUP_BUCKET_MS) - ONLINE_ROOM_TTL_MS;
     const snap = await fbeDb.ref("fbe/rooms")
       .orderByChild("createdAt")
       .endAt(cutoff)
