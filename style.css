@@ -179,6 +179,53 @@ h3 {
   margin-top: 16px;
 }
 
+/* タイトル画面のモードを「対戦／一人用／その他」の枠でまとめる */
+.mode-group {
+  position: relative;
+  margin-top: 26px;
+  padding: 22px 14px 14px;
+  border: 2px solid #999;
+  border-radius: 14px;
+  background: #f7f6f2;
+}
+
+.mode-group-label {
+  position: absolute;
+  top: -13px;
+  left: 16px;
+  padding: 2px 14px;
+  border: 2px solid #333;
+  border-radius: 999px;
+  background: #fff;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.4;
+}
+
+.mode-group .mode-grid {
+  margin-top: 0;
+}
+
+.mode-group-versus {
+  border-color: #2e7d55;
+  background: #f1f8f3;
+}
+
+.mode-group-versus .mode-group-label {
+  border-color: #2e7d55;
+  color: #1f5c3d;
+}
+
+.mode-group-solo {
+  border-color: #2f5f9e;
+  background: #f1f5fb;
+}
+
+.mode-group-solo .mode-group-label {
+  border-color: #2f5f9e;
+  color: #23477a;
+}
+
 .mode-card {
   border: 2px solid #333;
   border-radius: 12px;

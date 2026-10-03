@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
 </head>
 
 <body>
@@ -35,77 +35,90 @@
         <span>検証モード：手動ターンで出目を選べるようにする</span>
       </label>
 
-      <div class="mode-grid">
-        <div class="mode-card">
-          <h2>オートバトル</h2>
-          <p>
-            味方側だけを操作します。敵側は自動でキャラクターを選び、ダイスを振って行動します。
-            任意の文字列を入力すると、その文字列をもとに敵構成をランダム生成します。未入力なら完全ランダム構成です。
-          </p>
+      <div class="mode-group mode-group-versus">
+        <div class="mode-group-label">対戦</div>
+        <div class="mode-grid">
+          <div class="mode-card online-mode-card">
+            <h2>🌐 オンライン対戦</h2>
+            <p>
+              離れた相手とリアルタイムでオンライン対戦します。ルームを作成してコードを共有するか、相手のコードを入力して参加してください。
+            </p>
 
-          <div class="code-area">
-            <label for="battle-code-input">敵生成シード</label>
-            <input id="battle-code-input" type="text" placeholder="未入力なら完全ランダム構成">
+            <button class="primary-button" id="start-online-button">オンライン対戦へ</button>
           </div>
 
-          <button class="primary-button" id="start-auto-button">オートバトル開始</button>
-        </div>
+          <div class="mode-card">
+            <h2>ローカル対戦</h2>
+            <p>
+              1台の端末で、2人が味方側と敵側を交互に操作して対戦します。
+              相手から受け取ったパーティコードを入力すると、敵陣形として反映します。
+            </p>
 
-        <div class="mode-card">
-          <h2>対人バトル</h2>
-          <p>
-            味方側も敵側も、同じ画面で交互に操作します。
-            相手から受け取ったパーティコードを入力すると、敵陣形として反映します。
-          </p>
+            <div class="code-area">
+              <label for="versus-enemy-code-input">敵パーティコード</label>
+              <input id="versus-enemy-code-input" type="text" placeholder="未入力なら標準敵パーティ">
+            </div>
 
-          <div class="code-area">
-            <label for="versus-enemy-code-input">敵パーティコード</label>
-            <input id="versus-enemy-code-input" type="text" placeholder="未入力なら標準敵パーティ">
-          </div>
-
-          <button class="primary-button" id="start-versus-button">対人バトル開始</button>
-        </div>
-
-        <div class="mode-card">
-          <h2>ステージ攻略</h2>
-          <p>
-            最初に作った4体パーティと陣形で、全10ステージのモンスター戦に挑みます。
-            ステージが進むほど敵が強くなり、各ステージ開始時に味方は全回復します。
-          </p>
-
-          <button class="primary-button" id="start-stage-button">ステージ攻略開始</button>
-        </div>
-
-        <div class="mode-card">
-          <h2>エンカウント・ドラフト</h2>
-          <p>
-            6体の候補から4体を選んでパーティを組みます。7連戦勝ち抜くごとに再ドラフト。
-            勝利後は倒した相手と1体交換でき、周を重ねるほど強い相手が出やすくなります。負けたら終了です。
-          </p>
-
-          <div style="display:flex; gap:8px;">
-            <button class="primary-button" id="start-battlefrontier-button" style="flex:1;">最初から</button>
-            <button class="primary-button" id="battlefrontier-resume-button" style="flex:1;" disabled>続きから</button>
+            <button class="primary-button" id="start-versus-button">ローカル対戦開始</button>
           </div>
         </div>
+      </div>
 
-        <div class="mode-card">
-          <h2>パーティコード作成</h2>
-          <p>
-            4体のパーティと3×3の初期陣形を作り、対戦相手に送るためのコードを生成します。
-            4体を配置すると、コードは自動で生成されます。
-          </p>
+      <div class="mode-group mode-group-solo">
+        <div class="mode-group-label">一人用</div>
+        <div class="mode-grid">
+          <div class="mode-card">
+            <h2>ステージ攻略</h2>
+            <p>
+              最初に作った4体パーティと陣形で、全10ステージのモンスター戦に挑みます。
+              ステージが進むほど敵が強くなり、各ステージ開始時に味方は全回復します。
+            </p>
 
-          <button class="primary-button" id="open-party-code-button">コード作成画面へ</button>
+            <button class="primary-button" id="start-stage-button">ステージ攻略開始</button>
+          </div>
+
+          <div class="mode-card">
+            <h2>エンカウント・ドラフト</h2>
+            <p>
+              6体の候補から4体を選んでパーティを組みます。7連戦勝ち抜くごとに再ドラフト。
+              勝利後は倒した相手と1体交換でき、周を重ねるほど強い相手が出やすくなります。負けたら終了です。
+            </p>
+
+            <div style="display:flex; gap:8px;">
+              <button class="primary-button" id="start-battlefrontier-button" style="flex:1;">最初から</button>
+              <button class="primary-button" id="battlefrontier-resume-button" style="flex:1;" disabled>続きから</button>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <div class="mode-card online-mode-card">
-          <h2>🌐 オンライン対戦</h2>
-          <p>
-            離れた相手とリアルタイムでオンライン対戦します。ルームを作成してコードを共有するか、相手のコードを入力して参加してください。
-          </p>
+      <div class="mode-group mode-group-other">
+        <div class="mode-group-label">その他</div>
+        <div class="mode-grid">
+          <div class="mode-card">
+            <h2>パーティコード作成</h2>
+            <p>
+              4体のパーティと3×3の初期陣形を作り、対戦相手に送るためのコードを生成します。
+              4体を配置すると、コードは自動で生成されます。
+            </p>
 
-          <button class="primary-button" id="start-online-button">オンライン対戦へ</button>
+            <button class="primary-button" id="open-party-code-button">コード作成画面へ</button>
+          </div>
+
+          <div class="mode-card">
+            <h2>オートバトル</h2>
+            <p>
+              味方側だけを操作します。敵側は自動でキャラクターを選び、ダイスを振って行動します。
+              任意の文字列を入力すると、その文字列をもとに敵構成をランダム生成します。未入力なら完全ランダム構成です。
+            </p>
+
+            <div class="code-area">
+              <label for="battle-code-input">敵生成シード</label>
+              <input id="battle-code-input" type="text" placeholder="未入力なら完全ランダム構成">
+            </div>
+
+            <button class="primary-button" id="start-auto-button">オートバトル開始</button>
+          </div>
         </div>
       </div>
 
@@ -435,7 +448,7 @@
   <script src="targetLogic.js?v=1"></script>
   <script src="battleLogic.js?v=3"></script>
   <script src="aiLogic.js?v=2"></script>
-  <script src="setup.js?v=3"></script>
+  <script src="setup.js?v=4"></script>
   <script src="render.js?v=2"></script>
   <script src="online.js?v=4"></script>
   <script src="battleFrontier.js?v=1"></script>

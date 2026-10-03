@@ -603,7 +603,7 @@ function renderCharacterSelectionScreen() {
 
   const pool = getCharacterPool();
   const selectedNames = gameState.selectedPlayerNames || [];
-  const modeName = gameState.pendingBattleMode === "versus" ? "対人バトル" : "オートバトル";
+  const modeName = gameState.pendingBattleMode === "versus" ? "ローカル対戦" : "オートバトル";
 
   descriptionElement.textContent = `${modeName}で使う味方4体を選んでください。現在 ${selectedNames.length} / ${gameState.partySize} 体。`;
   startButton.disabled = selectedNames.length !== gameState.partySize;
@@ -1926,7 +1926,7 @@ function getBattleModeDescriptionText() {
     return `エンカウント・ドラフト：第${gameState.battleFrontier.lap}周 ${gameState.battleFrontier.winsThisLap}勝目 / 通算${gameState.battleFrontier.totalWins}勝。勝利ごとに全回復、敗北で終了です。`;
   }
 
-  return "対人バトル：味方側も敵側も手動で操作します。";
+  return "ローカル対戦：味方側も敵側も手動で操作します。";
 }
 
 function getBattleStartEnemyDescriptionText() {
