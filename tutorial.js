@@ -279,7 +279,7 @@ function tutorialOnRender() {
     return;
   }
 
-  if (gameState.phase === "confirm" && gameState.selectedAction && !canCurrentActorUseSelectedAction()) {
+  if (gameState.phase === "confirm" && gameState.selectedActor && gameState.selectedAction && !canCurrentActorUseSelectedAction()) {
     showTutorialStep("meleeBlocked");
     return;
   }

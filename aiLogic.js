@@ -211,12 +211,6 @@ function chooseEnemyAutoTarget(action) {
 }
 
 function scheduleEnemyAutoTurn() {
-  // チュートリアルの説明を読んでいる間は敵を待たせる
-  if (typeof isTutorialPopupOpen === "function" && isTutorialPopupOpen()) {
-    setTimeout(scheduleEnemyAutoTurn, 300);
-    return;
-  }
-
   if (
     gameState.enemyAutoRunning ||
     gameState.gameOver ||
@@ -225,11 +219,31 @@ function scheduleEnemyAutoTurn() {
     return;
   }
 
+  // チュートリアルの説明を読んでいる間は敵を待たせる。
+  // 待ち合わせは1本だけにし、再開時に敵の行動がすでに進行中（select_actor 以外）なら新しく始めない
+  // （二重に始めると、行動の途中で選択がクリアされて表示が壊れるため）
+  if (typeof isTutorialPopupOpen === "function" && isTutorialPopupOpen()) {
+    if (!gameState.enemyAutoWaitingForTutorial) {
+      gameState.enemyAutoWaitingForTutorial = true;
+      setTimeout(() => {
+        gameState.enemyAutoWaitingForTutorial = false;
+        if (gameState.phase === "select_actor") {
+          scheduleEnemyAutoTurn();
+        }
+      }, 300);
+    }
+    return;
+  }
+
   gameState.enemyAutoRunning = true;
 
   setTimeout(async () => {
-    await runEnemyAutoTurn();
-    gameState.enemyAutoRunning = false;
+    try {
+      await runEnemyAutoTurn();
+    } finally {
+      // 途中でエラーが起きても、以降の敵の行動が止まったままにならないようにする
+      gameState.enemyAutoRunning = false;
+    }
   }, 500);
 }
 

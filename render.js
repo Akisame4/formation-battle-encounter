@@ -1206,7 +1206,8 @@ function renderStatus() {
     return;
   }
 
-  if (gameState.phase === "confirm") {
+  // 選択が消えた直後（盤面のリセットと敵の行動が重なったとき等）に描画されても落ちないようにする
+  if (gameState.phase === "confirm" && gameState.selectedActor) {
     const actor = getBoardBySide(gameState.selectedActor.side)[gameState.selectedActor.index];
 
     if (gameState.selectedAction && !canCurrentActorUseSelectedAction()) {
