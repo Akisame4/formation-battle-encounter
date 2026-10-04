@@ -1296,7 +1296,6 @@ function clearRecommendedButtons() {
     "cancel-button",
     "pass-button",
     "next-stage-button",
-    "reset-button",
     "online-rematch-button",
     "back-title-button"
   ];
@@ -1358,14 +1357,8 @@ function renderButtons() {
     button.disabled = !(gameState.debugMode && canRoll);
   });
 
-  const resetButton = document.getElementById("reset-button");
   const onlineRematchButton = document.getElementById("online-rematch-button");
   const backTitleButton = document.getElementById("back-title-button");
-
-  if (resetButton) {
-    resetButton.disabled = gameState.animation.locked;
-    resetButton.style.display = gameState.battleMode === "online" ? "none" : "";
-  }
 
   if (onlineRematchButton) {
     onlineRematchButton.style.display = gameState.battleMode === "online" ? "" : "none";

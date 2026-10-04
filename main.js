@@ -617,18 +617,6 @@ function bindResizeEvents() {
   });
 }
 
-function confirmBeforeResetBattle() {
-  if (gameState.animation.locked) {
-    return false;
-  }
-
-  if (gameState.gameOver) {
-    return true;
-  }
-
-  return window.confirm("現在の戦闘を最初からやり直します。よろしいですか？");
-}
-
 function confirmBeforeBackToTitleFromBattle() {
   if (gameState.animation.locked) {
     return false;
@@ -1038,14 +1026,6 @@ function bindEvents() {
 
   document.getElementById("next-stage-button").addEventListener("click", () => {
     startNextStage();
-  });
-
-  document.getElementById("reset-button").addEventListener("click", () => {
-    if (!confirmBeforeResetBattle()) {
-      return;
-    }
-
-    resetGame();
   });
 
   document.getElementById("online-rematch-button").addEventListener("click", () => {
