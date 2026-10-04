@@ -1944,7 +1944,7 @@ function getBattleStartEnemyDescriptionText() {
   }
 
   if (gameState.battleMode === "auto") {
-    return "チュートリアル用の敵（スライムとゴブリン）で開始しました。";
+    return "チュートリアル用の敵（前列にスライム、中列にゴブリン）で開始しました。";
   }
 
   return gameState.lastVersusEnemyCode

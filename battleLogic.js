@@ -1867,6 +1867,11 @@ function applyAutoAdvance() {
   movements.push(...autoAdvanceSide("enemy"));
 
   gameState.animation.movingUnits = movements;
+
+  if (movements.length > 0 && typeof tutorialOnAutoAdvance === "function") {
+    tutorialOnAutoAdvance(movements);
+  }
+
   return movements;
 }
 

@@ -4,17 +4,20 @@
 // 各説明は1回の対戦で1度だけ表示する。
 // ============================================================
 
-// チュートリアルの敵は、短く終わるよう弱いモンスター2体だけにする（盤面の 6〜8 が敵の前列）
+// チュートリアルの敵は、短く終わるよう弱いモンスター2体だけにする（盤面の 6〜8 が敵の前列、3〜5 が中列）。
+// ゴブリンをスライムの後ろ（中列）に置き、「近」と「遠」の届く範囲の違いと、
+// スライムが倒れたあとにゴブリンが前に出てくる様子を実際に見られるようにしている
 const TUTORIAL_ENEMIES = [
-  { id: "monster_slime", position: 6 },
-  { id: "monster_goblin", position: 8 }
+  { id: "monster_slime", position: 7 },
+  { id: "monster_goblin", position: 4 }
 ];
 
 const tutorialState = {
   active: false,
   disabled: false,
   shown: new Set(),
-  popupOpen: false
+  popupOpen: false,
+  pendingAdvanceSides: []
 };
 
 const TUTORIAL_STEPS = {
@@ -23,7 +26,7 @@ const TUTORIAL_STEPS = {
     body: [
       "このゲームは、3×3の盤面に4体のキャラクターを置いて戦います。",
       "右のキャラクターカードをタップしてから、左の盤面のマスをタップすると配置できます（ドラッグでもOK）。",
-      "上段が「前列」です。カードの「近」は近接攻撃で、前列にいないと使えません。「遠」は遠距離攻撃で、どこからでも使えます。",
+      "上段が「前列」です。カードの行動に「近」が多いキャラクターは前列に、「遠」が多いキャラクターは後ろの列に置くのがおすすめです（くわしくはバトルが始まってから説明します）。",
       "4体置いたら、右上の「この陣形で開始」を押しましょう。"
     ]
   },
@@ -33,6 +36,26 @@ const TUTORIAL_STEPS = {
       "先攻・後攻はサイコロで決まりました。",
       "画面の左はキャラクターカード、真ん中が盤面（下が味方、上が敵）、右が操作とログです。",
       "カードに並んでいる 1〜6 は、サイコロの出目ごとの行動です。どの出目で何が起きるか確認してみましょう。"
+    ]
+  },
+  attackRange: {
+    title: "近距離「近」と遠距離「遠」",
+    body: [
+      "カードの行動にある「近」は近距離攻撃、「遠」は遠距離攻撃です。たとえば「近単40」は「近距離で1体に40ダメージ」という意味です。",
+      "「近」は、自分が前列にいるときだけ使えます。狙えるのは、相手の一番前の列にいるキャラクターだけです。",
+      "「遠」は、どの列からでも使えて、相手のどの位置にいるキャラクターでも狙えます。",
+      "今回の敵は、スライムが前列、ゴブリンがその後ろの中列にいます。スライムが倒れるまで、ゴブリンには「遠」の攻撃しか届きません。"
+    ]
+  },
+  advance: {
+    title: "前の列が空くと、後ろが前に出る",
+    body: (sides) => [
+      sides.includes("enemy") && sides.includes("player")
+        ? "味方と敵の両方で、一番前の列にだれもいなくなったので、後ろにいたキャラクターが1列前に出ました。"
+        : sides.includes("enemy")
+          ? "敵の一番前の列にだれもいなくなったので、後ろにいたキャラクターが1列前に出てきました。"
+          : "味方の一番前の列にだれもいなくなったので、後ろにいたキャラクターが1列前に出ました。",
+      "前に出たキャラクターは「近」の攻撃が使えるようになり、そのかわり相手の「近」の攻撃にも狙われるようになります。"
     ]
   },
   selectActor: {
@@ -111,6 +134,7 @@ function setTutorialActive(active) {
   tutorialState.active = !!active;
   tutorialState.disabled = false;
   tutorialState.shown = new Set();
+  tutorialState.pendingAdvanceSides = [];
   closeTutorialPopup();
 }
 
@@ -195,7 +219,8 @@ function showTutorialStep(stepKey) {
   overlay.querySelector(".tutorial-popup-title").textContent = step.title;
   const body = overlay.querySelector(".tutorial-popup-body");
   body.innerHTML = "";
-  step.body.forEach(text => {
+  const bodyTexts = typeof step.body === "function" ? step.body(tutorialState.pendingAdvanceSides) : step.body;
+  bodyTexts.forEach(text => {
     const paragraph = document.createElement("p");
     paragraph.textContent = text;
     body.appendChild(paragraph);
@@ -212,6 +237,19 @@ function closeTutorialPopup() {
   if (overlay) {
     overlay.classList.remove("visible");
   }
+}
+
+// 最前列が空いて隊列が前に出たとき（applyAutoAdvance）に呼ばれる
+function tutorialOnAutoAdvance(movements) {
+  if (!isTutorialRunning() || tutorialState.shown.has("advance")) {
+    return;
+  }
+
+  movements.forEach(movement => {
+    if (movement && !tutorialState.pendingAdvanceSides.includes(movement.side)) {
+      tutorialState.pendingAdvanceSides.push(movement.side);
+    }
+  });
 }
 
 function tutorialOnFormationOpen() {
@@ -246,6 +284,19 @@ function tutorialOnRender() {
 
   if (showTutorialStep("battleStart")) {
     return;
+  }
+
+  if (showTutorialStep("attackRange")) {
+    return;
+  }
+
+  if (tutorialState.pendingAdvanceSides.length > 0) {
+    const shownAdvance = showTutorialStep("advance");
+    tutorialState.pendingAdvanceSides = [];
+
+    if (shownAdvance) {
+      return;
+    }
   }
 
   if (typeof getDecisiveMomentDisplayStatus === "function" && getDecisiveMomentDisplayStatus().isActive) {
