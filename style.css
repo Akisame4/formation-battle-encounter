@@ -206,6 +206,20 @@ h3 {
   margin-top: 0;
 }
 
+.mode-grid-single {
+  grid-template-columns: 1fr;
+}
+
+.mode-group-tutorial {
+  border-color: #c77d12;
+  background: #fff7e8;
+}
+
+.mode-group-tutorial .mode-group-label {
+  border-color: #c77d12;
+  color: #8a5208;
+}
+
 .mode-group-versus {
   border-color: #2e7d55;
   background: #f1f8f3;

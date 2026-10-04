@@ -17,7 +17,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=5">
+  <link rel="stylesheet" href="style.css?v=6">
 </head>
 
 <body>
@@ -34,6 +34,23 @@
         <input id="debug-mode-checkbox" type="checkbox">
         <span>検証モード：手動ターンで出目を選べるようにする</span>
       </label>
+
+      <div class="mode-group mode-group-tutorial">
+        <div class="mode-group-label">はじめての方へ</div>
+        <div class="mode-grid mode-grid-single">
+          <div class="mode-card">
+            <h2>チュートリアル</h2>
+            <p>
+              はじめての方はこちら。自動で動く敵と1戦しながら、配置・サイコロ・攻撃などの遊び方を、ポップアップで順番に説明します。
+            </p>
+
+            <!-- チュートリアルは毎回同じ敵パーティにするため、敵生成シードを固定値にしている -->
+            <input id="battle-code-input" type="hidden" value="tutorial">
+
+            <button class="primary-button" id="start-auto-button">チュートリアル開始</button>
+          </div>
+        </div>
+      </div>
 
       <div class="mode-group mode-group-versus">
         <div class="mode-group-label">対戦</div>
@@ -94,7 +111,7 @@
 
       <div class="mode-group mode-group-other">
         <div class="mode-group-label">その他</div>
-        <div class="mode-grid">
+        <div class="mode-grid mode-grid-single">
           <div class="mode-card">
             <h2>パーティコード作成</h2>
             <p>
@@ -103,18 +120,6 @@
             </p>
 
             <button class="primary-button" id="open-party-code-button">コード作成画面へ</button>
-          </div>
-
-          <div class="mode-card">
-            <h2>チュートリアル</h2>
-            <p>
-              はじめての方はこちら。自動で動く敵と1戦しながら、配置・サイコロ・攻撃などの遊び方を、ポップアップで順番に説明します。
-            </p>
-
-            <!-- チュートリアルは毎回同じ敵パーティにするため、敵生成シードを固定値にしている -->
-            <input id="battle-code-input" type="hidden" value="tutorial">
-
-            <button class="primary-button" id="start-auto-button">チュートリアル開始</button>
           </div>
         </div>
       </div>
