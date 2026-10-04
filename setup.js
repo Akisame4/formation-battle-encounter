@@ -124,7 +124,9 @@ function resetGame() {
     gameState.maxStage = getStageCount();
     gameState.enemyBoard = createEnemyBoardForStage(gameState.stageNumber || 1);
   } else if (gameState.battleMode === "auto") {
-    gameState.enemyBoard = createEnemyBoardForAutoBattle(gameState.lastBattleCode);
+    gameState.enemyBoard = typeof isTutorialMode === "function" && isTutorialMode()
+      ? createTutorialEnemyBoard()
+      : createEnemyBoardForAutoBattle(gameState.lastBattleCode);
   } else if (gameState.battleMode === "online") {
     // createPartyBoardFromFormation(..., "enemy") が rotatePartyFormationPositionForEnemy で
     // 行・列を180度回転するため、手動の行反転は不要（二重変換になりバグになる）
@@ -1942,7 +1944,7 @@ function getBattleStartEnemyDescriptionText() {
   }
 
   if (gameState.battleMode === "auto") {
-    return "チュートリアル用の敵パーティで開始しました。";
+    return "チュートリアル用の敵（スライムとゴブリン）で開始しました。";
   }
 
   return gameState.lastVersusEnemyCode

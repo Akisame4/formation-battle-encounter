@@ -44,7 +44,7 @@
               はじめての方はこちら。自動で動く敵と1戦しながら、配置・サイコロ・攻撃などの遊び方を、ポップアップで順番に説明します。
             </p>
 
-            <!-- チュートリアルは毎回同じ敵パーティにするため、敵生成シードを固定値にしている -->
+            <!-- 敵生成シード欄は使わないが、オートバトル用の処理が参照するので隠して残している（チュートリアルの敵は tutorial.js で固定） -->
             <input id="battle-code-input" type="hidden" value="tutorial">
 
             <button class="primary-button" id="start-auto-button">チュートリアル開始</button>
@@ -450,9 +450,9 @@
   <script src="targetLogic.js?v=1"></script>
   <script src="battleLogic.js?v=3"></script>
   <script src="aiLogic.js?v=3"></script>
-  <script src="setup.js?v=5"></script>
+  <script src="setup.js?v=6"></script>
   <script src="render.js?v=3"></script>
-  <script src="tutorial.js?v=1"></script>
+  <script src="tutorial.js?v=3"></script>
   <script src="online.js?v=4"></script>
   <script src="battleFrontier.js?v=1"></script>
   <script src="main.js?v=2"></script>

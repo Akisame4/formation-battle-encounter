@@ -1,8 +1,14 @@
 // ============================================================
 // tutorial.js - チュートリアル（遊びながらポップアップで説明する）
 // 中身はオートバトル（battleMode "auto"）で、タイトルの「チュートリアル」から始めたときだけ説明を出す。
-// 各説明は1回の対戦で1度だけ表示する。敵パーティは index.html の隠し入力（敵生成シード "tutorial"）で固定している。
+// 各説明は1回の対戦で1度だけ表示する。
 // ============================================================
+
+// チュートリアルの敵は、短く終わるよう弱いモンスター2体だけにする（盤面の 6〜8 が敵の前列）
+const TUTORIAL_ENEMIES = [
+  { id: "monster_slime", position: 6 },
+  { id: "monster_goblin", position: 8 }
+];
 
 const tutorialState = {
   active: false,
@@ -57,6 +63,13 @@ const TUTORIAL_STEPS = {
       "光っているマスから、2体目をタップしましょう。"
     ]
   },
+  meleeBlocked: {
+    title: "近接攻撃は前列から",
+    body: [
+      "このキャラクターは前列にいないので、出た「近」の攻撃は使えず、今回は空振りになります。",
+      "近接攻撃が多いキャラクターは、陣形づくりのときに前列（敵に近い列）に置くのがおすすめです。"
+    ]
+  },
   enemyTurn: {
     title: "敵のターン",
     body: [
@@ -103,6 +116,29 @@ function setTutorialActive(active) {
 
 function isTutorialRunning() {
   return tutorialState.active && !tutorialState.disabled && gameState.battleMode === "auto";
+}
+
+// 説明を閉じても、チュートリアル用の敵構成はそのまま使う
+function isTutorialMode() {
+  return tutorialState.active && gameState.battleMode === "auto";
+}
+
+function createTutorialEnemyBoard() {
+  const board = Array(9).fill(null);
+
+  TUTORIAL_ENEMIES.forEach(({ id, position }) => {
+    const template = getMonsterTemplateById(id);
+
+    if (!template) {
+      return;
+    }
+
+    const monster = deepCopyBoard([template])[0];
+    resetCharacterRuntimeStatus(monster);
+    board[position] = monster;
+  });
+
+  return board;
 }
 
 function isTutorialPopupOpen() {
@@ -240,6 +276,11 @@ function tutorialOnRender() {
 
   if (gameState.phase === "roll") {
     showTutorialStep("roll");
+    return;
+  }
+
+  if (gameState.phase === "confirm" && gameState.selectedAction && !canCurrentActorUseSelectedAction()) {
+    showTutorialStep("meleeBlocked");
     return;
   }
 
