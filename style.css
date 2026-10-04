@@ -2018,14 +2018,14 @@ button.recommended-button {
 }
 
 
-/* チュートリアルのポップアップ（盤面が見えるよう背景は薄く暗くするだけ） */
+/* チュートリアルのポップアップ（盤面が見えるよう背景は薄く暗くするだけ。画面の上寄りに出す） */
 .tutorial-popup-overlay {
   display: none;
   position: fixed;
   inset: 0;
   z-index: 10000;
   background: rgba(0, 0, 0, 0.25);
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: center;
   padding: 16px;
 }
@@ -2036,7 +2036,7 @@ button.recommended-button {
 
 .tutorial-popup {
   width: min(560px, 100%);
-  margin-bottom: 4vh;
+  margin-top: 4vh;
   background: #fff;
   border: 3px solid #2f5f9e;
   border-radius: 16px;
@@ -2089,7 +2089,7 @@ button.recommended-button {
 
 @keyframes tutorial-popup-in {
   from {
-    transform: translateY(12px);
+    transform: translateY(-12px);
     opacity: 0;
   }
 
