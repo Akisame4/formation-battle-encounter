@@ -78,6 +78,9 @@ function openCharacterSelection(mode) {
 }
 
 function openPlayerFormationForBattle(mode) {
+  if (typeof setTutorialActive === "function") {
+    setTutorialActive(mode === "auto");
+  }
   gameState.pendingBattleMode = mode;
   gameState.battleMode = mode;
   gameState.lastBattleCode = document.getElementById("battle-code-input").value.trim();
@@ -603,7 +606,7 @@ function renderCharacterSelectionScreen() {
 
   const pool = getCharacterPool();
   const selectedNames = gameState.selectedPlayerNames || [];
-  const modeName = gameState.pendingBattleMode === "versus" ? "ローカル対戦" : "オートバトル";
+  const modeName = gameState.pendingBattleMode === "versus" ? "ローカル対戦" : "チュートリアル";
 
   descriptionElement.textContent = `${modeName}で使う味方4体を選んでください。現在 ${selectedNames.length} / ${gameState.partySize} 体。`;
   startButton.disabled = selectedNames.length !== gameState.partySize;
@@ -1306,6 +1309,9 @@ function openPlayerFormationBuilder() {
   showPlayerFormationScreen();
   syncDecisiveMomentStartTurnInput();
   renderPlayerFormationScreen();
+  if (typeof tutorialOnFormationOpen === "function") {
+    tutorialOnFormationOpen();
+  }
 }
 
 function initializePlayerFormationBuilder() {
@@ -1914,7 +1920,7 @@ function getBattleModeDescriptionText() {
   }
 
   if (gameState.battleMode === "auto") {
-    return "オートバトル：味方は手動、敵は自動で行動します。";
+    return "チュートリアル：味方を操作して、自動で動く敵と戦います。";
   }
 
   if (gameState.battleMode === "online") {
@@ -1936,9 +1942,7 @@ function getBattleStartEnemyDescriptionText() {
   }
 
   if (gameState.battleMode === "auto") {
-    return gameState.lastBattleCode
-      ? `敵生成シード「${gameState.lastBattleCode}」から敵構成を生成しました。`
-      : "敵生成シード未入力のため、完全ランダム敵構成で開始しました。";
+    return "チュートリアル用の敵パーティで開始しました。";
   }
 
   return gameState.lastVersusEnemyCode

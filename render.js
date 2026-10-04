@@ -76,6 +76,9 @@ function renderAll() {
     renderBattleFrontierStreakDisplay();
   }
   saveBattleSnapshot();
+  if (typeof tutorialOnRender === "function") {
+    tutorialOnRender();
+  }
 }
 
 function getDecisiveMomentDisplayStatus() {

@@ -2003,3 +2003,84 @@ button.recommended-button {
   to { transform: rotate(360deg); }
 }
 
+
+/* チュートリアルのポップアップ（盤面が見えるよう背景は薄く暗くするだけ） */
+.tutorial-popup-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.25);
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+}
+
+.tutorial-popup-overlay.visible {
+  display: flex;
+}
+
+.tutorial-popup {
+  width: min(560px, 100%);
+  margin-bottom: 4vh;
+  background: #fff;
+  border: 3px solid #2f5f9e;
+  border-radius: 16px;
+  padding: 18px 20px 16px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+  animation: tutorial-popup-in 0.18s ease-out;
+}
+
+.tutorial-popup-label {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  background: #2f5f9e;
+  color: #fff;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.tutorial-popup-title {
+  margin: 8px 0 8px;
+  font-size: 19px;
+}
+
+.tutorial-popup-body p {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.tutorial-popup-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 6px;
+}
+
+.tutorial-popup-skip {
+  border: none;
+  background: none;
+  color: #666;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tutorial-popup-ok {
+  min-width: 110px;
+}
+
+@keyframes tutorial-popup-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

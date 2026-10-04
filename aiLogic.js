@@ -211,6 +211,12 @@ function chooseEnemyAutoTarget(action) {
 }
 
 function scheduleEnemyAutoTurn() {
+  // チュートリアルの説明を読んでいる間は敵を待たせる
+  if (typeof isTutorialPopupOpen === "function" && isTutorialPopupOpen()) {
+    setTimeout(scheduleEnemyAutoTurn, 300);
+    return;
+  }
+
   if (
     gameState.enemyAutoRunning ||
     gameState.gameOver ||
