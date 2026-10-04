@@ -50,7 +50,7 @@ const TUTORIAL_STEPS = {
   },
   advance: {
     title: "前の列が空くと、後ろが前に出る",
-    body: (sides) => [
+    body: ({ sides }) => [
       sides.includes("enemy") && sides.includes("player")
         ? "味方と敵の両方で、一番前の列にだれもいなくなったので、後ろにいたキャラクターが1列前に出ました。"
         : sides.includes("enemy")
@@ -92,6 +92,13 @@ const TUTORIAL_STEPS = {
     body: [
       "このキャラクターは前列にいないので、出た「近」の攻撃は使えず、今回は空振りになります。",
       "近接攻撃が多いキャラクターは、陣形づくりのときに前列（敵に近い列）に置くのがおすすめです。"
+    ]
+  },
+  enemyMeleeBlocked: {
+    title: "敵の「近」が空振り！",
+    body: ({ actorName, rowName }) => [
+      `${actorName}は${rowName}にいるので、出た「近」の攻撃が使えず空振りしました。`,
+      "「近」は前列からしか使えないのは、敵も同じです。前の敵を倒すと後ろの敵が前に出てきて、「近」の攻撃もしてくるようになるので気をつけましょう。"
     ]
   },
   enemyTurn: {
@@ -211,7 +218,8 @@ function ensureTutorialPopupElement() {
   return overlay;
 }
 
-function showTutorialStep(stepKey) {
+// context は文面を状況に合わせて変える説明（body が関数のもの）に渡す情報
+function showTutorialStep(stepKey, context = {}) {
   const step = TUTORIAL_STEPS[stepKey];
 
   if (!step || tutorialState.shown.has(stepKey) || tutorialState.popupOpen) {
@@ -225,7 +233,7 @@ function showTutorialStep(stepKey) {
   overlay.querySelector(".tutorial-popup-title").textContent = step.title;
   const body = overlay.querySelector(".tutorial-popup-body");
   body.innerHTML = "";
-  const bodyTexts = typeof step.body === "function" ? step.body(tutorialState.pendingAdvanceSides) : step.body;
+  const bodyTexts = typeof step.body === "function" ? step.body(context) : step.body;
   bodyTexts.forEach(text => {
     const paragraph = document.createElement("p");
     paragraph.textContent = text;
@@ -297,7 +305,7 @@ function tutorialOnRender() {
   }
 
   if (tutorialState.pendingAdvanceSides.length > 0) {
-    const shownAdvance = showTutorialStep("advance");
+    const shownAdvance = showTutorialStep("advance", { sides: tutorialState.pendingAdvanceSides });
     tutorialState.pendingAdvanceSides = [];
 
     if (shownAdvance) {
@@ -312,6 +320,19 @@ function tutorialOnRender() {
   }
 
   if (gameState.currentSide !== "player") {
+    if (
+      gameState.phase === "confirm" &&
+      gameState.selectedActor &&
+      gameState.selectedAction &&
+      !canCurrentActorUseSelectedAction()
+    ) {
+      const { side, index } = gameState.selectedActor;
+      const actor = getBoardBySide(side)[index];
+      const rowName = getRowsFromFront(side)[1].includes(index) ? "中列" : "後列";
+      showTutorialStep("enemyMeleeBlocked", { actorName: actor ? actor.name : "敵", rowName });
+      return;
+    }
+
     showTutorialStep("enemyTurn");
     return;
   }
