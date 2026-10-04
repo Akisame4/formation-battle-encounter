@@ -6,10 +6,9 @@
 
 // チュートリアルの敵は、短く終わるよう弱いモンスター2体だけにする（盤面の 6〜8 が敵の前列、3〜5 が中列）。
 // ゴブリンをスライムの後ろ（中列）に置き、「近」と「遠」の届く範囲の違いと、
-// スライムが倒れたあとにゴブリンが前に出てくる様子を実際に見られるようにしている。
-// スライムはすぐ倒れないよう、チュートリアルでだけ HP を上げる（ステージ攻略のスライムは変えない）
+// スライムが倒れたあとにゴブリンが前に出てくる様子を実際に見られるようにしている
 const TUTORIAL_ENEMIES = [
-  { id: "monster_slime", position: 7, maxHp: 120 },
+  { id: "monster_slime", position: 7 },
   { id: "monster_goblin", position: 4 }
 ];
 
@@ -158,7 +157,7 @@ function isTutorialMode() {
 function createTutorialEnemyBoard() {
   const board = Array(9).fill(null);
 
-  TUTORIAL_ENEMIES.forEach(({ id, position, maxHp }) => {
+  TUTORIAL_ENEMIES.forEach(({ id, position }) => {
     const template = getMonsterTemplateById(id);
 
     if (!template) {
@@ -166,11 +165,6 @@ function createTutorialEnemyBoard() {
     }
 
     const monster = deepCopyBoard([template])[0];
-
-    if (maxHp) {
-      monster.maxHp = maxHp;
-    }
-
     resetCharacterRuntimeStatus(monster);
     board[position] = monster;
   });
