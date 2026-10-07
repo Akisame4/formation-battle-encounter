@@ -828,6 +828,11 @@ function bindEvents() {
     showOnlineLobbyScreen();
   });
 
+  // 試験モードの選択肢は開発用（URLに ?dev を付けたときだけ表示）
+  if (!new URLSearchParams(location.search).has("dev")) {
+    document.querySelector(".online-room-mode-area").style.display = "none";
+  }
+
   // オンラインロビー: ルーム作成
   document.getElementById("online-create-button").addEventListener("click", async () => {
     const modeInput = document.querySelector('input[name="online-room-mode"]:checked');
