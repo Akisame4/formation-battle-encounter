@@ -828,9 +828,12 @@ function bindEvents() {
     showOnlineLobbyScreen();
   });
 
-  // 試験モードの選択肢は開発用（URLに ?dev を付けたときだけ表示）
+  // 試験モード・検証モードの選択肢は開発用（URLに ?dev を付けたときだけ表示）
   if (!new URLSearchParams(location.search).has("dev")) {
     document.querySelector(".online-room-mode-area").style.display = "none";
+    document.querySelector(".debug-mode-toggle").style.display = "none";
+    document.getElementById("debug-mode-checkbox").checked = false;
+    syncDebugModeFromTitle();
   }
 
   // オンラインロビー: ルーム作成
