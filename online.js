@@ -32,10 +32,46 @@ function initOnlineFirebase() {
 async function ensureOnlineAuth() {
   initOnlineFirebase();
   const auth = firebase.auth(fbeApp);
-  if (auth.currentUser) return auth.currentUser.uid;
-  await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
-  const cred = await auth.signInAnonymously();
-  return cred.user.uid;
+  let uid;
+  if (auth.currentUser) {
+    uid = auth.currentUser.uid;
+  } else {
+    await auth.setPersistence(firebase.auth.Auth.Persistence.SESSION);
+    const cred = await auth.signInAnonymously();
+    uid = cred.user.uid;
+  }
+  await ensureOnlineConnection();
+  return uid;
+}
+
+// DBにつながるまで待つ。無料プランは同時接続100までで、満員だと接続できないまま
+// 書き込みが保留され続けるため、一定時間つながらなければ「混み合っています」として扱う
+const ONLINE_CONNECT_TIMEOUT_MS = 10000;
+
+function ensureOnlineConnection() {
+  fbeDb.goOnline();
+  return new Promise((resolve, reject) => {
+    const ref = fbeDb.ref(".info/connected");
+    const timer = setTimeout(() => {
+      ref.off("value", handler);
+      disconnectOnlineFirebase();
+      const error = new Error("ただいまオンライン対戦が混み合っています。しばらく時間をおいてからお試しください。");
+      error.busy = true;
+      reject(error);
+    }, ONLINE_CONNECT_TIMEOUT_MS);
+    const handler = (snap) => {
+      if (snap.val() !== true) return;
+      clearTimeout(timer);
+      ref.off("value", handler);
+      resolve();
+    };
+    ref.on("value", handler);
+  });
+}
+
+// オンラインをやめたら接続を切り、同時接続の枠を空ける
+function disconnectOnlineFirebase() {
+  if (fbeDb) fbeDb.goOffline();
 }
 
 function generateShortId() {
@@ -65,6 +101,10 @@ function showOnlineLobbyScreen() {
   setScreenDisplay("main-layout", "none");
   setScreenDisplay("online-waiting-screen", "none");
   setScreenDisplay("online-lobby-screen", "flex");
+  // 前回の作成・参加で押せなくなったボタンを戻す
+  document.getElementById("online-create-button").disabled = false;
+  document.getElementById("online-join-button").disabled = false;
+  if (typeof showOnlineLobbyError === "function") showOnlineLobbyError("");
 }
 
 function showOnlineWaitingScreen() {
@@ -540,6 +580,7 @@ function cleanupOnlineState() {
   gameState.onlineGuestFormationEntries = null;
   gameState.onlineTestMode = false;
   setOnlineWaitingOverlay(false);
+  disconnectOnlineFirebase();
 
   if (typeof clearBattleSnapshot === "function") {
     clearBattleSnapshot();

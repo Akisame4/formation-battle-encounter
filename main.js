@@ -856,7 +856,7 @@ function bindEvents() {
         openPlayerFormationForBattle("online");
       });
     } catch (e) {
-      showOnlineLobbyError("エラー: " + e.message);
+      showOnlineLobbyError(e.busy ? e.message : "エラー: " + e.message);
       document.getElementById("online-create-button").disabled = false;
     }
   });
@@ -874,7 +874,7 @@ function bindEvents() {
       gameState.onlineTestMode = onlineState.mode === "test";
       openPlayerFormationForBattle("online");
     } catch (e) {
-      showOnlineLobbyError("エラー: " + e.message);
+      showOnlineLobbyError(e.busy ? e.message : "エラー: " + e.message);
       document.getElementById("online-join-button").disabled = false;
     }
   });
@@ -894,6 +894,7 @@ function bindEvents() {
 
   // ロビー: タイトルへ
   document.getElementById("online-lobby-back-button").addEventListener("click", () => {
+    disconnectOnlineFirebase();
     showTitleScreen();
   });
 
