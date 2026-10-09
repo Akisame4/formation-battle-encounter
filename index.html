@@ -18,7 +18,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 
 <body>
@@ -340,22 +340,29 @@
   </div>
 
 
-  <div id="main-layout" class="main-layout">
-    <div id="card-panel" class="card-panel">
-      <div class="left-panel-header">
-        <div class="game-title">フォーメーションバトル・エンカウント</div>
-        <div class="panel-subtitle">キャラクターカード</div>
-        <div id="battlefrontier-streak-display" class="battlefrontier-streak-display" style="display:none;"></div>
+  <div id="main-layout" class="main-layout battle-v2">
+    <header class="battle-hud">
+      <div class="hud-mode">
+        <small id="hud-mode-sub"></small>
+        <b id="hud-mode-name"></b>
+        <span id="battlefrontier-streak-display" class="battlefrontier-streak-display" style="display:none;"></span>
       </div>
+      <div class="hud-turn">
+        <span id="hud-turn-number" class="hud-turn-number"></span>
+        <span id="hud-turn-pill" class="hud-turn-pill"></span>
+      </div>
+      <div id="hud-doom" class="hud-doom"></div>
+      <button id="hud-log-button" class="hud-log-button" type="button">ログ</button>
+      <button id="back-title-button" class="hud-title-button" type="button">タイトルへ</button>
+    </header>
 
-      <div id="card-list" class="card-list-inner"></div>
-    </div>
-
-    <div
-      id="card-vertical-resizer"
-      class="vertical-resizer"
-      title="左右にドラッグしてカード領域を調整"
-    ></div>
+    <aside class="log-panel" id="log-panel">
+      <div class="log-panel-head">
+        <h3>ログ</h3>
+        <button id="log-close-button" class="log-close-button" type="button">閉じる</button>
+      </div>
+      <div id="message"></div>
+    </aside>
 
     <div id="board-panel" class="board-panel">
       <div class="title-area">
@@ -365,8 +372,8 @@
         </div>
       </div>
 
-      <div class="board-section">
-        <h2 id="board-label-top">敵陣営 ↓</h2>
+      <div class="board-section board-section-top">
+        <h2 id="board-label-top" class="board-side-label side-top">敵陣営 ↓</h2>
         <div class="board-wrapper">
           <div id="enemy-board" class="board"></div>
         </div>
@@ -374,38 +381,31 @@
 
       <div class="vs-line">VS</div>
 
-      <div class="board-section">
-        <h2 id="board-label-bottom">味方陣営 ↑</h2>
+      <div class="board-section board-section-bottom">
         <div class="board-wrapper">
           <div id="player-board" class="board"></div>
         </div>
+        <h2 id="board-label-bottom" class="board-side-label side-bottom">味方陣営 ↑</h2>
       </div>
     </div>
 
-    <div
-      id="right-vertical-resizer"
-      class="vertical-resizer"
-      title="左右にドラッグして右側領域を調整"
-    ></div>
-
     <div id="right-panel" class="right-panel">
       <div id="control-panel" class="control-panel">
-        <h3>操作・アナウンス</h3>
+        <div id="actor-panel" class="actor-panel"></div>
 
-        <div id="battle-turn-info" class="battle-turn-info">
-          現在ターン：-
+        <div id="status-area" class="status-area">
+          準備中です。
         </div>
 
         <div id="decisive-moment-banner" class="decisive-moment-banner" aria-live="polite"></div>
 
         <div class="button-area">
+          <button id="cancel-button" disabled>選び直す</button>
           <button id="roll-button" disabled>ダイスを振る</button>
           <button id="execute-button" disabled>実行</button>
-          <button id="cancel-button" disabled>選択解除</button>
           <button id="pass-button" disabled>ターン終了</button>
           <button id="next-stage-button" disabled>次のステージへ</button>
           <button id="online-rematch-button" style="display:none">もう一度対戦</button>
-          <button id="back-title-button">タイトルへ</button>
         </div>
 
         <div id="debug-dice-area" class="debug-dice-area">
@@ -420,23 +420,22 @@
           </div>
         </div>
 
-        <div id="status-area" class="status-area">
-          準備中です。
-        </div>
-      </div>
-
-      <div
-        id="right-horizontal-resizer"
-        class="horizontal-resizer"
-        title="上下にドラッグして操作欄とログ欄を調整"
-      ></div>
-
-      <div class="log-panel">
-        <h3>ログ</h3>
-        <div id="message"></div>
+        <div id="battle-turn-info" class="battle-turn-info" hidden></div>
       </div>
     </div>
+
+    <!-- 旧レイアウトの部品。描画処理やドラッグ処理が参照するので非表示で残す -->
+    <div class="battle-legacy" hidden>
+      <div id="card-panel" class="card-panel">
+        <div id="card-list" class="card-list-inner"></div>
+      </div>
+      <div id="card-vertical-resizer" class="vertical-resizer"></div>
+      <div id="right-vertical-resizer" class="vertical-resizer"></div>
+      <div id="right-horizontal-resizer" class="horizontal-resizer"></div>
+    </div>
   </div>
+
+  <div id="unit-popover" class="unit-popover" role="dialog" aria-hidden="true"></div>
 
   <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
@@ -451,8 +450,9 @@
   <script src="battleLogic.js?v=4"></script>
   <script src="aiLogic.js?v=5"></script>
   <script src="setup.js?v=7"></script>
-  <script src="render.js?v=5"></script>
-  <script src="tutorial.js?v=8"></script>
+  <script src="render.js?v=6"></script>
+  <script src="battleUi.js?v=2"></script>
+  <script src="tutorial.js?v=9"></script>
   <script src="online.js?v=5"></script>
   <script src="battleFrontier.js?v=1"></script>
   <script src="main.js?v=5"></script>

@@ -75,6 +75,9 @@ function renderAll() {
   if (typeof renderBattleFrontierStreakDisplay === "function") {
     renderBattleFrontierStreakDisplay();
   }
+  if (typeof renderBattleUi === "function") {
+    renderBattleUi();
+  }
   saveBattleSnapshot();
   if (typeof tutorialOnRender === "function") {
     tutorialOnRender();
@@ -881,6 +884,7 @@ function renderBoard(board, elementId, side) {
             ${getCharacterImageHtml(character, "board-character-image", "IMAGE")}
           </div>
           <div class="character-name">${character.name}</div>
+          <div class="hp-bar"><i style="width:${(Math.max(0, character.hp) / character.maxHp) * 100}%"></i></div>
           <div
             class="hp hp-number"
             data-hp-key="${hpKey}"
@@ -921,9 +925,13 @@ function renderBoard(board, elementId, side) {
       `;
     }
 
-    cell.addEventListener("click", () => {
-      handleCellClick(side, index);
-    });
+    if (typeof bindBoardCellUi === "function") {
+      bindBoardCellUi(cell, side, index);
+    } else {
+      cell.addEventListener("click", () => {
+        handleCellClick(side, index);
+      });
+    }
 
     boardElement.appendChild(cell);
 

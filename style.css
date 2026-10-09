@@ -2098,3 +2098,1055 @@ button.recommended-button {
     opacity: 1;
   }
 }
+
+/* ============================================================
+   バトル画面（2026-10 リニューアル）
+   盤面を真ん中に大きく、右に行動パネル、左にログ、上にターン情報。
+   旧レイアウトのルールより後ろに置き、.battle-v2 の中だけ上書きする
+   ============================================================ */
+.battle-v2 {
+  --ink: #1e1e22;
+  --sub: #6b6862;
+  --line: #dcd7cc;
+  --ally: #2f6fde;
+  --ally-soft: #e8f0ff;
+  --ally-line: #9dbbf3;
+  --enemy: #d8343a;
+  --enemy-soft: #fdecec;
+  --enemy-line: #f0a7a9;
+  --gold: #f0a20f;
+  --gold-soft: #fff4dc;
+  --cell-h: min(calc((100vh - 220px) / 6 - 6px), 124px, calc((100vw - 700px) / 3.7));
+  grid-template-columns: 250px minmax(0, 1fr) 340px;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    "hud hud hud"
+    "log board right";
+  gap: 12px;
+  height: calc(100vh - 16px);
+  color: var(--ink);
+}
+
+/* 色分け（出目の種類） */
+.k-melee { --k: #e46d25; }
+.k-ranged { --k: #169b8c; }
+.k-support { --k: #3a9a4a; }
+.k-miss { --k: #a19d95; }
+.k-special { --k: #8b4fd1; }
+
+/* ---------- 上部バー ---------- */
+.battle-hud {
+  grid-area: hud;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 180px 8px 16px; /* 右上の音量つまみと重ならないように空ける */
+  background: #fff;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  min-height: 52px;
+}
+
+.hud-mode {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.25;
+  min-width: 0;
+}
+
+.hud-mode small {
+  color: var(--sub);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.hud-mode b {
+  font-size: 16px;
+}
+
+.battle-v2 .battlefrontier-streak-display {
+  margin-top: 2px;
+  font-size: 12px;
+  padding: 1px 8px;
+  align-self: flex-start;
+}
+
+.hud-turn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 auto;
+}
+
+.hud-turn-number {
+  font-weight: 900;
+  font-size: 20px;
+}
+
+.hud-turn-pill {
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-size: 14px;
+  font-weight: 800;
+  background: #eee;
+  color: var(--ink);
+}
+
+.hud-turn-pill.ally { background: var(--ally); color: #fff; }
+.hud-turn-pill.enemy { background: var(--enemy); color: #fff; }
+
+.hud-doom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--sub);
+}
+
+.hud-doom .doom-bar {
+  width: 100px;
+  height: 8px;
+  border-radius: 4px;
+  background: #eee;
+  overflow: hidden;
+}
+
+.hud-doom .doom-bar i {
+  display: block;
+  height: 100%;
+  background: var(--enemy);
+}
+
+.hud-doom.active {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  color: var(--enemy);
+}
+
+.hud-doom.active b { font-size: 14px; }
+
+.battle-v2 .hud-title-button,
+.battle-v2 .hud-log-button {
+  border: 1.5px solid var(--line);
+  background: #fff;
+  border-radius: 10px;
+  padding: 6px 12px;
+  font-weight: bold;
+  color: var(--sub);
+}
+
+.battle-v2 .hud-log-button { display: none; }
+
+/* ---------- ログ ---------- */
+.battle-v2 .log-panel {
+  grid-area: log;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+.log-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.log-panel-head h3 {
+  margin: 0 0 6px;
+  font-size: 15px;
+}
+
+.battle-v2 .log-close-button { display: none; }
+
+.battle-v2 #message {
+  font-size: 12.5px;
+  line-height: 1.6;
+}
+
+/* ---------- 盤面 ---------- */
+.battle-v2 .board-panel {
+  grid-area: board;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  background: transparent;
+  padding: 4px;
+  border-radius: 14px;
+}
+
+.battle-v2 .board-section {
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+
+.battle-v2 .board-section h2.board-side-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  align-self: flex-start;
+}
+
+.battle-v2 .board-side-label::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.battle-v2 .side-top { color: var(--enemy); }
+.battle-v2 .side-bottom { color: var(--ally); }
+
+.battle-v2 .board {
+  grid-template-columns: repeat(3, calc(var(--cell-h) * 1.18));
+  grid-template-rows: repeat(3, var(--cell-h));
+  gap: 8px;
+}
+
+.battle-v2 .vs-line {
+  width: calc(var(--cell-h) * 3.54 + 16px);
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--sub);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.battle-v2 .vs-line::before,
+.battle-v2 .vs-line::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  background: repeating-linear-gradient(90deg, #c9c3b6 0 6px, transparent 6px 12px);
+}
+
+.battle-v2 .cell {
+  border: 2px solid transparent;
+  border-radius: 12px;
+  background: #ebe7de;
+  padding: 4px 6px 5px;
+}
+
+.battle-v2 .cell.empty {
+  background: #ebe7de;
+  color: transparent;
+}
+
+.battle-v2 .cell.empty::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1.5px dashed #d3cdc0;
+  border-radius: 9px;
+}
+
+.battle-v2 #enemy-board .cell:not(.empty) {
+  background: var(--enemy-soft);
+  border-color: var(--enemy-line);
+}
+
+.battle-v2 #player-board .cell:not(.empty) {
+  background: var(--ally-soft);
+  border-color: var(--ally-line);
+}
+
+.battle-v2 .board-character {
+  grid-template-rows: minmax(0, 1fr) auto auto auto;
+  gap: 2px;
+  padding: 0;
+}
+
+.battle-v2 .board-portrait {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  border: none;
+  background: transparent;
+  border-radius: 0;
+}
+
+.battle-v2 .board-character-image {
+  mix-blend-mode: multiply;
+}
+
+.battle-v2 .character-name {
+  font-size: 12px;
+  font-weight: bold;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: 6px;
+  padding: 0 6px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hp-bar {
+  width: 100%;
+  height: 7px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.hp-bar i {
+  display: block;
+  height: 100%;
+  border-radius: 4px;
+  background: #2f6fde;
+  transition: width 0.4s ease;
+}
+
+.battle-v2 #enemy-board .hp-bar i,
+.hp-bar.enemy i,
+.actor-panel.enemy .hp-bar i { background: #d8343a; }
+
+.battle-v2 .hp-number {
+  font-size: 11px;
+  font-weight: bold;
+  color: var(--sub);
+  line-height: 1.1;
+}
+
+/* ---------- 右：行動パネルと操作 ---------- */
+.battle-v2 .right-panel {
+  grid-area: right;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.battle-v2 .control-panel {
+  flex: 1;
+  gap: 12px;
+  border: 1.5px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  overflow: auto;
+}
+
+.actor-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actor-panel.empty {
+  border: 1.5px dashed var(--line);
+  border-radius: 12px;
+  padding: 18px 12px;
+  text-align: center;
+}
+
+.actor-empty-headline {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.actor-empty-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--sub);
+}
+
+.actor-who {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.actor-portrait {
+  width: 68px;
+  height: 68px;
+  flex: none;
+  border-radius: 12px;
+  background: var(--ally-soft);
+  border: 2px solid var(--ally-line);
+  overflow: hidden;
+}
+
+.actor-portrait img { mix-blend-mode: multiply; }
+
+.actor-panel.enemy .actor-portrait {
+  background: var(--enemy-soft);
+  border-color: var(--enemy-line);
+}
+
+.actor-who-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.actor-who-text b { font-size: 18px; }
+
+.actor-job {
+  margin-left: 6px;
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--ally);
+}
+
+.actor-panel.enemy .actor-job { color: var(--enemy); }
+.actor-who-text .hp-bar { height: 9px; margin-top: 5px; }
+
+.actor-hp {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--sub);
+}
+
+.actor-roll {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--gold-soft);
+  border: 1.5px solid #f3d38b;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.actor-roll.waiting {
+  background: #f7f5f0;
+  border-color: var(--line);
+}
+
+.actor-die {
+  width: 52px;
+  height: 52px;
+  flex: none;
+  border-radius: 12px;
+  background: #fff;
+  border: 3px solid var(--ink);
+  box-shadow: 0 4px 0 var(--ink);
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.actor-roll-text b {
+  font-size: 18px;
+  color: var(--k, var(--ink));
+}
+
+.actor-roll-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--sub);
+  line-height: 1.5;
+}
+
+.faces6 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.face {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  border: 1.5px solid #dcd7cc;
+  border-left: 5px solid var(--k);
+  border-radius: 9px;
+  padding: 5px 7px;
+  background: #fff;
+  font-size: 12.5px;
+  font-weight: bold;
+}
+
+.face-n {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 6px;
+  background: var(--k);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 12px;
+}
+
+.face-t { line-height: 1.25; }
+
+.face.hit {
+  outline: 3px solid #f0a20f;
+  outline-offset: 1px;
+  background: #fff4dc;
+}
+
+.battle-v2 .status-area {
+  flex: none;
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-align: left;
+  font-size: 14px;
+  font-weight: bold;
+  line-height: 1.55;
+}
+
+.battle-v2 .decisive-moment-banner { padding: 8px 10px; }
+.battle-v2 .decisive-moment-banner-title { font-size: 18px; }
+.battle-v2 .decisive-moment-banner-detail { font-size: 12px; }
+
+.battle-v2 .button-area {
+  margin-top: auto;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+/* 押せないボタンは出さない。いま押すべきボタンは大きな青いボタンにする */
+.battle-v2 .button-area button:disabled { display: none !important; }
+
+.battle-v2 .button-area button {
+  border: 2px solid var(--ink);
+  border-radius: 12px;
+  padding: 11px 12px;
+  font-size: 15px;
+  font-weight: bold;
+}
+
+.battle-v2 .button-area button.recommended-button {
+  grid-column: 1 / -1;
+  order: -1;
+  background: var(--ally);
+  border-color: var(--ally);
+  color: #fff;
+  font-size: 17px;
+  padding: 14px;
+  box-shadow: 0 4px 0 #1d4fa8;
+  animation: none;
+}
+
+.battle-v2 .button-area button.recommended-button:hover { background: #2a63c8; }
+
+/* ---------- キャラ能力のポップアップ ---------- */
+.unit-popover {
+  display: none;
+  position: fixed;
+  z-index: 9000;
+  width: 320px;
+  background: #fff;
+  border: 2px solid #1e1e22;
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+  color: #1e1e22;
+}
+
+.unit-popover.visible { display: block; }
+.unit-popover.ally { border-color: #2f6fde; }
+.unit-popover.enemy { border-color: #d8343a; }
+
+.unit-popover-head {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.unit-popover-portrait {
+  width: 54px;
+  height: 54px;
+  flex: none;
+}
+
+.unit-popover-portrait img { mix-blend-mode: multiply; }
+
+.unit-popover-title { flex: 1; min-width: 0; }
+.unit-popover-title b { font-size: 17px; }
+
+.unit-popover-side {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  color: #fff;
+  border-radius: 6px;
+  padding: 1px 6px;
+  background: #2f6fde;
+}
+
+.unit-popover-side.enemy { background: #d8343a; }
+
+.unit-popover-job {
+  font-size: 12px;
+  font-weight: bold;
+  color: #6b6862;
+}
+
+.unit-popover-title .hp-bar { margin-top: 4px; }
+
+.unit-popover-role {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: #6b6862;
+}
+
+.unit-popover-status {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.unit-popover-badge {
+  display: inline-block;
+  margin-right: 6px;
+  border-radius: 6px;
+  padding: 0 6px;
+  background: #8a857b;
+  color: #fff;
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.unit-popover-close { display: none; }
+
+.unit-popover-cta {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.unit-popover-cta small { color: #6b6862; font-size: 11px; }
+
+.unit-popover-pick {
+  background: #2f6fde;
+  border: 2px solid #2f6fde;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+/* スマホ：下から出るカードにして、タップで操作できるようにする */
+.unit-popover.touch {
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  top: auto;
+  width: auto;
+  max-width: 480px;
+  margin: 0 auto;
+  pointer-events: auto;
+  border-radius: 18px;
+}
+
+.unit-popover.touch .unit-popover-close {
+  display: block;
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: #eee;
+  font-weight: 900;
+  font-size: 16px;
+  padding: 0;
+}
+
+/* ---------- 狭い画面 ---------- */
+@media (max-width: 1100px) {
+  .battle-v2 {
+    --cell-h: min(calc((100vw - 32px) / 3.7), 110px, max(84px, calc((100vh - 430px) / 6)));
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+      "hud"
+      "board"
+      "right";
+    height: auto;
+    gap: 8px;
+  }
+
+  .battle-hud {
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    padding: 8px 12px;
+  }
+
+  /* 1段目：モード名（右上は音量つまみ）／2段目：ターンとボタン／3段目：決着の刻 */
+  .hud-mode { flex: 1 1 100%; padding-right: 150px; }
+  .hud-turn { margin: 0 auto 0 0; }
+  .hud-turn-number { font-size: 16px; }
+  .hud-turn-pill { font-size: 12px; padding: 4px 10px; }
+  .hud-doom { order: 5; width: 100%; }
+  .hud-doom .doom-bar { flex: 1; }
+  .battle-v2 .hud-log-button { display: inline-block; }
+
+  .battle-v2 .log-panel {
+    display: none;
+    position: fixed;
+    inset: 60px 8px 8px 8px;
+    z-index: 8800;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .battle-v2.show-log .log-panel { display: flex; }
+  .battle-v2 .log-close-button { display: inline-block; }
+
+  .battle-v2 .board { gap: 6px; }
+  .battle-v2 .cell { padding: 3px 4px 4px; }
+  .battle-v2 .character-name { font-size: 10.5px; }
+  .battle-v2 .hp-number { font-size: 10px; }
+  .battle-v2 .cell-badge { font-size: 8.5px; }
+
+  .battle-v2 .control-panel { overflow: visible; padding: 12px; gap: 10px; }
+  .actor-panel.empty { padding: 10px; }
+  .actor-empty-hint { display: none; }
+  .actor-portrait { width: 52px; height: 52px; }
+  .actor-who-text b { font-size: 16px; }
+  .actor-die { width: 44px; height: 44px; font-size: 24px; }
+  .actor-roll-text b { font-size: 16px; }
+  .faces6 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .face { font-size: 11px; padding: 4px 5px; gap: 5px; }
+}
+
+/* ---------- サイズ調整（2026-10-09）：文字とボタンを一回り小さく、盤面の絵を大きく ---------- */
+.battle-v2 {
+  --cell-h: min(calc((100vh - 168px) / 6 - 5px), 124px, calc((100vw - 640px) / 3.7));
+  grid-template-columns: 230px minmax(0, 1fr) 300px;
+  gap: 10px;
+}
+
+.battle-hud {
+  min-height: 44px;
+  padding: 5px 170px 5px 14px;
+  border-radius: 10px;
+}
+
+.hud-mode small { font-size: 11px; }
+.hud-mode b { font-size: 14px; }
+.hud-turn-number { font-size: 16px; }
+.hud-turn-pill { font-size: 12px; padding: 3px 11px; }
+
+.battle-v2 .hud-title-button,
+.battle-v2 .hud-log-button {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.battle-v2 .log-panel,
+.battle-v2 .control-panel {
+  border-radius: 10px;
+}
+
+.log-panel-head h3 { font-size: 13px; }
+.battle-v2 #message { font-size: 12px; line-height: 1.55; }
+
+.battle-v2 .board-panel { gap: 4px; padding: 0; }
+.battle-v2 .board-section { gap: 4px; }
+.battle-v2 .board-section h2.board-side-label { font-size: 12px; }
+.battle-v2 .vs-line { font-size: 10px; line-height: 1; }
+.battle-v2 .board { gap: 6px; }
+
+/* マス：絵を大きく、名前とHPは1行にまとめる */
+.battle-v2 .cell {
+  border-radius: 9px;
+  padding: 3px 5px 4px;
+}
+
+.battle-v2 .board-character {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "img img"
+    "name name"
+    "bar hp";
+  column-gap: 4px;
+  row-gap: 2px;
+  align-items: end;
+}
+
+.battle-v2 .board-portrait { grid-area: img; }
+
+.battle-v2 .character-name {
+  grid-area: name;
+  justify-self: center;
+  font-size: 11px;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.battle-v2 .hp-number {
+  grid-area: hp;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.battle-v2 .board-character .hp-bar {
+  grid-area: bar;
+  height: 5px;
+  align-self: center;
+}
+
+.battle-v2 .cell-badge { font-size: 9px; }
+
+/* 右パネル */
+.battle-v2 .control-panel { padding: 12px; gap: 10px; }
+.actor-panel { gap: 8px; }
+.actor-panel.empty { padding: 12px 10px; border-radius: 8px; }
+.actor-empty-headline { font-size: 14px; }
+.actor-empty-hint { font-size: 11px; }
+.actor-who { gap: 10px; }
+.actor-portrait { width: 52px; height: 52px; border-radius: 8px; border-width: 1.5px; }
+.actor-who-text b { font-size: 15px; }
+.actor-job { font-size: 11px; }
+.actor-who-text .hp-bar { height: 6px; margin-top: 4px; }
+.actor-hp { font-size: 11px; }
+.actor-roll { gap: 10px; padding: 8px 10px; border-radius: 8px; }
+.actor-die {
+  width: 40px;
+  height: 40px;
+  font-size: 22px;
+  border-width: 2px;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+.actor-roll-text b { font-size: 14px; }
+.actor-roll-text p { font-size: 11px; }
+.faces6 { gap: 5px; }
+.face { font-size: 11.5px; padding: 3px 6px; gap: 6px; border-radius: 6px; border-left-width: 4px; }
+.face-n { width: 17px; height: 17px; font-size: 11px; border-radius: 4px; }
+.face.hit { outline-width: 2px; }
+
+.battle-v2 .status-area { font-size: 12.5px; font-weight: 500; line-height: 1.6; color: #3a3833; }
+
+.battle-v2 .button-area { gap: 6px; }
+
+.battle-v2 .button-area button {
+  border-width: 1.5px;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 13px;
+}
+
+.battle-v2 .button-area button.recommended-button {
+  font-size: 14px;
+  padding: 9px 12px;
+  box-shadow: 0 2px 0 #1d4fa8;
+}
+
+/* 能力ポップアップ */
+.unit-popover { width: 290px; padding: 10px; border-width: 1.5px; border-radius: 10px; }
+.unit-popover-portrait { width: 44px; height: 44px; }
+.unit-popover-title b { font-size: 15px; }
+.unit-popover-job, .unit-popover-role, .unit-popover-status { font-size: 11px; }
+.unit-popover-pick { font-size: 14px; padding: 10px; border-radius: 8px; }
+.unit-popover.touch { border-radius: 14px; }
+
+@media (max-width: 1100px) {
+  .battle-v2 {
+    --cell-h: min(calc((100vw - 32px) / 3.7), 104px, max(84px, calc((100vh - 400px) / 6)));
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .battle-hud { padding: 6px 10px; }
+  .battle-v2 .character-name { font-size: 10px; }
+  .battle-v2 .hp-number { font-size: 9px; }
+  .face { font-size: 10.5px; padding: 3px 4px; gap: 4px; }
+}
+
+/* 行動パネルが空のときは、案内文をパネルの見出しに出しているので下の案内文は隠す */
+.battle-v2 .actor-panel.empty + .status-area { display: none; }
+
+/* ============================================================
+   陣形画面・パーティコード作成画面のサイズ調整（2026-10-09）
+   バトル画面と同じくらいの文字・ボタンの大きさにそろえる
+   ============================================================ */
+.party-code-screen .party-code-box {
+  border-width: 1.5px;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+.party-code-screen .select-header {
+  border-bottom-width: 1.5px;
+  padding-right: 170px; /* 右上の音量つまみと重ならないように空ける */
+  align-items: center;
+}
+
+.party-code-screen .select-header h1 {
+  font-size: 18px;
+  margin-bottom: 2px;
+}
+
+.party-code-screen .select-description,
+.party-code-screen .select-help {
+  font-size: 12px;
+}
+
+.party-code-screen .select-header-actions button {
+  min-width: 0;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.party-code-screen .select-header-actions .primary-button {
+  width: auto;
+  background: #2f6fde;
+  border-color: #2f6fde;
+  color: #fff;
+}
+
+.party-code-screen .select-header-actions .primary-button:disabled {
+  background: #fff;
+  border-color: #c9c3b6;
+  color: #9a958c;
+  opacity: 1;
+}
+
+.party-code-screen .party-code-layout {
+  grid-template-columns: minmax(320px, 440px) 1fr;
+  gap: 10px;
+}
+
+/* 左側：コード読み込み・現在のパーティ・盤面 */
+.party-code-screen .formation-title,
+.party-code-screen .party-code-output-area label,
+.party-code-screen .selected-party-title {
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.party-code-screen .party-code-output-area textarea {
+  font-size: 12px;
+  min-height: 56px;
+  border-width: 1.5px;
+  border-radius: 8px;
+}
+
+.party-code-screen .party-code-output-area button,
+.party-code-screen .party-code-output-buttons button {
+  font-size: 12px;
+  padding: 5px 12px;
+  border-width: 1.5px;
+  border-radius: 8px;
+}
+
+.party-code-screen .selected-party-area { border-radius: 10px; padding: 8px; }
+
+.party-code-screen .selected-party-slot {
+  min-height: 26px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.party-code-screen .formation-board {
+  grid-template-columns: repeat(3, 112px);
+  grid-template-rows: repeat(3, 96px);
+}
+
+.party-code-screen .formation-cell {
+  border-width: 1.5px;
+  border-radius: 9px;
+}
+
+.party-code-screen .formation-row-label { font-size: 10px; }
+.party-code-screen .formation-name { font-size: 12px; }
+.party-code-screen .empty-formation-cell { font-size: 11px; }
+
+/* 右側：キャラクター一覧 */
+.party-code-screen .character-selection-list {
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+
+.party-code-screen .selection-character-card {
+  border-width: 1.5px;
+  border-radius: 10px;
+  padding: 8px;
+}
+
+.party-code-screen .selection-card-top {
+  grid-template-columns: 48px 1fr;
+  gap: 8px;
+}
+
+.party-code-screen .selection-card-name {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.party-code-screen .selection-card-job {
+  font-size: 12px;
+}
+
+.party-code-screen .selection-card-role,
+.party-code-screen .selection-card-hp {
+  font-size: 11px;
+  color: #6b6862;
+}
+
+.party-code-screen .selection-action-list ol { font-size: 10.5px; }
+
+.party-code-screen .selection-card-footer {
+  font-size: 11px;
+  font-weight: 600;
+  color: #6b6862;
+  padding-top: 4px;
+}
+
+.party-code-screen .character-detail-button {
+  font-size: 10px;
+  padding: 1px 7px;
+  border-width: 1.5px;
+}
+
+@media (max-width: 1100px) {
+  .party-code-screen .select-header { padding-right: 0; }
+  .party-code-screen .select-header > div:first-child { padding-right: 150px; }
+  .party-code-screen .party-code-layout { grid-template-columns: 1fr; }
+  .party-code-screen .formation-board {
+    grid-template-columns: repeat(3, minmax(0, 104px));
+    grid-template-rows: repeat(3, 88px);
+  }
+  .party-code-screen .character-selection-list {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+}
+
+.party-code-screen .selection-portrait-box {
+  width: 48px;
+  height: 48px;
+  border: none;
+  background: transparent;
+}
+
+.party-code-screen .card-character-image { mix-blend-mode: multiply; }
+
+.party-code-screen .formation-portrait {
+  width: 50px;
+  height: 50px;
+  border: none;
+  background: transparent;
+}
+
+.party-code-screen .formation-portrait img { mix-blend-mode: multiply; }
+
+.party-code-screen .formation-board {
+  grid-template-rows: repeat(3, 100px);
+}
