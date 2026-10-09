@@ -483,7 +483,7 @@ function ensureCharacterDetailModal() {
   overlay.className = "character-detail-modal";
   overlay.innerHTML = `
     <div class="character-detail-dialog" role="dialog" aria-modal="true" aria-labelledby="character-detail-title">
-      <button id="character-detail-close-button" class="character-detail-close-button" type="button" aria-label="詳細を閉じる">×</button>
+      <button id="character-detail-close-button" class="character-detail-close-button" type="button" aria-label="詳細を閉じる"></button>
       <div id="character-detail-content"></div>
     </div>
   `;

@@ -3200,3 +3200,35 @@ button.recommended-button {
 .character-detail-dialog.is-prototype-detail .personality-tag small {
   background: #fff;
 }
+
+/* ---------------- 閉じるボタンの × ----------------
+   文字の × はフォントや padding で中心がずれるので、線2本で描いて必ず真ん中に置く */
+.character-detail-close-button,
+.unit-popover.touch .unit-popover-close {
+  padding: 0;
+  font-size: 0;
+}
+
+.character-detail-close-button::before,
+.character-detail-close-button::after,
+.unit-popover.touch .unit-popover-close::before,
+.unit-popover.touch .unit-popover-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 55%;
+  height: 3px;
+  border-radius: 2px;
+  background: currentColor;
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.character-detail-close-button::after,
+.unit-popover.touch .unit-popover-close::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+.unit-popover.touch .unit-popover-close {
+  color: #333;
+}

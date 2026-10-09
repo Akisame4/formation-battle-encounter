@@ -274,7 +274,7 @@ function getUnitPopoverHtml(character, side, index, withAction) {
   const role = getRoleDisplayHtml(character, true);
 
   return `
-    <button class="unit-popover-close" type="button" aria-label="閉じる">×</button>
+    <button class="unit-popover-close" type="button" aria-label="閉じる"></button>
     <div class="unit-popover-head">
       <div class="unit-popover-portrait">${getCharacterImageHtml(character, "board-character-image", "IMAGE")}</div>
       <div class="unit-popover-title">
