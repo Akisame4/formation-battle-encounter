@@ -26,7 +26,7 @@ function applyAttackBuff(character, amount) {
 }
 
 // ============================================================
-// 性格（プロトタイプ専用の常時パッシブ特性）
+// スタイル（旧称：性格。プロトタイプ専用の常時パッシブ特性）
 // ============================================================
 
 const PERSONALITY_TYPES = {
@@ -59,7 +59,7 @@ function getRoleDisplayText(character) {
   return character.role || "";
 }
 
-// カード等に出す性格タグ。説明文は withDescription のとき（詳細表示）だけ付ける
+// カード等に出すスタイルタグ。説明文は withDescription のとき（詳細表示）だけ付ける
 function getRoleDisplayHtml(character, withDescription = false) {
   if (!character) {
     return "";
@@ -69,7 +69,7 @@ function getRoleDisplayHtml(character, withDescription = false) {
     return character.role || "";
   }
 
-  const tag = `<span class="personality-tag" data-personality="${character.personality}"><small>性格</small>${character.personality}</span>`;
+  const tag = `<span class="personality-tag" data-personality="${character.personality}"><small>スタイル</small>${character.personality}</span>`;
 
   if (!withDescription) {
     return tag;
@@ -348,11 +348,11 @@ function getDamageDetailText(result) {
   }
 
   if (result.personalityAttackBonus > 0) {
-    parts.push(`性格(攻)+${result.personalityAttackBonus}`);
+    parts.push(`スタイル(攻)+${result.personalityAttackBonus}`);
   }
 
   if (result.personalityDefenseBonus > 0) {
-    parts.push(`性格(防)-${result.personalityDefenseBonus}`);
+    parts.push(`スタイル(防)-${result.personalityDefenseBonus}`);
   }
 
   if (result.incomingDamageIncrease > 0) {

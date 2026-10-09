@@ -3151,7 +3151,7 @@ button.recommended-button {
   grid-template-rows: repeat(3, 100px);
 }
 
-/* ---------------- 性格タグ ---------------- */
+/* ---------------- スタイルタグ ---------------- */
 .personality-tag {
   display: inline-flex;
   align-items: center;

@@ -464,7 +464,7 @@ function getCharacterRuntimeStatusHtml(character) {
         bonusParts.push(`防+${defenseBonus}`);
       }
 
-      statusItems.push(`性格発動中(${character.personality}：${bonusParts.join("/")})`);
+      statusItems.push(`スタイル発動中(${character.personality}：${bonusParts.join("/")})`);
     }
   }
 
