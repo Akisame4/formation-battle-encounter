@@ -3150,3 +3150,53 @@ button.recommended-button {
 .party-code-screen .formation-board {
   grid-template-rows: repeat(3, 100px);
 }
+
+/* ---------------- 性格タグ ---------------- */
+.personality-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px 1px 3px;
+  border-radius: 999px;
+  background: var(--personality-color, #1e1e22);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.6;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.personality-tag small {
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--personality-color, #1e1e22);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.personality-tag[data-personality="孤高"] { --personality-color: #6b3fa0; }
+.personality-tag[data-personality="連携"] { --personality-color: #2f7d4f; }
+.personality-tag[data-personality="守護"] { --personality-color: #2b5fb4; }
+.personality-tag[data-personality="援護"] { --personality-color: #c0392b; }
+
+.selection-card-role .personality-tag {
+  margin: 2px 0;
+}
+
+.personality-desc {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.character-detail-role .personality-tag {
+  font-size: 14px;
+}
+
+.character-detail-dialog.is-prototype-detail .personality-tag small {
+  background: #fff;
+}

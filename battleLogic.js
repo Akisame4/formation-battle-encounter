@@ -30,10 +30,10 @@ function applyAttackBuff(character, amount) {
 // ============================================================
 
 const PERSONALITY_TYPES = {
-  ANALYST: "分析家",
-  DIPLOMAT: "外交官",
-  SENTINEL: "番人",
-  EXPLORER: "探検家"
+  ANALYST: "援護",
+  DIPLOMAT: "連携",
+  SENTINEL: "守護",
+  EXPLORER: "孤高"
 };
 
 const PERSONALITY_DESCRIPTIONS = {
@@ -57,6 +57,25 @@ function getRoleDisplayText(character) {
   }
 
   return character.role || "";
+}
+
+// カード等に出す性格タグ。説明文は withDescription のとき（詳細表示）だけ付ける
+function getRoleDisplayHtml(character, withDescription = false) {
+  if (!character) {
+    return "";
+  }
+
+  if (!(character.isPrototype && character.personality)) {
+    return character.role || "";
+  }
+
+  const tag = `<span class="personality-tag" data-personality="${character.personality}"><small>性格</small>${character.personality}</span>`;
+
+  if (!withDescription) {
+    return tag;
+  }
+
+  return `${tag}<span class="personality-desc">${getPersonalityDescriptionText(character.personality)}</span>`;
 }
 
 function locateCharacterOnBoard(character) {

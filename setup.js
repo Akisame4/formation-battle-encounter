@@ -542,7 +542,7 @@ function openCharacterDetailModal(character, contextLabel = "") {
       ${contextHtml}
       <div id="character-detail-title" class="character-detail-name">${escapeHtml(character.name)}</div>
       <div class="character-detail-job">${escapeHtml(character.job || "")}</div>
-      <div class="character-detail-role">${escapeHtml(getRoleDisplayText(character))}</div>
+      <div class="character-detail-role">${getRoleDisplayHtml(character, true)}</div>
     </div>
 
     <div class="character-detail-status">
@@ -646,7 +646,7 @@ function renderCharacterSelectionScreen() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
+          <div class="selection-card-role">${getRoleDisplayHtml(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>
@@ -1192,7 +1192,7 @@ function renderPartyCodeCharacterList() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
+          <div class="selection-card-role">${getRoleDisplayHtml(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>
@@ -1750,7 +1750,7 @@ function renderPlayerFormationCharacterList() {
         <div class="selection-card-info">
           <div class="selection-card-name-row"><div class="selection-card-name">${character.name}</div></div>
           <div class="selection-card-job">${character.job}</div>
-          <div class="selection-card-role">${getRoleDisplayText(character)}</div>
+          <div class="selection-card-role">${getRoleDisplayHtml(character)}</div>
           <div class="selection-card-hp">HP ${character.maxHp}</div>
         </div>
       </div>

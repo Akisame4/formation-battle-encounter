@@ -271,7 +271,7 @@ function getUnitPopoverHtml(character, side, index, withAction) {
   const highlight = isActor && gameState.rolledNumber && gameState.selectedAction ? gameState.rolledNumber : null;
   const sideClass = isViewerSide(side) ? "ally" : "enemy";
   const statusLines = getCharacterStatusLines(character, side);
-  const role = typeof getRoleDisplayText === "function" ? getRoleDisplayText(character) : (character.role || "");
+  const role = getRoleDisplayHtml(character, true);
 
   return `
     <button class="unit-popover-close" type="button" aria-label="閉じる">×</button>
