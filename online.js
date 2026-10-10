@@ -552,7 +552,9 @@ function flashOnlineTurnBanner() {
 // Cleanup
 // ============================================================
 
-function cleanupOnlineState() {
+function cleanupOnlineState(options = {}) {
+  const leftWrite = options.notifyLeft ? notifyOnlineLeftRoom() : null;
+
   if (fbeDb && onlineState.roomId) {
     if (onlineState.battleListener) {
       fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).off("value", onlineState.battleListener);
@@ -579,8 +581,19 @@ function cleanupOnlineState() {
   gameState.onlineMySide = null;
   gameState.onlineGuestFormationEntries = null;
   gameState.onlineTestMode = false;
+  rematchState.status = "none";
+  rematchState.moving = false;
   setOnlineWaitingOverlay(false);
-  disconnectOnlineFirebase();
+
+  if (leftWrite) {
+    // 「タイトルへ戻った」の書き込みを送ってから切断する（新しい部屋に入っていたら切らない）
+    const timeout = new Promise((resolve) => setTimeout(resolve, 1500));
+    Promise.race([leftWrite, timeout]).then(() => {
+      if (!onlineState.roomId) disconnectOnlineFirebase();
+    });
+  } else {
+    disconnectOnlineFirebase();
+  }
 
   if (typeof clearBattleSnapshot === "function") {
     clearBattleSnapshot();
@@ -622,17 +635,70 @@ function resumeOnlineBattleFromSession() {
 }
 
 // ============================================================
-// Rematch
+// Rematch（再戦の申し込み → 相手が受けたら双方キャラ選びへ）
 // ============================================================
+
+// DBルールで rematch には数値しか置けないので「時刻×10＋種類」で表す
+const REMATCH_CODE = {
+  HOST_REQUEST: 1,
+  GUEST_REQUEST: 2,
+  DECLINED: 3,
+  CANCELLED: 4,
+  HOST_LEFT: 5,
+  ACCEPTED: 6,
+  GUEST_LEFT: 7
+};
+
+// none / sent（申し込み中）/ received（申し込まれた）/ declined / cancelled / left（相手がタイトルへ）
+const rematchState = { status: "none", moving: false };
+
+function encodeRematchValue(code) {
+  return Date.now() * 10 + code;
+}
+
+function decodeRematchCode(value) {
+  return typeof value === "number" ? value % 10 : 0;
+}
+
+function getMyRematchRequestCode() {
+  return onlineState.mySide === "player" ? REMATCH_CODE.HOST_REQUEST : REMATCH_CODE.GUEST_REQUEST;
+}
+
+function getMyRematchLeftCode() {
+  return onlineState.mySide === "player" ? REMATCH_CODE.HOST_LEFT : REMATCH_CODE.GUEST_LEFT;
+}
+
+function getOnlineRematchStatus() {
+  return rematchState.status;
+}
+
+function setOnlineRematchStatus(status) {
+  rematchState.status = status;
+
+  if (typeof onOnlineRematchStatusChanged === "function") {
+    onOnlineRematchStatusChanged(status);
+  }
+}
+
+function writeOnlineRematch(code) {
+  return fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).set(encodeRematchValue(code));
+}
+
+function stopWatchingRematch() {
+  if (onlineState.rematchListener && fbeDb && onlineState.roomId) {
+    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
+  }
+  onlineState.rematchListener = null;
+}
 
 function startWatchingRematch() {
   if (!onlineState.roomId || !fbeDb) return;
 
-  if (onlineState.rematchListener) {
-    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
-    onlineState.rematchListener = null;
-  }
+  stopWatchingRematch();
+  rematchState.moving = false;
+  setOnlineRematchStatus("none");
 
+  // 前の対戦で残った値で反応しないよう、最初の1回は読み飛ばす
   let initialized = false;
 
   const ref = fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`);
@@ -642,47 +708,125 @@ function startWatchingRematch() {
       return;
     }
 
-    const val = snap.val();
-    if (!val) return;
-
-    ref.off("value", handler);
-    onlineState.rematchListener = null;
-
-    if (onlineState.battleListener) {
-      fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).off("value", onlineState.battleListener);
-      onlineState.battleListener = null;
-    }
-
-    openPlayerFormationForBattle("online");
+    handleOnlineRematchValue(decodeRematchCode(snap.val()));
   });
 
   onlineState.rematchListener = handler;
 }
 
-async function requestOnlineRematch() {
-  if (!onlineState.roomId || !fbeDb) return;
+function handleOnlineRematchValue(code) {
+  const status = rematchState.status;
 
-  if (onlineState.rematchListener) {
-    fbeDb.ref(`fbe/rooms/${onlineState.roomId}/rematch`).off("value", onlineState.rematchListener);
-    onlineState.rematchListener = null;
+  switch (code) {
+    case REMATCH_CODE.HOST_REQUEST:
+    case REMATCH_CODE.GUEST_REQUEST:
+      if (code === getMyRematchRequestCode()) {
+        if (status !== "sent") setOnlineRematchStatus("sent");
+      } else if (status === "sent") {
+        // お互いに同時に申し込んだら、そのまま成立させる
+        acceptOnlineRematch();
+      } else {
+        setOnlineRematchStatus("received");
+      }
+      break;
+    case REMATCH_CODE.DECLINED:
+      if (status === "sent") setOnlineRematchStatus("declined");
+      break;
+    case REMATCH_CODE.CANCELLED:
+      if (status === "received") setOnlineRematchStatus("cancelled");
+      break;
+    case REMATCH_CODE.HOST_LEFT:
+    case REMATCH_CODE.GUEST_LEFT:
+      if (code !== getMyRematchLeftCode()) setOnlineRematchStatus("left");
+      break;
+    case REMATCH_CODE.ACCEPTED:
+      moveToOnlineRematchFormation();
+      break;
   }
+}
+
+function moveToOnlineRematchFormation() {
+  if (rematchState.moving) return;
+  rematchState.moving = true;
+
+  stopWatchingRematch();
 
   if (onlineState.battleListener) {
     fbeDb.ref(`fbe/rooms/${onlineState.roomId}/battle`).off("value", onlineState.battleListener);
     onlineState.battleListener = null;
   }
 
+  rematchState.status = "none";
+
+  if (typeof hideBattleResult === "function") hideBattleResult();
+
+  openPlayerFormationForBattle("online");
+}
+
+async function requestOnlineRematch() {
+  if (!onlineState.roomId || !fbeDb) return;
+  if (rematchState.status === "left" || rematchState.status === "sent") return;
+
+  setOnlineRematchStatus("sent");
+
+  try {
+    await writeOnlineRematch(getMyRematchRequestCode());
+  } catch (e) {
+    setOnlineRematchStatus("none");
+    alert("再戦の申し込みを送れませんでした: " + e.message);
+  }
+}
+
+async function cancelOnlineRematch() {
+  if (!onlineState.roomId || !fbeDb || rematchState.status !== "sent") return;
+
+  setOnlineRematchStatus("none");
+
+  try {
+    await writeOnlineRematch(REMATCH_CODE.CANCELLED);
+  } catch (e) {
+    // 取り下げが届かなくても、相手が受けた時点でキャラ選びに進むだけなので続ける
+  }
+}
+
+async function declineOnlineRematch() {
+  if (!onlineState.roomId || !fbeDb || rematchState.status !== "received") return;
+
+  setOnlineRematchStatus("none");
+
+  try {
+    await writeOnlineRematch(REMATCH_CODE.DECLINED);
+  } catch (e) {
+    // 届かなくても相手側は待ち続けるだけなので続ける
+  }
+}
+
+async function acceptOnlineRematch() {
+  if (!onlineState.roomId || !fbeDb || rematchState.moving) return;
+
   try {
     await fbeDb.ref(`fbe/rooms/${onlineState.roomId}`).update({
       setup: null,
       battle: null,
-      rematch: Date.now()
+      rematch: encodeRematchValue(REMATCH_CODE.ACCEPTED)
     });
   } catch (e) {
-    startWatchingRematch();
-    alert("再戦リクエストの送信に失敗しました: " + e.message);
+    alert("再戦の受付に失敗しました: " + e.message);
     return;
   }
 
-  openPlayerFormationForBattle("online");
+  moveToOnlineRematchFormation();
+}
+
+// 「断られました」「取り下げられました」は、見て閉じたら消す
+function clearOnlineRematchNotice() {
+  if (rematchState.status === "declined" || rematchState.status === "cancelled") {
+    rematchState.status = "none";
+  }
+}
+
+// タイトルへ戻ることを相手に知らせる（届かなくても戻る操作は止めない）
+function notifyOnlineLeftRoom() {
+  if (!onlineState.roomId || !fbeDb || !onlineState.mySide) return null;
+  return writeOnlineRematch(getMyRematchLeftCode()).catch(() => {});
 }

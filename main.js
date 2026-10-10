@@ -1038,9 +1038,7 @@ function bindEvents() {
   });
 
   document.getElementById("online-rematch-button").addEventListener("click", () => {
-    if (gameState.animation.locked) return;
-    if (!window.confirm("もう一度対戦しますか？双方がキャラ選びの画面に戻ります。")) return;
-    requestOnlineRematch();
+    handleOnlineRematchButtonClick();
   });
 
   document.getElementById("back-title-button").addEventListener("click", () => {
@@ -1048,8 +1046,10 @@ function bindEvents() {
       return;
     }
 
+    hideBattleResult();
+
     if (gameState.battleMode === "online") {
-      cleanupOnlineState();
+      cleanupOnlineState({ notifyLeft: true });
     }
     clearBattleSnapshot();
 

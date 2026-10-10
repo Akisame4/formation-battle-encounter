@@ -208,7 +208,9 @@ function renderActorPanel() {
     panel.className = "actor-panel empty";
     panel.innerHTML = `
       <div class="actor-empty-headline">${headline}</div>
-      <div class="actor-empty-hint">キャラにマウスを乗せる（スマホはタップ）と、能力が見られます</div>`;
+      ${isBattleResultTarget()
+        ? `<button class="actor-result-button" type="button">結果画面を開く</button>`
+        : `<div class="actor-empty-hint">キャラにマウスを乗せる（スマホはタップ）と、能力が見られます</div>`}`;
     return;
   }
 
@@ -253,6 +255,7 @@ function renderBattleUi() {
   renderBattleHud();
   renderActorPanel();
   refreshUnitPopover();
+  scheduleBattleResult();
 }
 
 // ---------------- 能力ポップアップ ----------------
@@ -468,4 +471,327 @@ function bindBattleUiEvents() {
   });
 }
 
+// ---------------- 勝利・敗北画面 ----------------
+// チュートリアルとエンカウント・ドラフトは専用の画面があるので出さない
+
+const battleResultState = { visible: false, shownForThisBattle: false, timer: null };
+
+function isBattleResultTarget() {
+  const mode = gameState.battleMode;
+
+  if (mode === "auto" || mode === "battlefrontier") {
+    return false;
+  }
+
+  return gameState.gameOver || (mode === "stage" && gameState.phase === "stage_clear");
+}
+
+function isBattleScreenVisible() {
+  const layout = document.getElementById("main-layout");
+  return !!layout && layout.style.display !== "none";
+}
+
+// 決着したら少し間をおいて結果画面を出す（最後の攻撃の演出を見せるため）
+function scheduleBattleResult() {
+  if (!isBattleResultTarget()) {
+    battleResultState.shownForThisBattle = false;
+
+    if (battleResultState.timer) {
+      clearTimeout(battleResultState.timer);
+      battleResultState.timer = null;
+    }
+
+    // 対戦中に届いた再戦の申し込みなどは閉じない
+    if (battleResultState.visible && !isOnlineRematchDialogNeeded()) {
+      hideBattleResult();
+    }
+    return;
+  }
+
+  if (battleResultState.shownForThisBattle || battleResultState.timer || gameState.animation.locked) {
+    if (battleResultState.visible) renderBattleResult();
+    return;
+  }
+
+  battleResultState.timer = setTimeout(() => {
+    battleResultState.timer = null;
+
+    if (!isBattleResultTarget() || !isBattleScreenVisible() || gameState.animation.locked) {
+      return;
+    }
+
+    battleResultState.shownForThisBattle = true;
+    showBattleResult();
+  }, 900);
+}
+
+function isOnlineRematchDialogNeeded() {
+  if (gameState.battleMode !== "online" || typeof getOnlineRematchStatus !== "function") {
+    return false;
+  }
+
+  return getOnlineRematchStatus() !== "none";
+}
+
+function getBattleWinnerSide() {
+  if (getAliveCharacterCount("enemy") === 0) return "player";
+  if (getAliveCharacterCount("player") === 0) return "enemy";
+  return null;
+}
+
+function getBattleResultHeadline() {
+  if (gameState.battleMode === "stage" && gameState.phase === "stage_clear") {
+    return { title: "ステージクリア！", tone: "win" };
+  }
+
+  const winner = getBattleWinnerSide();
+
+  if (!winner) {
+    return { title: "バトル終了", tone: "neutral" };
+  }
+
+  if (gameState.battleMode === "versus") {
+    return { title: `${getSideName(winner)}の勝利！`, tone: winner === "player" ? "win" : "enemy-win" };
+  }
+
+  if (gameState.battleMode === "stage" && isViewerSide(winner)) {
+    return { title: "全ステージ制覇！", tone: "win" };
+  }
+
+  return isViewerSide(winner) ? { title: "勝利！", tone: "win" } : { title: "敗北…", tone: "lose" };
+}
+
+function getBattleResultDetailHtml() {
+  if (!isBattleResultTarget()) {
+    return "";
+  }
+
+  const mode = gameState.battleMode;
+  const mySide = mode === "online" && gameState.onlineMySide ? gameState.onlineMySide : "player";
+  const otherSide = getEnemySide(mySide);
+  const myLabel = mode === "versus" ? getSideName(mySide) : "味方";
+  const otherLabel = mode === "versus" ? getSideName(otherSide) : mode === "online" ? "相手" : "敵";
+
+  return `
+    <span>第${gameState.turnNumber || 1}ターンで決着</span>
+    <span>${myLabel} 残り${getAliveCharacterCount(mySide)}体</span>
+    <span>${otherLabel} 残り${getAliveCharacterCount(otherSide)}体</span>`;
+}
+
+// 再戦まわりの案内文と、押せるボタン
+function getOnlineRematchView(ended) {
+  const status = typeof getOnlineRematchStatus === "function" ? getOnlineRematchStatus() : "none";
+  const toTitle = ended ? [{ action: "title", label: "タイトルへ戻る" }] : [];
+  const request = { action: "rematch-request", label: "再戦を申し込む", primary: true };
+
+  switch (status) {
+    case "sent":
+      return {
+        message: "再戦を申し込みました。相手の返事を待っています…",
+        waiting: true,
+        buttons: [{ action: "rematch-cancel", label: "申し込みを取り下げる" }, ...toTitle]
+      };
+    case "received":
+      return {
+        message: ended
+          ? "相手から再戦の申し込みが届きました。"
+          : "相手から再戦の申し込みが届きました。受けると今の対戦は終わり、キャラ選びに戻ります。",
+        alert: true,
+        buttons: [
+          { action: "rematch-accept", label: "受ける", primary: true },
+          { action: "rematch-decline", label: "断る" },
+          ...toTitle
+        ]
+      };
+    case "declined":
+      return { message: "再戦は断られました。", buttons: [request, ...toTitle] };
+    case "cancelled":
+      return { message: "相手が再戦の申し込みを取り下げました。", buttons: [request, ...toTitle] };
+    case "left":
+      return { message: "相手はタイトルに戻りました。", buttons: [{ action: "title", label: "タイトルへ戻る", primary: true }] };
+    default:
+      return { message: "", buttons: ended ? [request, ...toTitle] : [request] };
+  }
+}
+
+function getBattleResultView() {
+  const mode = gameState.battleMode;
+
+  if (mode === "online") {
+    return getOnlineRematchView(isBattleResultTarget());
+  }
+
+  const toTitle = { action: "title", label: "タイトルへ戻る" };
+
+  if (mode === "stage") {
+    if (gameState.phase === "stage_clear") {
+      return { buttons: [{ action: "next-stage", label: "次のステージへ", primary: true }, toTitle] };
+    }
+
+    if (isViewerSide(getBattleWinnerSide())) {
+      return { buttons: [{ ...toTitle, primary: true }] };
+    }
+
+    return { buttons: [{ action: "retry", label: "このステージに再挑戦", primary: true }, toTitle] };
+  }
+
+  return { buttons: [{ action: "retry", label: "もう一度戦う", primary: true }, toTitle] };
+}
+
+function renderBattleResult() {
+  const overlay = document.getElementById("battle-result-overlay");
+
+  if (!overlay) {
+    return;
+  }
+
+  const ended = isBattleResultTarget();
+  const headline = ended ? getBattleResultHeadline() : { title: "再戦の申し込み", tone: "neutral" };
+  const view = getBattleResultView();
+  const modeTexts = getHudModeTexts();
+
+  overlay.querySelector(".battle-result-dialog").className = `battle-result-dialog tone-${headline.tone}`;
+  document.getElementById("battle-result-sub").textContent = [modeTexts.sub, modeTexts.name].filter(Boolean).join("　");
+  document.getElementById("battle-result-title").textContent = headline.title;
+
+  const detail = document.getElementById("battle-result-detail");
+  detail.innerHTML = getBattleResultDetailHtml();
+  detail.hidden = !ended;
+
+  const message = document.getElementById("battle-result-message");
+  message.textContent = view.message || "";
+  message.className = `battle-result-message${view.alert ? " alert" : ""}${view.waiting ? " waiting" : ""}`;
+  message.hidden = !view.message;
+
+  document.getElementById("battle-result-actions").innerHTML = view.buttons
+    .map((button) => `<button type="button" class="${button.primary ? "primary" : ""}" data-result-action="${button.action}">${button.label}</button>`)
+    .join("");
+
+  document.getElementById("battle-result-close").textContent = ended ? "盤面を見る" : "盤面に戻る";
+}
+
+function showBattleResult() {
+  const overlay = document.getElementById("battle-result-overlay");
+
+  if (!overlay) {
+    return;
+  }
+
+  hideUnitPopover();
+  renderBattleResult();
+  overlay.classList.add("visible");
+  overlay.setAttribute("aria-hidden", "false");
+  battleResultState.visible = true;
+}
+
+function hideBattleResult() {
+  const overlay = document.getElementById("battle-result-overlay");
+
+  if (overlay) {
+    overlay.classList.remove("visible");
+    overlay.setAttribute("aria-hidden", "true");
+  }
+
+  battleResultState.visible = false;
+}
+
+// online.js から呼ばれる：再戦の状態が変わったら画面を合わせる
+function onOnlineRematchStatusChanged(status) {
+  if (gameState.battleMode !== "online" || !isBattleScreenVisible()) {
+    return;
+  }
+
+  if (typeof renderButtons === "function") {
+    renderButtons();
+  }
+
+  // 申し込まれた・断られた・相手が抜けた などは、閉じていても結果画面を開いて知らせる
+  if (status !== "none" && status !== "sent") {
+    showBattleResult();
+  } else if (battleResultState.visible) {
+    if (status === "none" && !isBattleResultTarget()) {
+      hideBattleResult();
+    } else {
+      renderBattleResult();
+    }
+  }
+}
+
+function handleOnlineRematchButtonClick() {
+  if (gameState.animation.locked) {
+    return;
+  }
+
+  const status = getOnlineRematchStatus();
+
+  if (status === "none" || status === "declined" || status === "cancelled") {
+    requestOnlineRematch();
+  }
+
+  showBattleResult();
+}
+
+function handleBattleResultAction(action) {
+  switch (action) {
+    case "title":
+      hideBattleResult();
+      document.getElementById("back-title-button").click();
+      break;
+    case "next-stage":
+      hideBattleResult();
+      startNextStage();
+      break;
+    case "retry":
+      hideBattleResult();
+      clearBattleSnapshot();
+      resetGame();
+      break;
+    case "rematch-request":
+      requestOnlineRematch();
+      break;
+    case "rematch-cancel":
+      cancelOnlineRematch();
+      break;
+    case "rematch-accept":
+      acceptOnlineRematch();
+      break;
+    case "rematch-decline":
+      declineOnlineRematch();
+      break;
+  }
+}
+
+function bindBattleResultEvents() {
+  const overlay = document.getElementById("battle-result-overlay");
+  const panel = document.getElementById("actor-panel");
+
+  if (overlay) {
+    overlay.addEventListener("click", (event) => {
+      const button = event.target.closest("[data-result-action]");
+
+      if (button) {
+        handleBattleResultAction(button.dataset.resultAction);
+      }
+    });
+
+    document.getElementById("battle-result-close").addEventListener("click", () => {
+      hideBattleResult();
+
+      if (typeof clearOnlineRematchNotice === "function") {
+        clearOnlineRematchNotice();
+        renderButtons();
+      }
+    });
+  }
+
+  if (panel) {
+    panel.addEventListener("click", (event) => {
+      if (event.target.closest(".actor-result-button")) {
+        showBattleResult();
+      }
+    });
+  }
+}
+
 bindBattleUiEvents();
+bindBattleResultEvents();

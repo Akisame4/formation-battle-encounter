@@ -1369,8 +1369,16 @@ function renderButtons() {
   const backTitleButton = document.getElementById("back-title-button");
 
   if (onlineRematchButton) {
+    const rematchStatus = typeof getOnlineRematchStatus === "function" ? getOnlineRematchStatus() : "none";
+    const rematchLabels = {
+      sent: "再戦を申し込み中",
+      received: "再戦の申し込みに答える",
+      left: "相手はタイトルに戻りました"
+    };
+
     onlineRematchButton.style.display = gameState.battleMode === "online" ? "" : "none";
-    onlineRematchButton.disabled = gameState.animation.locked;
+    onlineRematchButton.disabled = gameState.animation.locked || rematchStatus === "left";
+    onlineRematchButton.textContent = rematchLabels[rematchStatus] || "再戦を申し込む";
   }
 
   if (backTitleButton) {

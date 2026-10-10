@@ -18,7 +18,7 @@
   <meta property="og:image:height" content="630">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="stylesheet" href="style.css?v=15">
+  <link rel="stylesheet" href="style.css?v=16">
 </head>
 
 <body>
@@ -405,7 +405,7 @@
           <button id="execute-button" disabled>実行</button>
           <button id="pass-button" disabled>ターン終了</button>
           <button id="next-stage-button" disabled>次のステージへ</button>
-          <button id="online-rematch-button" style="display:none">もう一度対戦</button>
+          <button id="online-rematch-button" style="display:none">再戦を申し込む</button>
         </div>
 
         <div id="debug-dice-area" class="debug-dice-area">
@@ -437,6 +437,17 @@
 
   <div id="unit-popover" class="unit-popover" role="dialog" aria-hidden="true"></div>
 
+  <div id="battle-result-overlay" class="battle-result-overlay" aria-hidden="true">
+    <div class="battle-result-dialog" role="dialog" aria-labelledby="battle-result-title">
+      <div id="battle-result-sub" class="battle-result-sub"></div>
+      <div id="battle-result-title" class="battle-result-title"></div>
+      <div id="battle-result-detail" class="battle-result-detail"></div>
+      <p id="battle-result-message" class="battle-result-message" hidden></p>
+      <div id="battle-result-actions" class="battle-result-actions"></div>
+      <button id="battle-result-close" class="battle-result-close" type="button">盤面を見る</button>
+    </div>
+  </div>
+
   <!-- Firebase compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -450,11 +461,11 @@
   <script src="battleLogic.js?v=6"></script>
   <script src="aiLogic.js?v=5"></script>
   <script src="setup.js?v=10"></script>
-  <script src="render.js?v=6"></script>
-  <script src="battleUi.js?v=4"></script>
+  <script src="render.js?v=7"></script>
+  <script src="battleUi.js?v=5"></script>
   <script src="tutorial.js?v=9"></script>
-  <script src="online.js?v=5"></script>
+  <script src="online.js?v=6"></script>
   <script src="battleFrontier.js?v=2"></script>
-  <script src="main.js?v=5"></script>
+  <script src="main.js?v=6"></script>
 </body>
 </html>
