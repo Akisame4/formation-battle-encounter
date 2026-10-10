@@ -272,6 +272,19 @@ function getSelectableCharacterPool() {
   return getCharacterPool().filter(character => !character.isPrototype);
 }
 
+// オンライン対戦・ローカル対戦・パーティコード作成で使う、今のキャラ（スタイル付き）
+function getCurrentCharacterPool() {
+  return getCharacterPool().filter(character => character.isPrototype);
+}
+
+// ローカル対戦で敵パーティコードが空のときの標準敵パーティ（位置は自陣配置画面と同じ向き）
+const VERSUS_DEFAULT_ENEMY_ENTRIES = [
+  { id: "lunaluna_prototype", position: 0 },
+  { id: "godo_prototype", position: 1 },
+  { id: "chaco_prototype", position: 2 },
+  { id: "shinonome_prototype", position: 4 }
+];
+
 function resetCharacterRuntimeStatus(character) {
   character.hp = character.maxHp;
   character.guard = 0;
@@ -1167,7 +1180,7 @@ function renderPartyCodeCharacterList() {
   }
 
   const selectedIds = gameState.partyCodeBuilderSelectedIds || [];
-  const pool = getCharacterPool();
+  const pool = getCurrentCharacterPool();
 
   listElement.innerHTML = "";
 
@@ -1721,8 +1734,8 @@ function renderPlayerFormationCharacterList() {
     ? gameState.battleFrontier.availableCharacterIds.map(id => getCharacterByIdFromPool(id)).filter(character => character)
     : (gameState.battleMode === "online" && gameState.onlineTestMode)
       ? getCharacterPool()
-      : gameState.battleMode === "online"
-        ? getCharacterPool().filter(character => character.isPrototype)
+      : gameState.battleMode === "online" || gameState.battleMode === "versus"
+        ? getCurrentCharacterPool()
         : getSelectableCharacterPool();
 
   availableCharacters.forEach((character) => {
@@ -1998,14 +2011,14 @@ function startNextStage() {
 
 function createEnemyBoardForVersusBattle(codeText) {
   if (!codeText) {
-    return createPartyBoardFromBase(INITIAL_ENEMY_BOARD, "enemy");
+    return createPartyBoardFromFormation(VERSUS_DEFAULT_ENEMY_ENTRIES, "enemy");
   }
 
   const decodeResult = tryDecodePartyFormation(codeText);
 
   if (!decodeResult.ok) {
     alert(`敵パーティコードを読み込めませんでした。\n${decodeResult.errors.join("\n")}\n標準敵パーティで開始します。`);
-    return createPartyBoardFromBase(INITIAL_ENEMY_BOARD, "enemy");
+    return createPartyBoardFromFormation(VERSUS_DEFAULT_ENEMY_ENTRIES, "enemy");
   }
 
   return createPartyBoardFromFormation(decodeResult.entries, "enemy");
