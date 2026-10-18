@@ -649,6 +649,13 @@ function setupVolumeControl() {
 
   slider.addEventListener("input", update);
   update();
+
+  // スマホ幅ではつまみを隠してアイコンだけにしているので、アイコンのタップで開閉する（PCでは常に表示）
+  const control = document.getElementById("volume-control");
+  icon.addEventListener("click", () => control.classList.toggle("open"));
+  document.addEventListener("click", (event) => {
+    if (!control.contains(event.target)) control.classList.remove("open");
+  });
 }
 
 document.addEventListener("click", () => {
